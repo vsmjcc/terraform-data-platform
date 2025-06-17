@@ -21,3 +21,11 @@ module "nat_gateway" {
 #   accepter_cidr_block       = var.main_account_vpc_cidr
 #   requester_route_table_ids = module.vpc.private_route_table_ids
 # }
+
+
+module "s3_data_lake" {
+  source        = "./modules/s3_data_lake"
+  environment   = var.environment
+  bucket_prefix = var.bucket_prefix
+  region        = var.region
+}
