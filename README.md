@@ -112,3 +112,4 @@ aws dynamodb create-table \
 - Criar o módulo de **VPC Peering**
 - Criar recursos para **Glue**, **Athena**, **MWAA**, etc
 - Implantar o ambiente **prod** após estabilizar o **dev**
+
