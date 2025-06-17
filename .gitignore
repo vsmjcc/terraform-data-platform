@@ -1,0 +1,27 @@
+# Terraform state
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Terraform plan output
+*.tfplan
+
+# Terraform variable files (se tiver secrets locais)
+*.tfvars
+*.tfvars.json
+
+# Diretórios gerados pelo Terraform
+.terraform/
+.terraform.lock.hcl
+
+# Logs ou arquivos temporários
+*.log
+*.backup
+
+# macOS specific
+.DS_Store
+
+# IDEs (exemplo: VSCode)
+.vscode/
+.idea/
+
