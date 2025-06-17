@@ -1,0 +1,31 @@
+name: Terraform Apply
+
+on:
+  push:
+    branches:
+      - dev
+      - prod
+
+jobs:
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
+      - name: Terraform Apply
+        run: |
+          BRANCH_NAME=${{ github.ref_name }}
+          if [ "$BRANCH_NAME" = "prod" ]; then
+            terraform apply -auto-approve -var-file=envs/prod/main.tfvars
+          else
+            terraform apply -auto-approve -var-file=envs/dev/main.tfvars
+          fi
