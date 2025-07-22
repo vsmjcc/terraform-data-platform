@@ -1,26 +1,16 @@
 # Terraform state
-*.tfstate
-*.tfstate.*
-crash.log
-
-# Terraform plan output
-*.tfplan
-
-.terraform/
 terraform.tfstate
 terraform.tfstate.backup
-crash.log
 
-# Terraform variable files (se tiver secrets locais)
-*.tfvars
-*.tfvars.json
-
-# Diretórios gerados pelo Terraform
+# Terraform cache/plugins
 .terraform/
 
-# Logs ou arquivos temporários
+# IDE/config
+*.tfplan
 *.log
-*.backup
+
+# Se tiver secrets no tfvars, ignore-os
+envs/**/secrets.tfvars
 
 # macOS specific
 .DS_Store
