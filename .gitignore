@@ -17,7 +17,6 @@ crash.log
 
 # Diretórios gerados pelo Terraform
 .terraform/
-.terraform.lock.hcl
 
 # Logs ou arquivos temporários
 *.log
