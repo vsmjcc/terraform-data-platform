@@ -11,6 +11,16 @@ variable "environment" {
   type        = string
 }
 
+variable "private_azs" {
+  description = "Lista de AZs para subnets privadas"
+  type        = list(string)
+}
+
+variable "public_azs" {
+  description = "Lista de AZs para subnets públicas"
+  type        = list(string)
+}
+
 variable "bucket_prefix" {
   description = "Prefixo dos buckets"
   type        = string
@@ -21,3 +31,5 @@ variable "region" {
   type        = string
   default     = "us-east-1"
 }
+
+
