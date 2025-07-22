@@ -3,13 +3,15 @@ resource "aws_iam_role" "task_execution_role" {
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Action    = "sts:AssumeRole"
-      Effect    = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
       }
-    }]
+    ]
   })
 }
 
@@ -26,6 +28,7 @@ resource "aws_iam_role_policy_attachment" "execution_policy" {
 resource "aws_cloudwatch_log_group" "airflow" {
   name              = "/ecs/airflow-${var.environment}"
   retention_in_days = 7
+  skip_destroy      = true
 
   tags = {
     Environment = var.environment
@@ -49,7 +52,7 @@ resource "aws_ecs_task_definition" "airflow" {
   container_definitions = jsonencode([
     {
       name      = "airflow-webserver"
-      image     = "apache/airflow:slim-latest-python3.9"
+      image     = local.container_image
       essential = true
       portMappings = [
         {
@@ -66,23 +69,22 @@ resource "aws_ecs_task_definition" "airflow" {
           awslogs-stream-prefix = "airflow"
         }
       }
+      environment = []
+      secrets     = []
     }
   ])
 }
 
-
 resource "aws_ecs_service" "airflow" {
-  name          = "airflow-${var.environment}-webserver"
-  cluster       = var.cluster_name
-  launch_type   = "FARGATE"
-  desired_count = 1
+  name            = "airflow-${var.environment}-webserver"
+  cluster         = var.cluster_name
+  launch_type     = "FARGATE"
+  desired_count   = 1
+  task_definition = aws_ecs_task_definition.airflow.arn
 
   network_configuration {
     subnets          = var.subnet_ids
     security_groups  = [var.security_group_id]
     assign_public_ip = false
   }
-
-  task_definition = aws_ecs_task_definition.airflow.arn
 }
-

@@ -13,3 +13,8 @@ variable "region" {
   type        = string
   default     = "us-east-1"
 }
+
+variable "layer" {
+  description = "Camada do data lake (bronze, silver, gold)"
+  type        = string
+}

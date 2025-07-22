@@ -27,11 +27,34 @@ module "nat_gateway" {
 # }
 
 
-module "s3_data_lake" {
-  source        = "./modules/s3_data_lake"
+#module "s3_data_lake" {
+#  source        = "./modules/s3_data_lake"
+#  environment   = var.environment
+#  bucket_prefix = var.bucket_prefix
+#  region        = var.region
+#}
+
+
+
+module "bronze_bucket" {
+  source        = "./modules/data_lake_bucket"
   environment   = var.environment
   bucket_prefix = var.bucket_prefix
-  region        = var.region
+  layer         = "bronze"
+}
+
+module "silver_bucket" {
+  source        = "./modules/data_lake_bucket"
+  environment   = var.environment
+  bucket_prefix = var.bucket_prefix
+  layer         = "silver"
+}
+
+module "gold_bucket" {
+  source        = "./modules/data_lake_bucket"
+  environment   = var.environment
+  bucket_prefix = var.bucket_prefix
+  layer         = "gold"
 }
 
 module "ecs_cluster" {

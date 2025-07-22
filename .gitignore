@@ -6,6 +6,11 @@ crash.log
 # Terraform plan output
 *.tfplan
 
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+crash.log
+
 # Terraform variable files (se tiver secrets locais)
 *.tfvars
 *.tfvars.json

@@ -10,8 +10,9 @@ TFVARS_PROD=envs/prod/main.tfvars
 # Dev
 ##########
 
-login-dev:
+init-dev:
 	aws sso login --profile $(AWS_PROFILE_DEV)
+	AWS_PROFILE=$(AWS_PROFILE_DEV) terraform init -reconfigure
 
 init-dev:
 	AWS_PROFILE=$(AWS_PROFILE_DEV) terraform init -reconfigure
