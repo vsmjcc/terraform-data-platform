@@ -2,11 +2,11 @@ resource "aws_iam_role" "task_execution_role" {
   name = "airflow-${var.environment}-task-execution-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action    = "sts:AssumeRole",
+        Effect    = "Allow",
         Principal = {
           Service = "ecs-tasks.amazonaws.com"
         }
@@ -35,56 +35,11 @@ resource "aws_cloudwatch_log_group" "airflow" {
   }
 }
 
-locals {
-  container_image = "apache/airflow:slim-latest-python3.9"
-  service_names   = ["webserver", "scheduler", "worker", "flower"]
+resource "aws_secretsmanager_secret" "sqlalchemy_conn" {
+  name = "zerezes-data-${var.environment}-AIRFLOW__DATABASE__SQL_ALCHEMY_CONN"
 }
 
-resource "aws_ecs_task_definition" "airflow" {
-  family                   = "airflow-${var.environment}"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = "512"
-  memory                   = "1024"
-  execution_role_arn       = aws_iam_role.task_execution_role.arn
-  task_role_arn            = aws_iam_role.task_execution_role.arn
-
-  container_definitions = jsonencode([
-    {
-      name      = "airflow-webserver"
-      image     = local.container_image
-      essential = true
-      portMappings = [
-        {
-          containerPort = 8080
-          protocol      = "tcp"
-        }
-      ]
-      command = ["airflow", "api-server"]
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-group         = aws_cloudwatch_log_group.airflow.name
-          awslogs-region        = var.region
-          awslogs-stream-prefix = "airflow"
-        }
-      }
-      environment = []
-      secrets     = []
-    }
-  ])
-}
-
-resource "aws_ecs_service" "airflow" {
-  name            = "airflow-${var.environment}-webserver"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
-  task_definition = aws_ecs_task_definition.airflow.arn
-
-  network_configuration {
-    subnets          = var.subnet_ids
-    security_groups  = [var.security_group_id]
-    assign_public_ip = false
-  }
+resource "aws_secretsmanager_secret_version" "sqlalchemy_conn_version" {
+  secret_id     = aws_secretsmanager_secret.sqlalchemy_conn.id
+  secret_string = "postgresql+psycopg2://${var.db_username}:${var.db_password}@${var.db_host}/${var.db_name}"
 }

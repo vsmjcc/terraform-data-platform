@@ -1,11 +1,11 @@
 resource "random_password" "rds_password" {
   length  = 16
   special = true
-  override_special = "_+=!#$%^&*()-"
+  override_special = "_!#$%^&*()-"
 }
 
 resource "aws_secretsmanager_secret" "rds_password" {
-  name = "zerezes-data-dev-rds-postgres-password"
+  name = "zerezes-data-dev-${var.db_name}-rds-postgres"
 }
 
 resource "aws_secretsmanager_secret_version" "rds_password_version" {
@@ -34,6 +34,7 @@ resource "aws_db_instance" "this" {
   vpc_security_group_ids  = [var.security_group_id]
   publicly_accessible     = false
   storage_encrypted       = false
+  db_name                 = var.db_name
   username                = var.username
   password                = random_password.rds_password.result
   skip_final_snapshot     = true

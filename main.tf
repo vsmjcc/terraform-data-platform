@@ -66,6 +66,7 @@ module "ecs_cluster" {
 module "rds_postgres" {
   source           = "./modules/rds_postgres"
   identifier       = "zerezes-data-dev-airflow-db"
+  db_name          = "airflow"
   username         = "airflow"
   subnet_ids       = module.vpc.private_subnet_ids
   security_group_id = aws_security_group.airflow.id
@@ -77,7 +78,10 @@ module "ecs_airflow" {
   subnet_ids        = module.vpc.private_subnet_ids
   security_group_id = aws_security_group.airflow.id
 
-  rds_endpoint      = module.rds_postgres.rds_instance_endpoint
+  db_host           = module.rds_postgres.endpoint
+  db_name           = module.rds_postgres.db_name
+  db_username       = module.rds_postgres.username
+  db_password       = module.rds_postgres.password
   rds_secret_arn    = module.rds_postgres.rds_secret_arn
   environment       = var.environment
   region            = var.region

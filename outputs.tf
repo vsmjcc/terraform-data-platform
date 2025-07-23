@@ -3,7 +3,7 @@ output "ecs_cluster_name" {
 }
 
 output "rds_endpoint" {
-  value = module.rds_postgres.rds_instance_endpoint
+  value = module.rds_postgres.endpoint
 }
 
 output "rds_secret_arn" {

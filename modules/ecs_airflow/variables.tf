@@ -13,13 +13,28 @@ variable "security_group_id" {
   type        = string
 }
 
-variable "rds_endpoint" {
+variable "rds_secret_arn" {
+  description = "ARN do Secrets Manager com a senha do banco"
+  type        = string
+}
+
+variable "db_host" {
   description = "Endpoint do banco de dados Postgres"
   type        = string
 }
 
-variable "rds_secret_arn" {
-  description = "ARN do Secrets Manager com a senha do banco"
+variable "db_username" {
+  description = "db username"
+  type        = string
+}
+
+variable "db_password" {
+  description = "db password"
+  type        = string
+}
+
+variable "db_name" {
+  description = "database name"
   type        = string
 }
 

@@ -3,6 +3,11 @@ variable "identifier" {
   type        = string
 }
 
+variable "db_name" {
+  description = "database name"
+  type        = string
+}
+
 variable "username" {
   description = "Usuário master"
   type        = string
