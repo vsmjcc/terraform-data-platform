@@ -18,3 +18,17 @@ output "app_deploy_role_arn" {
 output "ecr_repository_urls" {
   value = module.ecr_repositories.repository_urls
 }
+
+output "airflow_alb_dns_name" {
+  description = "URL pública do Airflow Webserver"
+  value       = module.ecs_airflow.airflow_alb_dns_name
+}
+
+output "redis_host" {
+  description = "URL pública do Airflow Webserver"
+  value       = module.redis.redis_host
+}
+
+output "private_subnet_cidrs" {
+  value = module.vpc.private_subnet_cidrs
+}

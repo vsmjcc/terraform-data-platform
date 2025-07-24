@@ -1,3 +1,4 @@
+
 variable "identifier" {
   description = "Identificador do RDS"
   type        = string
@@ -13,12 +14,17 @@ variable "username" {
   type        = string
 }
 
+variable "vpc_id" {
+  description = "VPC ID "
+  type        = string
+}
+
 variable "subnet_ids" {
   description = "Lista de subnet IDs privadas"
   type        = list(string)
 }
 
-variable "security_group_id" {
-  description = "ID do Security Group para o RDS"
-  type        = string
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "IDs das subnets privadas usadas para gerar regras de acesso no SG"
 }
