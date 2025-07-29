@@ -41,27 +41,19 @@ resource "aws_service_discovery_private_dns_namespace" "internal" {
 #}
 
 
-
-module "bronze_bucket" {
-  source        = "./modules/data_lake_bucket"
+module "buckets" {
+  source        = "./modules/buckets"
   environment   = var.environment
-  bucket_prefix = var.bucket_prefix
-  layer         = "bronze"
+  region        = var.region
 }
 
-module "silver_bucket" {
-  source        = "./modules/data_lake_bucket"
-  environment   = var.environment
-  bucket_prefix = var.bucket_prefix
-  layer         = "silver"
+module "lambdas" {
+  source              = "./modules/lambdas"
+  environment         = var.environment
+  region              = var.region
+  packages_bucket_name= module.buckets.packages_bucket_name
 }
 
-module "gold_bucket" {
-  source        = "./modules/data_lake_bucket"
-  environment   = var.environment
-  bucket_prefix = var.bucket_prefix
-  layer         = "gold"
-}
 
 module "ecs_cluster" {
   source       = "./modules/ecs_cluster"

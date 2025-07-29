@@ -3,18 +3,13 @@ variable "environment" {
   type        = string
 }
 
-variable "bucket_prefix" {
-  description = "Prefixo padrão para os buckets"
-  type        = string
-}
-
 variable "region" {
   description = "AWS Region"
   type        = string
   default     = "us-east-1"
 }
 
-variable "layer" {
-  description = "Camada do data lake (bronze, silver, gold)"
+variable "packages_bucket_name" {
+  description = "packages bucket name"
   type        = string
 }

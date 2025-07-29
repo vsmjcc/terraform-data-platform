@@ -218,6 +218,54 @@ resource "aws_ecs_task_definition" "airflow_dag_processor" {
 }
 
 
+resource "aws_cloudfront_distribution" "airflow" {
+  origin {
+    domain_name = aws_lb.airflow.dns_name
+    origin_id   = "airflow-alb"
+
+    custom_origin_config {
+      origin_protocol_policy = "http-only" # ou "https-only" se quiser adicionar SSL no ALB depois
+      http_port              = 80
+      https_port             = 443
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  enabled             = true
+  default_root_object = ""
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods   = ["GET", "HEAD"]
+
+    viewer_protocol_policy = "redirect-to-https"
+    target_origin_id       = "airflow-alb"
+
+    forwarded_values {
+      headers = ["Host"]
+      query_string = true
+
+      cookies {
+        forward = "all"
+      }
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  tags = {
+    Environment = var.environment
+  }
+}
+
 
 # Security Groups
 resource "aws_security_group" "alb" {
@@ -349,6 +397,12 @@ resource "aws_ecs_service" "airflow_scheduler" {
     assign_public_ip = false
   }
 
+  lifecycle {
+    ignore_changes = [
+      task_definition
+    ]
+  }
+
   depends_on = [aws_ecs_task_definition.airflow_scheduler]
 }
 
@@ -367,6 +421,12 @@ resource "aws_ecs_service" "airflow_worker" {
     assign_public_ip = false
   }
 
+  lifecycle {
+    ignore_changes = [
+      task_definition
+    ]
+  }
+
   depends_on = [aws_ecs_task_definition.airflow_worker]
 }
 
@@ -383,6 +443,12 @@ resource "aws_ecs_service" "airflow_dag_processor" {
     subnets          = var.private_subnet_ids
     security_groups  = [aws_security_group.airflow.id]
     assign_public_ip = false
+  }
+
+  lifecycle {
+    ignore_changes = [
+      task_definition
+    ]
   }
 
   depends_on = [aws_ecs_task_definition.airflow_dag_processor]

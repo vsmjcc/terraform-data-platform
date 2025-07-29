@@ -32,3 +32,18 @@ output "redis_host" {
 output "private_subnet_cidrs" {
   value = module.vpc.private_subnet_cidrs
 }
+
+output "airfloa_cloudfront_url" {
+  description = "URL pública do CloudFront do airflow com HTTPS"
+  value       = "https://${module.ecs_airflow.cloudfront_url}"
+}
+
+output "buckets_info" {
+  description = "Nome e ARN dos buckets"
+  value       = module.buckets.buckets_info
+}
+
+output "lambdas_info" {
+  description = "dados das lambdas"
+  value       = module.lambdas.lambdas_info
+}
