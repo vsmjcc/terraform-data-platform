@@ -8,13 +8,3 @@ variable "region" {
   type        = string
   default     = "us-east-1"
 }
-
-variable "packages_bucket_name" {
-  description = "packages bucket name"
-  type        = string
-}
-
-variable "bronze_bucket_name" {
-  description = "Broze bucket name"
-  type        = string
-}

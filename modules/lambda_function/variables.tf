@@ -52,3 +52,15 @@ variable "environment_variables" {
   type        = map(string)
   default     = {}
 }
+
+variable "log_retention_in_days" {
+  description = "Retention for the Lambda CloudWatch Logs group"
+  type        = number
+  default     = 30
+}
+
+variable "create_log_group" {
+  description = "Whether to pre-create the CloudWatch Logs group for the Lambda"
+  type        = bool
+  default     = true
+}

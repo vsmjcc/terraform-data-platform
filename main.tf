@@ -52,8 +52,8 @@ module "lambdas" {
   environment         = var.environment
   region              = var.region
   packages_bucket_name= module.buckets.packages_bucket_name
+  bronze_bucket_name  = module.buckets.bronze_bucket_name
 }
-
 
 module "ecs_cluster" {
   source       = "./modules/ecs_cluster"
@@ -129,6 +129,8 @@ resource "aws_security_group_rule" "allow_airflow_ecs_to_redis" {
 
 module "iam" {
   source = "./modules/iam"
+  environment         = var.environment
+  region              = var.region
 }
 
 
