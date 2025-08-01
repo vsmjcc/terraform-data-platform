@@ -18,9 +18,9 @@
     }
   }
 
-module "shopify_lambda" {
+module "shopify_orders_lambda" {
   source             = "../lambda_function"
-  function_name      = "ingest-shopify-to-bronze"
+  function_name      = "ingest-shopify-orders-to-bronze"
   handler            = "main.handler"
   runtime            = "python3.11"
   timeout            = 10
@@ -42,7 +42,7 @@ module "shopify_lambda" {
 
 locals {
   lambda_modules = {
-    typeform   = module.typeform_lambda
-    shopify    = module.shopify_lambda
+    typeform        = module.typeform_lambda
+    shopify_orders  = module.shopify_orders_lambda
   }
 }

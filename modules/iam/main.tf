@@ -83,6 +83,30 @@ resource "aws_iam_policy" "lambda_deploy_policy" {
   })
 }
 
+resource "aws_iam_policy" "s3_dag_upload_policy" {
+  name        = "zerezes-app-s3-upload-policy"
+  description = "Permite o upload de DAGs no bucket zrzs-dev-packages"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:PutObjectAcl"
+        ],
+        Resource = "arn:aws:s3:::zrzs-dev-packages/airflow-dags/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_s3_dag_upload_policy" {
+  role       = aws_iam_role.app_deploy_role.name
+  policy_arn = aws_iam_policy.s3_dag_upload_policy.arn
+}
+
 # ---------------------------------------------------------
 # Permissão para as Lambdas escreverem no bucket bronze
 # ---------------------------------------------------------
@@ -158,7 +182,7 @@ resource "aws_iam_role_policy_attachment" "attach_bronze_write_to_lambda" {
   policy_arn = aws_iam_policy.bronze_write_policy.arn
 }
 
-resource "aws_iam_role_policy_attachment" "attach_shopify_bronze_write_to_lambda" {
-  role       = "ingest-shopify-to-bronze-lambda-role" 
+resource "aws_iam_role_policy_attachment" "attach_shopify_orders_bronze_write_to_lambda" {
+  role       = "ingest-shopify-orders-to-bronze-lambda-role" 
   policy_arn = aws_iam_policy.bronze_write_policy.arn
 }

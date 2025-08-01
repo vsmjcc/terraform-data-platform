@@ -52,6 +52,56 @@ resource "aws_secretsmanager_secret_version" "sqlalchemy_conn_version" {
   secret_string = "postgresql+psycopg2://${var.db_username}:${var.db_password}@${var.db_host}/${var.db_name}"
 }
 
+resource "aws_efs_file_system" "dag_volume" {
+  creation_token = "airflow-${var.environment}-dag-efs"
+
+  lifecycle_policy {
+    transition_to_ia = "AFTER_7_DAYS"
+  }
+
+  tags = {
+    Name        = "airflow-${var.environment}-dag-efs"
+    Environment = var.environment
+  }
+}
+
+resource "aws_efs_mount_target" "dag_volume_targets" {
+  for_each = toset(var.private_subnet_ids)
+
+  file_system_id  = aws_efs_file_system.dag_volume.id
+  subnet_id       = each.value
+  security_groups = [aws_security_group.airflow.id]
+}
+
+# volume definition to inject in each task
+locals {
+  dags_volume = {
+    name = "airflow-dags"
+
+    efs_volume_configuration = {
+      file_system_id     = aws_efs_file_system.dag_volume.id
+      root_directory     = "/"
+      transit_encryption = "ENABLED"
+
+      authorization_config = {
+        access_point_id = null
+        iam             = "DISABLED"
+      }
+    }
+  }
+
+  dag_mount = {
+    sourceVolume  = "airflow-dags"
+    containerPath = "/opt/airflow/dags"
+    readOnly      = true
+  }
+
+  dag_env = {
+    name  = "AIRFLOW__CORE__DAGS_FOLDER"
+    value = "/opt/airflow/dags"
+  }
+}
+
 # Task Definition
 resource "aws_ecs_task_definition" "airflow_webserver" {
   family                   = "airflow-${var.environment}-webserver"
@@ -216,7 +266,6 @@ resource "aws_ecs_task_definition" "airflow_dag_processor" {
     }
   ])
 }
-
 
 resource "aws_cloudfront_distribution" "airflow" {
   origin {
