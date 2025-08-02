@@ -64,3 +64,45 @@ variable "create_log_group" {
   type        = bool
   default     = true
 }
+
+variable "efs_arn" {
+  type        = string
+  default     = null
+  description = "ARN do EFS Access Point (para montar EFS na Lambda)"
+}
+
+variable "efs_mount_path" {
+  type        = string
+  default     = "/mnt/efs"
+  description = "Caminho local onde o EFS será montado"
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = []
+  description = "Subnets privadas da VPC onde a Lambda deve rodar"
+}
+
+variable "security_group_ids" {
+  type        = list(string)
+  default     = []
+  description = "Security groups da Lambda (requerido se usar VPC)"
+}
+
+variable "vpc_id" {
+  description = "ID da VPC usada para o SG da Lambda (obrigatório se create_sg for true)"
+  type        = string
+  default     = null
+}
+
+variable "efs_security_group_id" {
+  type        = string
+  default     = null
+  description = "ID do SG do EFS que a Lambda precisa acessar (para liberar porta 2049)"
+}
+
+variable "allow_efs_ingress" {
+  description = "Se deve adicionar uma regra no SG do EFS para permitir acesso da Lambda"
+  type        = bool
+  default     = false
+}

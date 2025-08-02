@@ -18,3 +18,24 @@ variable "bronze_bucket_name" {
   description = "Broze bucket name"
   type        = string
 }
+
+variable "vpc_id" {
+  description = "ID da VPC"
+  type        = string
+  default     = null
+}
+
+variable "private_subnet_ids" {
+  type        = list(string)
+  default     = []
+  description = "Subnets privadas da VPC onde a Lambda deve rodar"
+}
+
+variable "volumes" {
+  description = "Mapa com informações dos volumes EFS"
+  type = map(object({
+    efs_id            = string
+    efs_arn           = string
+    security_group_id = string
+  }))
+}

@@ -47,3 +47,9 @@ output "lambdas_info" {
   description = "dados das lambdas"
   value       = module.lambdas.lambdas_info
 }
+
+
+output "volumes_info" {
+  description = "dados das lambdas"
+  value       = module.volumes.volumes
+}

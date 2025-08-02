@@ -47,12 +47,22 @@ module "buckets" {
   region        = var.region
 }
 
+module "volumes" {
+  source              = "./modules/volumes"
+  environment         = var.environment
+  vpc_id              = module.vpc.vpc_id
+  private_subnet_ids  = module.vpc.private_subnet_ids
+}
+
 module "lambdas" {
   source              = "./modules/lambdas"
   environment         = var.environment
   region              = var.region
   packages_bucket_name= module.buckets.packages_bucket_name
   bronze_bucket_name  = module.buckets.bronze_bucket_name
+  volumes             = module.volumes.volumes
+  vpc_id              = module.vpc.vpc_id
+  private_subnet_ids  = module.vpc.private_subnet_ids
 }
 
 module "ecs_cluster" {

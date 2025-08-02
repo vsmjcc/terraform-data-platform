@@ -75,7 +75,8 @@ resource "aws_iam_policy" "lambda_deploy_policy" {
         Action = [
           "lambda:UpdateFunctionCode",
           "lambda:GetFunction",
-          "lambda:GetFunctionConfiguration"
+          "lambda:GetFunctionConfiguration",
+          "lambda:InvokeFunction"
         ],
         Resource = "arn:aws:lambda:us-east-1:414669981241:function:*"
       }
