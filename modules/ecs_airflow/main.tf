@@ -52,6 +52,15 @@ resource "aws_secretsmanager_secret_version" "sqlalchemy_conn_version" {
   secret_string = "postgresql+psycopg2://${var.db_username}:${var.db_password}@${var.db_host}/${var.db_name}"
 }
 
+module "airflow_logs_bucket" {
+  source          = "../s3_bucket"
+  environment     = var.environment
+  region          = var.aws_region
+  bucket_name     = "zrzs-${var.environment}-airflow-logs"
+  tags = {}
+}
+
+
 
 # Exemplo de task definition atualizada: airflow_webserver
 resource "aws_ecs_task_definition" "airflow_webserver" {
@@ -81,7 +90,10 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
         { name = "AIRFLOW__WEBSERVER__WORKERS", value = "2" },
         { name = "AIRFLOW__CORE__LOAD_EXAMPLES", value = "False" },
         { name = "AIRFLOW__LOGGING__LOGGING_LEVEL", value = "DEBUG" },
-        { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" }
+        { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" },
+        { name = "AIRFLOW__LOGGING__REMOTE_LOGGING", value = "true" },
+        { name = "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER", value = "s3://${module.airflow_logs_bucket.bucket_name}" },
+        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" }
       ],
       secrets = [
         {
@@ -145,7 +157,10 @@ resource "aws_ecs_task_definition" "airflow_scheduler" {
         { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" },
         { name = "AIRFLOW__SCHEDULER__STANDALONE_DAG_PROCESSOR", value = "false" },
         { name = "AIRFLOW__CORE__MIN_FILE_PROCESS_INTERVAL", value = "10" },
-        { name = "AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL", value = "30" }
+        { name = "AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL", value = "30" },
+        { name = "AIRFLOW__LOGGING__REMOTE_LOGGING", value = "true" },
+        { name = "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER", value = "s3://${module.airflow_logs_bucket.bucket_name}" },
+        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" }
       ],
       secrets = [
         {
@@ -207,7 +222,10 @@ resource "aws_ecs_task_definition" "airflow_worker" {
         { name = "AIRFLOW__LOGGING__LOGGING_LEVEL", value = "DEBUG" },
         { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" },
         { name = "AIRFLOW__CELERY__WORKER_CONCURRENCY", value = "2" },
-        { name = "AIRFLOW__CELERY__WORKER_MAX_TASKS_PER_CHILD", value = "5" }
+        { name = "AIRFLOW__CELERY__WORKER_MAX_TASKS_PER_CHILD", value = "5" },
+        { name = "AIRFLOW__LOGGING__REMOTE_LOGGING", value = "true" },
+        { name = "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER", value = "s3://${module.airflow_logs_bucket.bucket_name}" },
+        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" }
       ],
       secrets = [
         {
@@ -528,6 +546,32 @@ resource "aws_ecs_service" "airflow_worker" {
   depends_on = [aws_ecs_task_definition.airflow_worker]
 }
 
+
+resource "aws_iam_policy" "airflow_logs" {
+  name   = "airflow-logs-s3-policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "${module.airflow_logs_bucket.bucket_arn}",
+          "${module.airflow_logs_bucket.bucket_arn}/*",
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "airflow_logs_attachment" {
+  role       = aws_iam_role.task_execution_role.name
+  policy_arn = aws_iam_policy.airflow_logs.arn
+}
 
 # resource "aws_ecs_service" "airflow_dag_processor" {
 #   name            = "airflow-${var.environment}-dag-processor"
