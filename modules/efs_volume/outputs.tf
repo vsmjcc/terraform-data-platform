@@ -17,3 +17,8 @@ output "access_point_path" {
   description = "Path montado no access point"
   value       = var.access_point_path
 }
+
+output "access_point_id" {
+  description = "Access Point ID para montagem no ECS"
+  value       = aws_efs_access_point.this.id
+}

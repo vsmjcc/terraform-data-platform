@@ -22,3 +22,14 @@ variable "environment" {
   description = "Ambiente (ex: dev, prod)"
   type        = string
 }
+
+variable "region" {
+  description = "Região AWS"
+  type        = string
+}
+
+variable "enable_vpc_flow_logs" {
+  description = "Ativa logs de fluxo da VPC para S3"
+  type        = bool
+  default     = false
+}

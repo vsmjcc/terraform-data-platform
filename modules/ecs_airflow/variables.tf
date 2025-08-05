@@ -64,3 +64,19 @@ variable "redis_host" {
   description = "Redis endpoint para CeleryExecutor"
   type        = string
 }
+
+variable "efs_id" {
+  description = "ID do EFS que armazenará os DAGs"
+  type        = string
+}
+
+variable "efs_access_point_id" {
+  description = "Access Point do EFS para montar o volume"
+  type        = string
+}
+
+variable "efs_security_group_id" {
+  type        = string
+  default     = null
+  description = "ID do SG do EFS que os containers precisa acessar (para liberar porta 2049)"
+}

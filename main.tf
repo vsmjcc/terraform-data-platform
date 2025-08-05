@@ -1,12 +1,14 @@
 module "vpc" {
-  source          = "./modules/vpc"
-  vpc_cidr_block  = var.vpc_cidr_block
-  private_subnets = var.private_subnets
-  public_subnets  = var.public_subnets
-  private_azs     = var.private_azs
-  public_azs      = var.public_azs
-  nat_gateway_id  = module.nat_gateway.nat_gateway_id
-  environment     = var.environment
+  source                = "./modules/vpc"
+  vpc_cidr_block        = var.vpc_cidr_block
+  private_subnets       = var.private_subnets
+  public_subnets        = var.public_subnets
+  private_azs           = var.private_azs
+  public_azs            = var.public_azs
+  nat_gateway_id        = module.nat_gateway.nat_gateway_id
+  environment           = var.environment
+  region                = var.region
+  enable_vpc_flow_logs  = true
 }
 
 module "nat_gateway" {
@@ -115,7 +117,11 @@ module "ecs_airflow" {
   worker_count        = 1
   redis_host          = module.redis.redis_host
   ecr_repo_url        = module.ecr_repositories.repository_urls["airflow"]
+  efs_id              = module.volumes.volumes["airflow_dags"].efs_id
+  efs_access_point_id = module.volumes.volumes["airflow_dags"].access_point_id
+  efs_security_group_id= module.volumes.volumes["airflow_dags"].security_group_id
 }
+
 
 # resource "aws_security_group_rule" "allow_airflow_ecs_to_rds" {
 #   type                     = "ingress"

@@ -53,7 +53,7 @@ resource "aws_secretsmanager_secret_version" "sqlalchemy_conn_version" {
 }
 
 
-# Task Definition
+# Exemplo de task definition atualizada: airflow_webserver
 resource "aws_ecs_task_definition" "airflow_webserver" {
   family                   = "airflow-${var.environment}-webserver"
   requires_compatibilities = ["FARGATE"]
@@ -89,6 +89,13 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
           valueFrom = aws_secretsmanager_secret.sqlalchemy_conn.arn
         }
       ],
+      mountPoints = [
+        {
+          sourceVolume  = "airflow-dags",
+          containerPath = "/opt/airflow/dags",
+          readOnly      = false
+        }
+      ],
       logConfiguration = {
         logDriver = "awslogs",
         options = {
@@ -99,7 +106,22 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
       }
     }
   ])
+
+  volume {
+    name = "airflow-dags"
+
+    efs_volume_configuration {
+      file_system_id          = var.efs_id
+      root_directory          = "/"
+      transit_encryption      = "ENABLED"
+      authorization_config {
+        access_point_id = var.efs_access_point_id
+        iam             = "ENABLED"
+      }
+    }
+  }
 }
+
 
 resource "aws_ecs_task_definition" "airflow_scheduler" {
   family                   = "airflow-${var.environment}-scheduler"
@@ -120,12 +142,22 @@ resource "aws_ecs_task_definition" "airflow_scheduler" {
         { name = "AIRFLOW__CORE__EXECUTOR", value = "CeleryExecutor" },
         { name = "AIRFLOW__CORE__LOAD_EXAMPLES", value = "False" },
         { name = "AIRFLOW__LOGGING__LOGGING_LEVEL", value = "DEBUG" },
-        { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" }
+        { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" },
+        { name = "AIRFLOW__SCHEDULER__STANDALONE_DAG_PROCESSOR", value = "false" },
+        { name = "AIRFLOW__CORE__MIN_FILE_PROCESS_INTERVAL", value = "10" },
+        { name = "AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL", value = "30" }
       ],
       secrets = [
         {
           name      = "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
           valueFrom = aws_secretsmanager_secret.sqlalchemy_conn.arn
+        }
+      ],
+      mountPoints = [
+        {
+          sourceVolume  = "airflow-dags",
+          containerPath = "/opt/airflow/dags",
+          readOnly      = true
         }
       ],
       logConfiguration = {
@@ -138,6 +170,20 @@ resource "aws_ecs_task_definition" "airflow_scheduler" {
       }
     }
   ])
+
+  volume {
+    name = "airflow-dags"
+
+    efs_volume_configuration {
+      file_system_id          = var.efs_id
+      root_directory          = "/"
+      transit_encryption      = "ENABLED"
+      authorization_config {
+        access_point_id = var.efs_access_point_id
+        iam             = "ENABLED"
+      }
+    }
+  }
 }
 
 resource "aws_ecs_task_definition" "airflow_worker" {
@@ -145,8 +191,8 @@ resource "aws_ecs_task_definition" "airflow_worker" {
   family                   = "airflow-${var.environment}-worker-${count.index}"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = "512"
-  memory                   = "1024"
+  cpu                      = "1024"
+  memory                   = "4096"
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_execution_role.arn
 
@@ -159,12 +205,21 @@ resource "aws_ecs_task_definition" "airflow_worker" {
       environment = [
         { name = "AIRFLOW__CORE__EXECUTOR", value = "CeleryExecutor" },
         { name = "AIRFLOW__LOGGING__LOGGING_LEVEL", value = "DEBUG" },
-        { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" }
+        { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" },
+        { name = "AIRFLOW__CELERY__WORKER_CONCURRENCY", value = "2" },
+        { name = "AIRFLOW__CELERY__WORKER_MAX_TASKS_PER_CHILD", value = "5" }
       ],
       secrets = [
         {
           name      = "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
           valueFrom = aws_secretsmanager_secret.sqlalchemy_conn.arn
+        }
+      ],
+      mountPoints = [
+        {
+          sourceVolume  = "airflow-dags",
+          containerPath = "/opt/airflow/dags",
+          readOnly      = true
         }
       ],
       logConfiguration = {
@@ -177,46 +232,80 @@ resource "aws_ecs_task_definition" "airflow_worker" {
       }
     }
   ])
-}
 
-resource "aws_ecs_task_definition" "airflow_dag_processor" {
-  family                   = "airflow-${var.environment}-dag-processor"
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = "512"
-  memory                   = "1024"
-  execution_role_arn       = aws_iam_role.task_execution_role.arn
-  task_role_arn            = aws_iam_role.task_execution_role.arn
+  volume {
+    name = "airflow-dags"
 
-  container_definitions = jsonencode([
-    {
-      name      = "airflow-dag-processor",
-      image     = "${var.ecr_repo_url}:latest",
-      essential = true,
-      command   = ["airflow", "dag-processor"],
-      environment = [
-        { name = "AIRFLOW__CORE__EXECUTOR", value = "CeleryExecutor" },
-        { name = "AIRFLOW__LOGGING__LOGGING_LEVEL", value = "DEBUG" },
-        { name = "AIRFLOW__SCHEDULER__STANDALONE_DAG_PROCESSOR", value = "true" },
-        { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" }
-      ],
-      secrets = [
-        {
-          name      = "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
-          valueFrom = aws_secretsmanager_secret.sqlalchemy_conn.arn
-        }
-      ],
-      logConfiguration = {
-        logDriver = "awslogs",
-        options = {
-          awslogs-group         = aws_cloudwatch_log_group.airflow.name,
-          awslogs-region        = var.aws_region,
-          awslogs-stream-prefix = "dag-processor"
-        }
+    efs_volume_configuration {
+      file_system_id          = var.efs_id
+      root_directory          = "/"
+      transit_encryption      = "ENABLED"
+      authorization_config {
+        access_point_id = var.efs_access_point_id
+        iam             = "ENABLED"
       }
     }
-  ])
+  }
 }
+
+# resource "aws_ecs_task_definition" "airflow_dag_processor" {
+#   family                   = "airflow-${var.environment}-dag-processor"
+#   requires_compatibilities = ["FARGATE"]
+#   network_mode             = "awsvpc"
+#   cpu                      = "512"
+#   memory                   = "1024"
+#   execution_role_arn       = aws_iam_role.task_execution_role.arn
+#   task_role_arn            = aws_iam_role.task_execution_role.arn
+
+#   container_definitions = jsonencode([
+#     {
+#       name      = "airflow-dag-processor",
+#       image     = "${var.ecr_repo_url}:latest",
+#       essential = true,
+#       command   = ["airflow", "dag-processor", "--standalone"],
+#       environment = [
+#         { name = "AIRFLOW__CORE__EXECUTOR", value = "CeleryExecutor" },
+#         { name = "AIRFLOW__LOGGING__LOGGING_LEVEL", value = "DEBUG" },
+#         { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" }
+#       ],
+#       secrets = [
+#         {
+#           name      = "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
+#           valueFrom = aws_secretsmanager_secret.sqlalchemy_conn.arn
+#         }
+#       ],
+#       mountPoints = [
+#         {
+#           sourceVolume  = "airflow-dags",
+#           containerPath = "/opt/airflow/dags",
+#           readOnly      = true
+#         }
+#       ],
+#       logConfiguration = {
+#         logDriver = "awslogs",
+#         options = {
+#           awslogs-group         = aws_cloudwatch_log_group.airflow.name,
+#           awslogs-region        = var.aws_region,
+#           awslogs-stream-prefix = "dag-processor"
+#         }
+#       }
+#     }
+#   ])
+
+#   volume {
+#     name = "airflow-dags"
+
+#     efs_volume_configuration {
+#       file_system_id          = var.efs_id
+#       root_directory          = "/"
+#       transit_encryption      = "ENABLED"
+#       authorization_config {
+#         access_point_id = var.efs_access_point_id
+#         iam             = "ENABLED"
+#       }
+#     }
+#   }
+# }
 
 resource "aws_cloudfront_distribution" "airflow" {
   origin {
@@ -311,13 +400,22 @@ resource "aws_security_group" "airflow" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"] #"10.30.0.0/16"
   }
 
   tags = {
     Name        = "airflow-${var.environment}-ecs-sg"
     Environment = var.environment
   }
+}
+
+resource "aws_security_group_rule" "allow_ecs_to_efs" {
+  type                     = "ingress"
+  from_port               = 2049
+  to_port                 = 2049
+  protocol                = "tcp"
+  security_group_id       = var.efs_security_group_id
+  source_security_group_id = aws_security_group.airflow.id
 }
 
 # Load Balancer
@@ -397,11 +495,11 @@ resource "aws_ecs_service" "airflow_scheduler" {
     assign_public_ip = false
   }
 
-  lifecycle {
-    ignore_changes = [
-      task_definition
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     task_definition
+  #   ]
+  # }
 
   depends_on = [aws_ecs_task_definition.airflow_scheduler]
 }
@@ -421,38 +519,38 @@ resource "aws_ecs_service" "airflow_worker" {
     assign_public_ip = false
   }
 
-  lifecycle {
-    ignore_changes = [
-      task_definition
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     task_definition
+  #   ]
+  # }
 
   depends_on = [aws_ecs_task_definition.airflow_worker]
 }
 
 
-resource "aws_ecs_service" "airflow_dag_processor" {
-  name            = "airflow-${var.environment}-dag-processor"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
-  enable_execute_command = true
-  task_definition = aws_ecs_task_definition.airflow_dag_processor.arn
+# resource "aws_ecs_service" "airflow_dag_processor" {
+#   name            = "airflow-${var.environment}-dag-processor"
+#   cluster         = var.cluster_name
+#   launch_type     = "FARGATE"
+#   desired_count   = 1
+#   enable_execute_command = true
+#   task_definition = aws_ecs_task_definition.airflow_dag_processor.arn
 
-  network_configuration {
-    subnets          = var.private_subnet_ids
-    security_groups  = [aws_security_group.airflow.id]
-    assign_public_ip = false
-  }
+#   network_configuration {
+#     subnets          = var.private_subnet_ids
+#     security_groups  = [aws_security_group.airflow.id]
+#     assign_public_ip = false
+#   }
 
-  lifecycle {
-    ignore_changes = [
-      task_definition
-    ]
-  }
+#   lifecycle {
+#     ignore_changes = [
+#       task_definition
+#     ]
+#   }
 
-  depends_on = [aws_ecs_task_definition.airflow_dag_processor]
-}
+#   depends_on = [aws_ecs_task_definition.airflow_dag_processor]
+# }
 
 
 

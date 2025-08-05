@@ -6,9 +6,9 @@ module "airflow_dags_volume" {
   create_security_group = true
   vpc_id                = var.vpc_id
 
-  access_point_path = "/airflow-dags"
-  access_point_uid  = 1000
-  access_point_gid  = 1000
+  access_point_path = "/dags"
+  access_point_uid  = 50000
+  access_point_gid  = 0
 
   tags = {
     Environment = var.environment

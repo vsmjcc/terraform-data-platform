@@ -50,6 +50,14 @@ resource "aws_s3_object" "lambda_zip" {
   content_type = "application/zip"
 }
 
+module "athena_results_bucket" {
+  source          = "../s3_bucket"
+  environment     = var.environment
+  region          = var.region
+  bucket_name     = "zrzs-${var.environment}-athena-results"
+  tags = {}
+}
+
 locals {
   bucket_modules = {
     bronze   = module.bronze_bucket

@@ -6,6 +6,7 @@ output "volumes" {
       efs_arn           = mod.efs_arn
       security_group_id = mod.security_group_id
       access_point_path = mod.access_point_path
+      access_point_id   = mod.access_point_id
     }
   }
 }
