@@ -13,20 +13,17 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-# Attach basic execution policy
 resource "aws_iam_role_policy_attachment" "lambda_basic_logs" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Optional CloudWatch log group
 resource "aws_cloudwatch_log_group" "lambda" {
   count             = var.create_log_group ? 1 : 0
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_in_days
 }
 
-# Optional security group for VPC-enabled Lambda
 resource "aws_security_group" "lambda" {
   count = length(var.subnet_ids) > 0 && length(var.security_group_ids) == 0 ? 1 : 0
 
@@ -45,7 +42,6 @@ resource "aws_security_group" "lambda" {
     Name = "${var.function_name}-sg"
   }
 }
-
 
 resource "aws_security_group_rule" "allow_lambda_to_efs" {
   count = var.allow_efs_ingress && var.efs_security_group_id != null && length(var.subnet_ids) > 0 ? 1 : 0
@@ -89,8 +85,8 @@ resource "aws_lambda_function" "this" {
   timeout       = var.timeout
   memory_size   = var.memory_size
 
-  s3_bucket     = var.s3_bucket
-  s3_key        = var.s3_key
+  s3_bucket = var.s3_bucket
+  s3_key    = var.s3_key
 
   environment {
     variables = var.environment_variables
@@ -121,7 +117,6 @@ resource "aws_lambda_function" "this" {
   }
 }
 
-
 resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
   count      = length(var.subnet_ids) > 0 ? 1 : 0
   role       = aws_iam_role.lambda_role.name
@@ -129,9 +124,9 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
 }
 
 resource "aws_apigatewayv2_api" "this" {
-  count          = var.enable_http_api ? 1 : 0
-  name           = "${var.function_name}-api"
-  protocol_type  = "HTTP"
+  count         = var.enable_http_api ? 1 : 0
+  name          = "${var.function_name}-api"
+  protocol_type = "HTTP"
 }
 
 resource "aws_lambda_permission" "allow_apigw" {
@@ -144,12 +139,12 @@ resource "aws_lambda_permission" "allow_apigw" {
 }
 
 resource "aws_apigatewayv2_integration" "this" {
-  count                  = var.enable_http_api ? 1 : 0
-  api_id                = aws_apigatewayv2_api.this[0].id
-  integration_type      = "AWS_PROXY"
-  integration_uri       = aws_lambda_function.this.invoke_arn
-  integration_method    = "POST"
-  payload_format_version = "2.0"
+  count                    = var.enable_http_api ? 1 : 0
+  api_id                  = aws_apigatewayv2_api.this[0].id
+  integration_type        = "AWS_PROXY"
+  integration_uri         = aws_lambda_function.this.invoke_arn
+  integration_method      = "POST"
+  payload_format_version  = "2.0"
 }
 
 resource "aws_apigatewayv2_route" "this" {
@@ -164,4 +159,38 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.this[0].id
   name        = "$default"
   auto_deploy = true
+}
+
+# Optional custom DNS record
+resource "aws_route53_record" "custom_dns" {
+  count   = var.enable_http_api && var.dns_zone_id != null && var.enable_custom_domain ? 1 : 0
+  zone_id = var.dns_zone_id
+  name    = "${var.function_name}.${data.aws_route53_zone.selected[0].name}"
+  type    = "CNAME"
+  ttl     = 300
+  records = [aws_apigatewayv2_domain_name.custom[0].domain_name_configuration[0].target_domain_name]
+}
+
+data "aws_route53_zone" "selected" {
+  count   = var.dns_zone_id != null ? 1 : 0
+  zone_id = var.dns_zone_id
+}
+
+# Cria domínio customizado usando o certificado ACM (wildcard *.data.zerezes.dev)
+resource "aws_apigatewayv2_domain_name" "custom" {
+  count = var.enable_http_api && var.enable_custom_domain ? 1 : 0
+  domain_name         = "${var.function_name}.${data.aws_route53_zone.selected[0].name}"
+  domain_name_configuration {
+    certificate_arn = var.dns_certificate_arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+}
+
+# Faz o mapeamento da API para esse domínio customizado
+resource "aws_apigatewayv2_api_mapping" "custom" {
+  count       = var.enable_http_api && var.enable_custom_domain ? 1 : 0
+  api_id      = aws_apigatewayv2_api.this[0].id
+  domain_name = aws_apigatewayv2_domain_name.custom[0].domain_name
+  stage       = aws_apigatewayv2_stage.default[0].name
 }

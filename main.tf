@@ -42,6 +42,10 @@ resource "aws_service_discovery_private_dns_namespace" "internal" {
 #  region        = var.region
 #}
 
+module "dns" {
+  source = "./modules/dns"
+}
+
 
 module "buckets" {
   source        = "./modules/buckets"
@@ -65,6 +69,7 @@ module "lambdas" {
   volumes             = module.volumes.volumes
   vpc_id              = module.vpc.vpc_id
   private_subnet_ids  = module.vpc.private_subnet_ids
+  dns_zones           = module.dns.dns_zones
 }
 
 module "ecs_cluster" {
@@ -120,8 +125,10 @@ module "ecs_airflow" {
   efs_id              = module.volumes.volumes["airflow_dags"].efs_id
   efs_access_point_id = module.volumes.volumes["airflow_dags"].access_point_id
   efs_security_group_id= module.volumes.volumes["airflow_dags"].security_group_id
+  dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
+  dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
+  dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
 }
-
 
 # resource "aws_security_group_rule" "allow_airflow_ecs_to_rds" {
 #   type                     = "ingress"

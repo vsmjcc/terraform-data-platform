@@ -6,7 +6,15 @@ output "lambda_arn" {
   value = aws_lambda_function.this.arn
 }
 
+
 output "http_api_url" {
-  value       = var.enable_http_api ? aws_apigatewayv2_api.this[0].api_endpoint : null
-  description = "Endpoint HTTP do API Gateway (se aplicável)"
+  value = (
+    length(aws_apigatewayv2_domain_name.custom) > 0
+    ? format("https://%s", aws_apigatewayv2_domain_name.custom[0].domain_name)
+    : (
+        length(aws_apigatewayv2_api.this) > 0
+        ? aws_apigatewayv2_api.this[0].api_endpoint
+        : null
+      )
+  )
 }

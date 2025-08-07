@@ -7,6 +7,7 @@ output "airflow_sg_id" {
   value = aws_security_group.airflow.id
 }
 
-output "cloudfront_url" {
-  value = aws_cloudfront_distribution.airflow.domain_name
+output "airflow_url" {
+  description = "URL pública do Airflow com HTTPS"
+  value       = "https://airflow.${var.dns_zone_name}"
 }

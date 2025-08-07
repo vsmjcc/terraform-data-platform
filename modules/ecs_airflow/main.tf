@@ -266,113 +266,6 @@ resource "aws_ecs_task_definition" "airflow_worker" {
   }
 }
 
-# resource "aws_ecs_task_definition" "airflow_dag_processor" {
-#   family                   = "airflow-${var.environment}-dag-processor"
-#   requires_compatibilities = ["FARGATE"]
-#   network_mode             = "awsvpc"
-#   cpu                      = "512"
-#   memory                   = "1024"
-#   execution_role_arn       = aws_iam_role.task_execution_role.arn
-#   task_role_arn            = aws_iam_role.task_execution_role.arn
-
-#   container_definitions = jsonencode([
-#     {
-#       name      = "airflow-dag-processor",
-#       image     = "${var.ecr_repo_url}:latest",
-#       essential = true,
-#       command   = ["airflow", "dag-processor", "--standalone"],
-#       environment = [
-#         { name = "AIRFLOW__CORE__EXECUTOR", value = "CeleryExecutor" },
-#         { name = "AIRFLOW__LOGGING__LOGGING_LEVEL", value = "DEBUG" },
-#         { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" }
-#       ],
-#       secrets = [
-#         {
-#           name      = "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN",
-#           valueFrom = aws_secretsmanager_secret.sqlalchemy_conn.arn
-#         }
-#       ],
-#       mountPoints = [
-#         {
-#           sourceVolume  = "airflow-dags",
-#           containerPath = "/opt/airflow/dags",
-#           readOnly      = true
-#         }
-#       ],
-#       logConfiguration = {
-#         logDriver = "awslogs",
-#         options = {
-#           awslogs-group         = aws_cloudwatch_log_group.airflow.name,
-#           awslogs-region        = var.aws_region,
-#           awslogs-stream-prefix = "dag-processor"
-#         }
-#       }
-#     }
-#   ])
-
-#   volume {
-#     name = "airflow-dags"
-
-#     efs_volume_configuration {
-#       file_system_id          = var.efs_id
-#       root_directory          = "/"
-#       transit_encryption      = "ENABLED"
-#       authorization_config {
-#         access_point_id = var.efs_access_point_id
-#         iam             = "ENABLED"
-#       }
-#     }
-#   }
-# }
-
-resource "aws_cloudfront_distribution" "airflow" {
-  origin {
-    domain_name = aws_lb.airflow.dns_name
-    origin_id   = "airflow-alb"
-
-    custom_origin_config {
-      origin_protocol_policy = "http-only" # ou "https-only" se quiser adicionar SSL no ALB depois
-      http_port              = 80
-      https_port             = 443
-      origin_ssl_protocols   = ["TLSv1.2"]
-    }
-  }
-
-  enabled             = true
-  default_root_object = ""
-
-  default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
-    cached_methods   = ["GET", "HEAD"]
-
-    viewer_protocol_policy = "redirect-to-https"
-    target_origin_id       = "airflow-alb"
-
-    forwarded_values {
-      headers = ["Host"]
-      query_string = true
-
-      cookies {
-        forward = "all"
-      }
-    }
-  }
-
-  viewer_certificate {
-    cloudfront_default_certificate = true
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
 
 # Security Groups
 resource "aws_security_group" "alb" {
@@ -381,9 +274,9 @@ resource "aws_security_group" "alb" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "Allow HTTP from anywhere"
-    from_port   = 80
-    to_port     = 80
+    description = "Allow HTTPS from anywhere"
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -464,16 +357,49 @@ resource "aws_lb_target_group" "airflow" {
   }
 }
 
-resource "aws_lb_listener" "airflow" {
+resource "aws_lb_listener" "airflow_http" {
   load_balancer_arn = aws_lb.airflow.arn
   port              = 80
   protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "airflow_https" {
+  load_balancer_arn = aws_lb.airflow.arn
+  port              = 443
+  protocol          = "HTTPS"
+
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.dns_certificate_arn
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.airflow.arn
   }
 }
+
+# Route53 Record for HTTPS
+resource "aws_route53_record" "airflow_dns" {
+  zone_id = var.dns_zone_id
+  name    = "airflow.${var.dns_zone_name}"
+  type    = "CNAME"
+  ttl     = 300
+  records = [aws_lb.airflow.dns_name]
+}
+
+#dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
+#dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
+#dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
+
 
 # ECS Service
 resource "aws_ecs_service" "airflow" {
@@ -496,7 +422,7 @@ resource "aws_ecs_service" "airflow" {
     container_port   = 8080
   }
 
-  depends_on = [aws_lb_listener.airflow]
+  depends_on = [aws_lb_listener.airflow_https]
 }
 
 resource "aws_ecs_service" "airflow_scheduler" {
@@ -512,12 +438,6 @@ resource "aws_ecs_service" "airflow_scheduler" {
     security_groups  = [aws_security_group.airflow.id]
     assign_public_ip = false
   }
-
-  # lifecycle {
-  #   ignore_changes = [
-  #     task_definition
-  #   ]
-  # }
 
   depends_on = [aws_ecs_task_definition.airflow_scheduler]
 }
@@ -536,12 +456,6 @@ resource "aws_ecs_service" "airflow_worker" {
     security_groups  = [aws_security_group.airflow.id]
     assign_public_ip = false
   }
-
-  # lifecycle {
-  #   ignore_changes = [
-  #     task_definition
-  #   ]
-  # }
 
   depends_on = [aws_ecs_task_definition.airflow_worker]
 }
@@ -573,28 +487,38 @@ resource "aws_iam_role_policy_attachment" "airflow_logs_attachment" {
   policy_arn = aws_iam_policy.airflow_logs.arn
 }
 
-# resource "aws_ecs_service" "airflow_dag_processor" {
-#   name            = "airflow-${var.environment}-dag-processor"
-#   cluster         = var.cluster_name
-#   launch_type     = "FARGATE"
-#   desired_count   = 1
-#   enable_execute_command = true
-#   task_definition = aws_ecs_task_definition.airflow_dag_processor.arn
 
-#   network_configuration {
-#     subnets          = var.private_subnet_ids
-#     security_groups  = [aws_security_group.airflow.id]
-#     assign_public_ip = false
-#   }
+resource "aws_iam_policy" "airflow_data_lake_access" {
+  name = "airflow-${var.environment}-data-lake-access"
 
-#   lifecycle {
-#     ignore_changes = [
-#       task_definition
-#     ]
-#   }
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "arn:aws:s3:::zrzs-dev-data-lake-bronze",
+          "arn:aws:s3:::zrzs-dev-data-lake-bronze/*",
+          "arn:aws:s3:::zrzs-dev-data-lake-silver",
+          "arn:aws:s3:::zrzs-dev-data-lake-silver/*",
+          "arn:aws:s3:::zrzs-dev-data-lake-gold",
+          "arn:aws:s3:::zrzs-dev-data-lake-gold/*"
+        ]
+      }
+    ]
+  })
+}
 
-#   depends_on = [aws_ecs_task_definition.airflow_dag_processor]
-# }
+
+resource "aws_iam_role_policy_attachment" "attach_airflow_data_lake_access" {
+  role       = aws_iam_role.task_execution_role.name
+  policy_arn = aws_iam_policy.airflow_data_lake_access.arn
+}
 
 
 

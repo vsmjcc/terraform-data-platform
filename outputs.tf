@@ -33,9 +33,9 @@ output "private_subnet_cidrs" {
   value = module.vpc.private_subnet_cidrs
 }
 
-output "airfloa_cloudfront_url" {
+output "airflow_url" {
   description = "URL pública do CloudFront do airflow com HTTPS"
-  value       = "https://${module.ecs_airflow.cloudfront_url}"
+  value       = module.ecs_airflow.airflow_url
 }
 
 output "buckets_info" {
@@ -52,4 +52,10 @@ output "lambdas_info" {
 output "volumes_info" {
   description = "dados das lambdas"
   value       = module.volumes.volumes
+}
+
+
+output "dns_info" {
+  description = "dados dos dns"
+  value       = module.dns.dns_zones
 }

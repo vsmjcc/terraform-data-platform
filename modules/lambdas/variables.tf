@@ -39,3 +39,19 @@ variable "volumes" {
     security_group_id = string
   }))
 }
+
+variable "dns_zone_id" {
+  description = "Route 53 Zone ID to create custom DNS record (optional)"
+  type        = string
+  default     = null
+}
+
+variable "dns_zones" {
+  description = "DNS Map"
+  type = map(object({
+    zone_id            = string
+    zone_name           = string
+    certificate_arn = string
+  }))
+}
+

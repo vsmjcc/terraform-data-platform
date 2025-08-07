@@ -80,3 +80,21 @@ variable "efs_security_group_id" {
   default     = null
   description = "ID do SG do EFS que os containers precisa acessar (para liberar porta 2049)"
 }
+
+variable "dns_zone_id" {
+  description = "ID da zona hospedada no Route 53"
+  type        = string
+  default     = null
+}
+
+variable "dns_zone_name" {
+  description = "Nome da zona hospedada no Route 53"
+  type        = string
+  default     = null
+}
+
+variable "dns_certificate_arn" {
+  description = "ARN do certificado SSL (ACM)"
+  type        = string
+  default     = null
+}

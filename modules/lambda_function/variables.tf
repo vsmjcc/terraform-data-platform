@@ -106,3 +106,21 @@ variable "allow_efs_ingress" {
   type        = bool
   default     = false
 }
+
+variable "enable_custom_domain" {
+  description = "Se true, cria o domínio customizado com certificado"
+  type        = bool
+  default     = false
+}
+
+variable "dns_zone_id" {
+  description = "ID da zona hospedada no Route 53"
+  type        = string
+  default     = null
+}
+
+variable "dns_certificate_arn" {
+  description = "ARN do certificado SSL (ACM)"
+  type        = string
+  default     = null
+}
