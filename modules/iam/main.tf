@@ -188,3 +188,13 @@ resource "aws_iam_role_policy_attachment" "attach_shopify_orders_bronze_write_to
   role       = "ingest-shopify-orders-to-bronze-lambda-role" 
   policy_arn = aws_iam_policy.bronze_write_policy.arn
 }
+
+resource "aws_iam_role_policy_attachment" "attach_shopify_products_bronze_write_to_lambda" {
+  role       = "ingest-shopify-products-to-bronze-lambda-role" 
+  policy_arn = aws_iam_policy.bronze_write_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_shopify_customers_bronze_write_to_lambda" {
+  role       = "ingest-shopify-customers-to-bronze-lambda-role" 
+  policy_arn = aws_iam_policy.bronze_write_policy.arn
+}

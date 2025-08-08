@@ -17,6 +17,22 @@ module "nat_gateway" {
   public_subnet_id = module.vpc.public_subnet_ids[0]
 }
 
+resource "aws_key_pair" "aws-data-key" {
+  key_name   = var.ssh_key_name
+  public_key = file("~/.ssh/aws-data-${var.environment}-key.pub")
+}
+
+module "vpn_pritunl" {
+  source       = "./modules/vpn_pritunl"
+  ami_id       = "ami-080e1f13689e07408"
+  instance_type= "t3.micro"
+  subnet_id    = module.vpc.public_subnet_ids[0]
+  vpc_id       = module.vpc.vpc_id
+  key_name     = var.ssh_key_name
+  environment  = var.environment
+}
+
+
 resource "aws_service_discovery_private_dns_namespace" "internal" {
   name        = "zerezes.local"
   description = "Internal namespace for service discovery"

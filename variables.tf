@@ -32,4 +32,8 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "ssh_key_name" {
+  description = "ssh key name"
+  type        = string
+}
 
