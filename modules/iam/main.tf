@@ -108,6 +108,46 @@ resource "aws_iam_role_policy_attachment" "attach_s3_dag_upload_policy" {
   policy_arn = aws_iam_policy.s3_dag_upload_policy.arn
 }
 
+
+resource "aws_iam_policy" "s3_etls_glue_upload_policy" {
+  name        = "zerezes-etls-glue-s3-upload-policy"
+  description = "Permite o upload e leitura dos scripts Glue no bucket zrzs-dev-etls"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:PutObjectAcl",
+          "s3:GetObject"
+        ],
+        Resource = "arn:aws:s3:::zrzs-dev-etls/glue/*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:ListBucket"
+        ],
+        Resource = "arn:aws:s3:::zrzs-dev-etls",
+        Condition = {
+          StringLike = {
+            "s3:prefix" = [
+              "glue/*"
+            ]
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_s3_etls_glue_upload_policy" {
+  role       = aws_iam_role.app_deploy_role.name
+  policy_arn = aws_iam_policy.s3_etls_glue_upload_policy.arn
+}
+
 # ---------------------------------------------------------
 # Permissão para as Lambdas escreverem no bucket bronze
 # ---------------------------------------------------------

@@ -146,6 +146,131 @@ module "ecs_airflow" {
   dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
 }
 
+
+# main.tf
+resource "aws_security_group" "glue" {
+  name        = "glue-${var.environment}"
+  description = "SG para AWS Glue"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port       = 0
+    to_port         = 65535
+    protocol        = "tcp"
+    self            = true
+    description     = "Allow Glue executors to communicate with each other"
+  }
+  # Se usa só endpoints VPC, mantenha egress dentro da VPC.
+  # Para simplificar, liberando tudo (ajuste conforme seu padrão):
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Environment = var.environment }
+}
+
+
+module "glue_hello_world" {
+  source = "./modules/glue_job"
+
+  project = "zrzs-${var.environment}"
+  name    = "hello-world"
+
+  # Script no S3 (publicado pelo seu CI/CD)
+  script_bucket      = "zrzs-dev-etls"
+  script_key         = "glue/hello_world.py"
+  upload_script      = true                         # se quiser que o TF envie a 1ª versão
+  script_local_path  = "${path.root}/glue/hello_world.py"
+
+  # TempDir
+  temp_bucket = "zrzs-dev-etls"
+  temp_prefix = "glue/tmp/"
+
+  # Buckets que o job vai acessar (leitura/escrita de dados)
+  data_buckets = [
+    "zrzs-dev-data-lake-silver",                   # OUTPUT_PATH
+    # adicione outros buckets de dados se necessário
+  ]
+
+  # Se seus buckets usam SSE-KMS, passe as chaves aqui:
+  # kms_keys = ["arn:aws:kms:us-east-1:123456789012:key/...."]
+
+  # Config do Job
+  glue_version      = "4.0"
+  worker_type       = "G.1X"
+  number_of_workers = 2
+  execution_class   = "STANDARD"
+
+  # Args default do hello world
+  default_arguments = {
+    "--OUTPUT_PATH" = "s3://zrzs-dev-data-lake-silver/test/hello_world/"
+  }
+
+  # VPC interna
+  use_vpc            = true
+  subnet_ids         = module.vpc.private_subnet_ids
+  security_group_ids = [aws_security_group.glue.id]
+
+  tags = {
+    Project = "zrzs"
+    Env     = "dev"
+    Owner   = "data-platform"
+  }
+}
+
+module "glue_customers_to_silver" {
+  source = "./modules/glue_job"
+
+  project = "zrzs-${var.environment}"
+  name    = "shopify_customers_to_silver"
+
+  # Script no S3 (seu CI/CD pode publicar)
+  script_bucket     = "zrzs-dev-etls"
+  script_key        = "glue/shopify_customers_to_silver.py"
+  upload_script     = false                        # true só se quiser que TF envie o arquivo local
+  script_local_path = "${path.root}/glue/shopify_customers_to_silver.py"
+
+  # TempDir
+  temp_bucket = "zrzs-dev-etls"
+  temp_prefix = "glue/tmp/"
+
+  # Buckets de dados (leitura/escrita) – bronze e silver
+  data_buckets = [
+    "zrzs-dev-data-lake-bronze",
+    "zrzs-dev-data-lake-silver",
+  ]
+
+  # Args default do job (ajuste paths conforme sua org)
+  default_arguments = {
+    "--SOURCE_PATH"           = "s3://zrzs-dev-data-lake-bronze/domain=commerce/source=shopify/dataset=customers"
+    "--TARGET_CUSTOMERS_PATH" = "s3://zrzs-dev-data-lake-silver/domain=commerce/source=shopify/dataset=customers"
+    "--TARGET_ADDRESSES_PATH" = "s3://zrzs-dev-data-lake-silver/domain=commerce/source=shopify/dataset=customer_addresses"
+    "--MODE"                  = "overwrite"
+    "--SINCE_DAYS"            = "7"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--enable-metrics"        = "true"
+    "--job-bookmark-option"   = "job-bookmark-enable"
+    "--conf"                  = "spark.sql.sources.partitionOverwriteMode=dynamic"
+  }
+
+  # VPC (opcional). Se não usar, deixe use_vpc = false.
+  use_vpc            = true
+  subnet_ids         = module.vpc.private_subnet_ids
+  security_group_ids = [aws_security_group.glue.id]
+
+  tags = {
+    Project = "zrzs"
+    Env     = var.environment
+    Owner   = "data-platform"
+  }
+}
+
+
+
+
 # resource "aws_security_group_rule" "allow_airflow_ecs_to_rds" {
 #   type                     = "ingress"
 #   from_port                = 5432

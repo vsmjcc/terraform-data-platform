@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 # IAM Role
 resource "aws_iam_role" "task_execution_role" {
   name = "airflow-${var.environment}-task-execution-role"
@@ -521,4 +523,61 @@ resource "aws_iam_role_policy_attachment" "attach_airflow_data_lake_access" {
 }
 
 
+data "aws_iam_policy_document" "airflow_glue" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "glue:GetJob",
+      "glue:StartJobRun",
+      "glue:GetJobRun",
+      "glue:GetJobRuns",
+      "glue:BatchStopJobRun",
+    ]
+    resources = [
+      "arn:aws:glue:us-east-1:${data.aws_caller_identity.current.account_id}:job/*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "airflow_glue_policy" {
+  name   = "airflow-glue-job-policy"
+  policy = data.aws_iam_policy_document.airflow_glue.json
+}
+
+resource "aws_iam_role_policy_attachment" "attach_airflow_glue_policy" {
+  role = aws_iam_role.task_execution_role.name
+  policy_arn = aws_iam_policy.airflow_glue_policy.arn
+}
+
+
+
+
+resource "aws_iam_policy" "airflow_glue_logs" {
+  name        = "airflow-glue-logs-policy"
+  description = "Permite o Airflow ler logs do Glue no CloudWatch"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "logs:GetLogEvents",
+          "logs:FilterLogEvents",
+          "logs:DescribeLogStreams",
+          "logs:DescribeLogGroups"
+        ],
+        Resource = [
+          "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws-glue/jobs/output:*",
+          "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws-glue/jobs/error:*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_airflow_glue_logs" {
+  role       = aws_iam_role.task_execution_role.name
+  policy_arn = aws_iam_policy.airflow_glue_logs.arn
+}
 

@@ -58,6 +58,14 @@ module "athena_results_bucket" {
   tags = {}
 }
 
+module "etls_bucket" {
+  source          = "../s3_bucket"
+  environment     = var.environment
+  region          = var.region
+  bucket_name     = "zrzs-${var.environment}-etls"
+  tags = {}
+}
+
 locals {
   bucket_modules = {
     bronze          = module.bronze_bucket
@@ -65,5 +73,6 @@ locals {
     gold            = module.gold_bucket
     packages        = module.packages_bucket
     athena_results  = module.athena_results_bucket
+    etls            = module.etls_bucket
   }
 }
