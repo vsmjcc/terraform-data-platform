@@ -268,6 +268,98 @@ module "glue_customers_to_silver" {
   }
 }
 
+resource "aws_glue_catalog_database" "commerce_silver" {
+  name = "commerce_silver"
+}
+
+data "aws_iam_policy_document" "crawler_trust" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["glue.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "glue_crawler" {
+  name               = "AWSGlueCrawlerRole-data-${var.environment}-shopify-silver"
+  assume_role_policy = data.aws_iam_policy_document.crawler_trust.json
+}
+
+# S3 leitura apenas nos caminhos usados pelo crawler
+data "aws_iam_policy_document" "crawler_s3_read" {
+  statement {
+    sid     = "ListSpecificBuckets"
+    actions = ["s3:ListBucket"]
+    resources = [
+      "arn:aws:s3:::zrzs-dev-data-lake-silver",
+    ]
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values = [
+        "domain=commerce/source=shopify/dataset=customers/*",
+        "domain=commerce/source=shopify/dataset=customer_addresses/*"
+      ]
+    }
+  }
+
+  statement {
+    sid     = "ReadObjects"
+    actions = ["s3:GetObject"]
+    resources = [
+      "arn:aws:s3:::zrzs-dev-data-lake-silver/domain=commerce/source=shopify/dataset=customers/*",
+      "arn:aws:s3:::zrzs-dev-data-lake-silver/domain=commerce/source=shopify/dataset=customer_addresses/*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "crawler_s3_read" {
+  name   = "GlueCrawlerS3Read-data-${var.environment}-shopify-silver"
+  policy = data.aws_iam_policy_document.crawler_s3_read.json
+}
+
+# Políticas: managed da AWS + S3 read acima
+resource "aws_iam_role_policy_attachment" "crawler_service_managed" {
+  role       = aws_iam_role.glue_crawler.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
+}
+
+resource "aws_iam_role_policy_attachment" "crawler_s3_read_attach" {
+  role       = aws_iam_role.glue_crawler.name
+  policy_arn = aws_iam_policy.crawler_s3_read.arn
+}
+
+
+resource "aws_glue_crawler" "shopify_silver" {
+  name         = "shopify-silver-crawler"
+  role         = aws_iam_role.glue_crawler.arn
+  database_name= aws_glue_catalog_database.commerce_silver.name
+  description  = "Descobre/atualiza schemas da camada silver do Shopify (customers e addresses)"
+
+  s3_target {
+    path = "s3://zrzs-dev-data-lake-silver/domain=commerce/source=shopify/dataset=customers/"
+  }
+
+  s3_target {
+    path = "s3://zrzs-dev-data-lake-silver/domain=commerce/source=shopify/dataset=customer_addresses/"
+  }
+
+  # Mantém as tabelas atualizadas no catálogo (sem apagar)
+  schema_change_policy {
+    update_behavior = "UPDATE_IN_DATABASE"
+    delete_behavior = "LOG"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING" # ou "CRAWL_NEW_FOLDERS_ONLY"
+  }
+
+  # Se quiser rodar periodicamente, descomente e ajuste o cron:
+  # schedule = "cron(0 * * * ? *)" # a cada hora
+}
+
 
 
 

@@ -69,8 +69,8 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
   family                   = "airflow-${var.environment}-webserver"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = "512"
-  memory                   = "1024"
+  cpu                      = "1024"
+  memory                   = "2048"
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_execution_role.arn
 
@@ -579,5 +579,54 @@ resource "aws_iam_policy" "airflow_glue_logs" {
 resource "aws_iam_role_policy_attachment" "attach_airflow_glue_logs" {
   role       = aws_iam_role.task_execution_role.name
   policy_arn = aws_iam_policy.airflow_glue_logs.arn
+}
+
+
+# O role que o Airflow usa nas tasks (o que aparece no erro)
+data "aws_iam_role" "airflow_task_exec" {
+  name = "airflow-dev-task-execution-role"
+}
+
+# Policy mínima para crawler + leitura de job (opcional, mas útil)
+resource "aws_iam_policy" "airflow_glue_crawler" {
+  name = "airflow-glue-crawler-permissions"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      # Permissões específicas do crawler
+      {
+        Sid    = "GlueCrawlerBasic"
+        Effect = "Allow"
+        Action = [
+          "glue:GetCrawler",
+          "glue:StartCrawler",
+          "glue:GetCrawlerMetrics"
+        ]
+        Resource = [
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:crawler/shopify-silver-crawler"
+        ]
+      },
+
+      # (Opcional) leitura de Jobs do Glue usada pelo GlueJobOperator p/ checagens
+      {
+        Sid    = "GlueJobRead"
+        Effect = "Allow"
+        Action = [
+          "glue:GetJob",
+          "glue:GetJobRun",
+          "glue:GetJobRuns",
+          "glue:ListJobs"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Anexa no role do Airflow
+resource "aws_iam_role_policy_attachment" "attach_airflow_glue_crawler" {
+  role       = data.aws_iam_role.airflow_task_exec.name
+  policy_arn = aws_iam_policy.airflow_glue_crawler.arn
 }
 

@@ -18,6 +18,8 @@
     environment_variables = {
       STAGE     = var.environment
       LOG_LEVEL = "debug"
+      S3_BUCKET               = var.bronze_bucket_name
+      TYPEFORM_WEBHOOK_SECRET = "3f2c49f7e5af99c7129931072111d34f85a69cea"
     }
   }
 
