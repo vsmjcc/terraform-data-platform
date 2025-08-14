@@ -21,7 +21,7 @@ variable "upload_script" {
 
 variable "script_local_path" {
   type    = string
-  default = null
+  default = "sample.py"
 }
 
 variable "script_sse" {

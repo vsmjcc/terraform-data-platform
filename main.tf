@@ -221,6 +221,9 @@ module "glue_hello_world" {
   }
 }
 
+
+
+
 module "glue_customers_to_silver" {
   source = "./modules/glue_job"
 
@@ -267,6 +270,56 @@ module "glue_customers_to_silver" {
     Owner   = "data-platform"
   }
 }
+
+module "glue_nps_to_silver" {
+  source = "./modules/glue_job"
+
+  project = "zrzs-${var.environment}"
+  name    = "typeform_nps_to_silver"
+
+  # Script no S3 (seu CI/CD pode publicar)
+  script_bucket     = "zrzs-dev-etls"
+  script_key        = "glue/typeform_nps_to_silver.py"
+  upload_script     = false                        # true só se quiser que TF envie o arquivo local
+  script_local_path = "${path.root}/glue/typeform_nps_to_silver.py"
+
+  # TempDir
+  temp_bucket = "zrzs-dev-etls"
+  temp_prefix = "glue/tmp/"
+
+  # Buckets de dados (leitura/escrita) – bronze e silver
+  data_buckets = [
+    "zrzs-dev-data-lake-bronze",
+    "zrzs-dev-data-lake-silver",
+  ]
+
+  # Args default do job (ajuste paths conforme sua org)
+  default_arguments = {
+    "--SOURCE_PATH"           = "s3://zrzs-dev-data-lake-bronze/domain=commerce/source=typeform/dataset=nps"
+    "--TARGET_NPS_PATH"       = "s3://zrzs-dev-data-lake-silver/domain=commerce/source=typeform/dataset=nps"
+    "--TARGET_ANSWERS_PATH"   = "s3://zrzs-dev-data-lake-silver/domain=commerce/source=typeform/dataset=nps_answers"
+    "--MODE"                  = "overwrite"
+    "--SINCE_DAYS"            = "7"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--enable-metrics"        = "true"
+    "--job-bookmark-option"   = "job-bookmark-enable"
+    "--conf"                  = "spark.sql.sources.partitionOverwriteMode=dynamic"
+  }
+
+
+  # VPC (opcional). Se não usar, deixe use_vpc = false.
+  use_vpc            = true
+  subnet_ids         = module.vpc.private_subnet_ids
+  security_group_ids = [aws_security_group.glue.id]
+
+  tags = {
+    Project = "zrzs"
+    Env     = var.environment
+    Owner   = "data-platform"
+  }
+}
+
+
 
 resource "aws_glue_catalog_database" "commerce_silver" {
   name = "commerce_silver"
@@ -359,6 +412,106 @@ resource "aws_glue_crawler" "shopify_silver" {
   # Se quiser rodar periodicamente, descomente e ajuste o cron:
   # schedule = "cron(0 * * * ? *)" # a cada hora
 }
+
+
+
+
+
+
+
+resource "aws_iam_role" "glue_crawler_typeform" {
+  name               = "AWSGlueCrawlerRole-data-${var.environment}-typeform-silver"
+  assume_role_policy = data.aws_iam_policy_document.crawler_trust.json
+}
+
+# S3 leitura apenas nos caminhos usados pelo crawler
+data "aws_iam_policy_document" "crawler_s3_nps_read" {
+  statement {
+    sid     = "ListSpecificBuckets"
+    actions = ["s3:ListBucket"]
+    resources = [
+      "arn:aws:s3:::zrzs-dev-data-lake-silver",
+    ]
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values = [
+        "domain=commerce/source=typeform/dataset=nps/*",
+        "domain=commerce/source=typeform/dataset=nps_answers/*"
+      ]
+    }
+  }
+
+  statement {
+    sid     = "ReadObjects"
+    actions = ["s3:GetObject"]
+    resources = [
+      "arn:aws:s3:::zrzs-dev-data-lake-silver/domain=commerce/source=typeform/dataset=nps/*",
+      "arn:aws:s3:::zrzs-dev-data-lake-silver/domain=commerce/source=typeform/dataset=nps_answers/*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "crawler_s3_nps_read" {
+  name   = "GlueCrawlerS3Read-data-${var.environment}-typeform-silver"
+  policy = data.aws_iam_policy_document.crawler_s3_nps_read.json
+}
+
+# Políticas: managed da AWS + S3 read acima
+resource "aws_iam_role_policy_attachment" "crawler_service_managed_typeform" {
+  role       = aws_iam_role.glue_crawler_typeform.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
+}
+
+resource "aws_iam_role_policy_attachment" "crawler_s3_nps_read_attach" {
+  role       = aws_iam_role.glue_crawler_typeform.name
+  policy_arn = aws_iam_policy.crawler_s3_nps_read.arn
+}
+
+
+resource "aws_glue_crawler" "typeform_silver" {
+  name         = "typeform-silver-crawler"
+  role         = aws_iam_role.glue_crawler_typeform.arn
+  database_name= aws_glue_catalog_database.commerce_silver.name
+  description  = "Descobre/atualiza schemas da camada silver do typeform (nps & answers)"
+
+  s3_target {
+    path = "s3://zrzs-dev-data-lake-silver/domain=commerce/source=typeform/dataset=nps/"
+  }
+
+  s3_target {
+    path = "s3://zrzs-dev-data-lake-silver/domain=commerce/source=typeform/dataset=nps_answers/"
+  }
+
+  # Mantém as tabelas atualizadas no catálogo (sem apagar)
+  schema_change_policy {
+    update_behavior = "UPDATE_IN_DATABASE"
+    delete_behavior = "LOG"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_EVERYTHING" # ou "CRAWL_NEW_FOLDERS_ONLY"
+  }
+
+  # Se quiser rodar periodicamente, descomente e ajuste o cron:
+  # schedule = "cron(0 * * * ? *)" # a cada hora
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
