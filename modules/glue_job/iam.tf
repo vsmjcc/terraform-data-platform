@@ -15,7 +15,7 @@ data "aws_iam_policy_document" "glue_trust" {
 }
 
 resource "aws_iam_role" "glue" {
-  name               = "AWSGlueServiceRole-${var.project}-${var.name}"
+  name               = "AWSGlueServiceRole-${var.name}"
   assume_role_policy = data.aws_iam_policy_document.glue_trust.json
   tags               = var.tags
 }
@@ -48,7 +48,7 @@ data "aws_iam_policy_document" "glue_s3" {
 }
 
 resource "aws_iam_policy" "glue_s3" {
-  name   = "${var.project}-${var.name}-glue-s3"
+  name   = "${var.name}-glue-s3"
   policy = data.aws_iam_policy_document.glue_s3.json
 }
 
@@ -87,7 +87,7 @@ data "aws_iam_policy_document" "glue_logs_catalog" {
 }
 
 resource "aws_iam_policy" "glue_logs_catalog" {
-  name   = "${var.project}-${var.name}-glue-logs-catalog"
+  name   = "${var.name}-glue-logs-catalog"
   policy = data.aws_iam_policy_document.glue_logs_catalog.json
 }
 
@@ -103,7 +103,7 @@ data "aws_iam_policy_document" "kms" {
 
 resource "aws_iam_policy" "kms" {
   count  = length(var.kms_keys) > 0 ? 1 : 0
-  name   = "${var.project}-${var.name}-glue-kms"
+  name   = "${var.name}-glue-kms"
   policy = data.aws_iam_policy_document.kms[0].json
 }
 

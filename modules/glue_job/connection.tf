@@ -1,6 +1,6 @@
 resource "aws_glue_connection" "vpc" {
   count = var.use_vpc ? 1 : 0
-  name  = "glue-vpc-${var.project}-${var.name}"
+  name  = "glue-vpc-${var.name}"
 
   connection_type = "NETWORK"
 

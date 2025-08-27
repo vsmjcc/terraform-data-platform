@@ -95,7 +95,8 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
         { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" },
         { name = "AIRFLOW__LOGGING__REMOTE_LOGGING", value = "true" },
         { name = "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER", value = "s3://${module.airflow_logs_bucket.bucket_name}" },
-        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" }
+        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" },
+        { name = "AIRFLOW__CORE__DEFAULT_TIMEZONE", value = "America/Sao_Paulo" }
       ],
       secrets = [
         {
@@ -162,7 +163,8 @@ resource "aws_ecs_task_definition" "airflow_scheduler" {
         { name = "AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL", value = "30" },
         { name = "AIRFLOW__LOGGING__REMOTE_LOGGING", value = "true" },
         { name = "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER", value = "s3://${module.airflow_logs_bucket.bucket_name}" },
-        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" }
+        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" },
+        { name = "AIRFLOW__CORE__DEFAULT_TIMEZONE", value = "America/Sao_Paulo" }
       ],
       secrets = [
         {
@@ -227,7 +229,8 @@ resource "aws_ecs_task_definition" "airflow_worker" {
         { name = "AIRFLOW__CELERY__WORKER_MAX_TASKS_PER_CHILD", value = "5" },
         { name = "AIRFLOW__LOGGING__REMOTE_LOGGING", value = "true" },
         { name = "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER", value = "s3://${module.airflow_logs_bucket.bucket_name}" },
-        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" }
+        { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" },
+        { name = "AIRFLOW__CORE__DEFAULT_TIMEZONE", value = "America/Sao_Paulo" }
       ],
       secrets = [
         {
@@ -490,8 +493,8 @@ resource "aws_iam_role_policy_attachment" "airflow_logs_attachment" {
 }
 
 
-resource "aws_iam_policy" "airflow_data_lake_access" {
-  name = "airflow-${var.environment}-data-lake-access"
+resource "aws_iam_policy" "airflow_data_lake_access_bronze" {
+  name = "airflow-${var.environment}-data-lake-access-bronze"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -505,7 +508,34 @@ resource "aws_iam_policy" "airflow_data_lake_access" {
         ],
         Resource = [
           "arn:aws:s3:::zrzs-dev-data-lake-bronze",
-          "arn:aws:s3:::zrzs-dev-data-lake-bronze/*",
+          "arn:aws:s3:::zrzs-dev-data-lake-bronze/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_airflow_data_lake_access-bronze" {
+  role       = aws_iam_role.task_execution_role.name
+  policy_arn = aws_iam_policy.airflow_data_lake_access_bronze.arn
+}
+
+
+resource "aws_iam_policy" "airflow_data_lake_access_silver_gold" {
+  name = "airflow-${var.environment}-data-lake-access-silver-gold"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket",
+          "s3:DeleteObject"
+        ],
+        Resource = [
           "arn:aws:s3:::zrzs-dev-data-lake-silver",
           "arn:aws:s3:::zrzs-dev-data-lake-silver/*",
           "arn:aws:s3:::zrzs-dev-data-lake-gold",
@@ -516,10 +546,9 @@ resource "aws_iam_policy" "airflow_data_lake_access" {
   })
 }
 
-
-resource "aws_iam_role_policy_attachment" "attach_airflow_data_lake_access" {
+resource "aws_iam_role_policy_attachment" "attach_airflow_data_lake_access_silver_gold" {
   role       = aws_iam_role.task_execution_role.name
-  policy_arn = aws_iam_policy.airflow_data_lake_access.arn
+  policy_arn = aws_iam_policy.airflow_data_lake_access_silver_gold.arn
 }
 
 
@@ -587,46 +616,92 @@ data "aws_iam_role" "airflow_task_exec" {
   name = "airflow-dev-task-execution-role"
 }
 
-# Policy mínima para crawler + leitura de job (opcional, mas útil)
-resource "aws_iam_policy" "airflow_glue_crawler" {
-  name = "airflow-glue-crawler-permissions"
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      # Permissões específicas do crawler
-      {
-        Sid    = "GlueCrawlerBasic"
-        Effect = "Allow"
-        Action = [
-          "glue:GetCrawler",
-          "glue:StartCrawler",
-          "glue:GetCrawlerMetrics"
-        ]
-        Resource = [
-          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:crawler/shopify-silver-crawler"
-        ]
-      },
-
-      # (Opcional) leitura de Jobs do Glue usada pelo GlueJobOperator p/ checagens
-      {
-        Sid    = "GlueJobRead"
-        Effect = "Allow"
-        Action = [
-          "glue:GetJob",
-          "glue:GetJobRun",
-          "glue:GetJobRuns",
-          "glue:ListJobs"
-        ]
-        Resource = "*"
-      }
+data "aws_iam_policy_document" "airflow_glue_crawlers_all" {
+  statement {
+    sid     = "CrawlersStartGet"
+    effect  = "Allow"
+    actions = [
+      "glue:GetCrawler",
+      "glue:GetCrawlerMetrics",
+      "glue:StartCrawler",
+      "glue:StopCrawler",            # opcional
+      "glue:StartCrawlerSchedule",   # opcional
+      "glue:StopCrawlerSchedule"     # opcional
     ]
-  })
+    resources = [
+      "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:crawler/*"
+    ]
+  }
+
+  # List* precisa ser em "*"
+  statement {
+    sid     = "ListCrawlers"
+    effect  = "Allow"
+    actions = [
+            "glue:ListCrawlers",
+            "glue:GetCrawlerMetrics"
+    ]
+    resources = ["*"]
+  }
 }
 
-# Anexa no role do Airflow
-resource "aws_iam_role_policy_attachment" "attach_airflow_glue_crawler" {
-  role       = data.aws_iam_role.airflow_task_exec.name
-  policy_arn = aws_iam_policy.airflow_glue_crawler.arn
+resource "aws_iam_policy" "airflow_glue_crawlers_all" {
+  name   = "airflow-${var.environment}-glue-crawlers-all"
+  policy = data.aws_iam_policy_document.airflow_glue_crawlers_all.json
 }
+
+# Anexe no MESMO role usado como task_role_arn das tasks ECS do Airflow
+resource "aws_iam_role_policy_attachment" "attach_airflow_glue_crawlers_all" {
+  role       = aws_iam_role.task_execution_role.name
+  policy_arn = aws_iam_policy.airflow_glue_crawlers_all.arn
+}
+
+
+# # Policy mínima para crawler + leitura de job (opcional, mas útil)
+# resource "aws_iam_policy" "airflow_glue_crawler" {
+#   name = "airflow-glue-crawler-permissions"
+
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       # Permissões específicas do crawler
+#       {
+#         Sid    = "GlueCrawlerBasic"
+#         Effect = "Allow"
+#         Action = [
+#           "glue:GetCrawler",
+#           "glue:StartCrawler",
+#           "glue:GetCrawlerMetrics",
+#           "glue:GetJob",
+#           "glue:GetJobRun",
+#           "glue:GetJobRuns",
+#           "glue:ListJobs"
+#         ]
+#         Resource = [
+#           "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:crawler/*"
+#         ]
+#       },
+
+#       # (Opcional) leitura de Jobs do Glue usada pelo GlueJobOperator p/ checagens
+#       {
+#         Sid    = "GlueJobRead"
+#         Effect = "Allow"
+#         Action = [
+#           "glue:GetJob",
+#           "glue:GetJobRun",
+#           "glue:GetJobRuns",
+#           "glue:ListJobs"
+#         ]
+#         Resource = "*"
+#       }
+#     ]
+#   })
+# }
+
+# # Anexa no role do Airflow
+# resource "aws_iam_role_policy_attachment" "attach_airflow_glue_crawler" {
+#   role       = data.aws_iam_role.airflow_task_exec.name
+#   policy_arn = aws_iam_policy.airflow_glue_crawler.arn
+# }
 

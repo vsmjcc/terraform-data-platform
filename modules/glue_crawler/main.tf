@@ -1,3 +1,21 @@
+locals {
+  # Se vier "arn:aws:s3:::<bucket>/<prefix>", remove a parte do ARN do bucket
+  # Ex.: "arn:aws:s3:::meu-bucket/domain=.../*" -> "domain=.../*"
+  normalized_prefixes = [
+    for p in var.read_prefixes :
+    length(split("arn:aws:s3:::", p)) > 1
+      ? join("/", slice(split("/", p), 1, length(split("/", p))))
+      : p
+  ]
+
+  # Monta ARNs de objeto corretamente: arn:aws:s3:::<bucket>/<prefix>
+  object_arns = flatten([
+    for b in var.read_bucket_arns : [
+      for p in local.normalized_prefixes : "${b}/${p}"
+    ]
+  ])
+}
+
 data "aws_iam_policy_document" "crawler_trust" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -9,7 +27,7 @@ data "aws_iam_policy_document" "crawler_trust" {
 }
 
 resource "aws_iam_role" "this" {
-  name               = "AWSGlueCrawlerRole-${var.project}-${var.name}"
+  name               = "GlueCrawler-${var.name}"
   assume_role_policy = data.aws_iam_policy_document.crawler_trust.json
   tags               = var.tags
 }
@@ -17,31 +35,26 @@ resource "aws_iam_role" "this" {
 # Permissões S3 (list e get limitada aos prefixos)
 data "aws_iam_policy_document" "s3_read" {
   statement {
-    sid     = "ListSpecificBuckets"
-    actions = ["s3:ListBucket"]
+    sid       = "ListSpecificBuckets"
+    actions   = ["s3:ListBucket"]
     resources = var.read_bucket_arns
     condition {
       test     = "StringLike"
       variable = "s3:prefix"
-      values   = var.read_prefixes
+      values   = local.normalized_prefixes
     }
   }
 
   statement {
     sid       = "ReadObjects"
     actions   = ["s3:GetObject"]
-    resources = [
-      for p in var.read_prefixes :
-      # transforma "arn:...:bucket/prefix/*" quando bucket veio em read_bucket_arns
-      # aqui assumimos que prefixes já vêm completos com "arn:aws:s3:::bucket/prefix/*"
-      # Se você passar sem arn, pode adaptar para construir o arn aqui.
-      "arn:aws:s3:::${replace(p, "arn:aws:s3:::", "")}"
-    ]
+    resources = local.object_arns
   }
 }
 
+
 resource "aws_iam_policy" "s3_read" {
-  name   = "GlueCrawlerS3Read-${var.project}-${var.name}"
+  name   = "GlueCrawlerS3Read-${var.name}"
   policy = data.aws_iam_policy_document.s3_read.json
 }
 
@@ -77,8 +90,7 @@ resource "aws_glue_crawler" "this" {
   }
 
   # agenda opcional
-  count    = length(var.schedule) > 0 ? 1 : 0
-  schedule = length(var.schedule) > 0 ? var.schedule : null
+  schedule = var.schedule != "" ? var.schedule : null
 
   tags = var.tags
 }

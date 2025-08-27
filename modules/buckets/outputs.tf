@@ -38,3 +38,13 @@ output "gold_bucket_name" {
 output "gold_bucket_arn" {
   value = module.gold_bucket.bucket_arn
 }
+
+
+# etls
+output "etls_bucket_name" {
+  value = module.etls_bucket.bucket_name
+}
+
+output "etls_bucket_arn" {
+  value = module.etls_bucket.bucket_arn
+}
