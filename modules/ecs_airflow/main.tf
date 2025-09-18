@@ -59,7 +59,9 @@ module "airflow_logs_bucket" {
   environment     = var.environment
   region          = var.aws_region
   bucket_name     = "zrzs-${var.environment}-airflow-logs"
-  tags = {}
+  tags = {
+    Environment = var.environment
+  }
 }
 
 
@@ -135,6 +137,9 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
       }
     }
   }
+  tags = {
+    Environment = var.environment
+  }
 }
 
 
@@ -203,6 +208,9 @@ resource "aws_ecs_task_definition" "airflow_scheduler" {
       }
     }
   }
+  tags = {
+    Environment = var.environment
+  }
 }
 
 resource "aws_ecs_task_definition" "airflow_worker" {
@@ -268,6 +276,9 @@ resource "aws_ecs_task_definition" "airflow_worker" {
         iam             = "ENABLED"
       }
     }
+  }
+  tags = {
+    Environment = var.environment
   }
 }
 
@@ -428,6 +439,10 @@ resource "aws_ecs_service" "airflow" {
   }
 
   depends_on = [aws_lb_listener.airflow_https]
+
+  tags = {
+    Environment = var.environment
+  }
 }
 
 resource "aws_ecs_service" "airflow_scheduler" {
@@ -445,6 +460,10 @@ resource "aws_ecs_service" "airflow_scheduler" {
   }
 
   depends_on = [aws_ecs_task_definition.airflow_scheduler]
+
+  tags = {
+    Environment = var.environment
+  }
 }
 
 resource "aws_ecs_service" "airflow_worker" {
@@ -463,6 +482,10 @@ resource "aws_ecs_service" "airflow_worker" {
   }
 
   depends_on = [aws_ecs_task_definition.airflow_worker]
+
+  tags = {
+    Environment = var.environment
+  }
 }
 
 

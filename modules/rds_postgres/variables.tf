@@ -1,3 +1,7 @@
+variable "environment" {
+  description = "Ambiente (ex: dev, staging, prod)"
+  type        = string
+}
 
 variable "identifier" {
   description = "Identificador do RDS"

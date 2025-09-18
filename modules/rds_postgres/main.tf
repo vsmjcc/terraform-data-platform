@@ -81,5 +81,6 @@ resource "aws_db_instance" "this" {
 
   tags = {
     Name = "${var.identifier}"
+    Environment = var.environment
   }
 }

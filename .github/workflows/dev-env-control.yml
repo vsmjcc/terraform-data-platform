@@ -1,0 +1,54 @@
+name: Control Dev Env
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: start ou stop
+        required: true
+        type: choice
+        options: [start, stop]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  LAMBDA_NAME: dev-scheduler-lambda
+  ROLE_TO_ASSUME: arn:aws:iam::414669981241:role/zerezes-app-deploy-role
+
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: dev-env-${{ github.event.inputs.action }}
+      cancel-in-progress: false
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Invoke Lambda -> ${{ github.event.inputs.action }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ACTION="${{ github.event.inputs.action }}"
+
+          aws lambda invoke \
+            --function-name "${LAMBDA_NAME}" \
+            --cli-binary-format raw-in-base64-out \
+            --payload "{\"action\":\"${ACTION}\"}" \
+            --log-type Tail \
+            response.json > invoke_meta.json
+
+          echo "=== Response body ==="
+          cat response.json || true
+          echo "=== Invoke metadata ==="
+          cat invoke_meta.json || true
+
+          # Falha o job se a Lambda retornou FunctionError
+          ERR=$(jq -r '.FunctionError // empty' invoke_meta.json)
+          test -z "$ERR"

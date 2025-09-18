@@ -98,6 +98,10 @@ resource "aws_ecs_service" "redis" {
   }
 
   depends_on = [aws_service_discovery_service.redis]
+
+  tags = {
+    Environment = var.environment
+  }
 }
 
 resource "aws_service_discovery_service" "redis" {

@@ -101,12 +101,15 @@ module "ecr_repositories" {
 
 module "rds_postgres" {
   source           = "./modules/rds_postgres"
+
   identifier       = "zerezes-data-dev-airflow-db"
+  environment         = var.environment
   db_name          = "airflow"
   username         = "airflow"
   vpc_id           = module.vpc.vpc_id
   subnet_ids       = module.vpc.private_subnet_ids
   private_subnet_ids = module.vpc.private_subnet_ids 
+
 }
 
 module "redis" {
@@ -120,6 +123,7 @@ module "redis" {
   cluster_name        = module.ecs_cluster.name
   service_discovery_namespace_id = aws_service_discovery_private_dns_namespace.internal.id
   service_discovery_namespace_name = "zerezes.local"
+
 }
 
 
@@ -176,5 +180,32 @@ module "iam" {
   environment         = var.environment
   region              = var.region
 }
+
+
+module "env_scheduler" {
+  source = "./modules/env-scheduler"
+
+  name_prefix   = "dev-scheduler"
+  tag_key       = "Environment"
+  tag_values    = ["dev"]
+
+  # 08:00 BR = 11:00 UTC | 20:00 BR = 23:00 UTC
+  start_cron_utc = "cron(0 11 ? * MON-FRI *)"
+  stop_cron_utc  = "cron(0 23 ? * MON-FRI *)"
+
+  manage_ecs = true
+  manage_asg = false
+  manage_ec2 = true
+  manage_rds = true
+
+  ecs_desired_default_on_start = 1
+  asg_default_on_start = { min = 1, max = 1, desired = 1 }
+
+  tags = {
+    Project     = "data-platform"
+    Environment = "dev"
+  }
+}
+
 
 

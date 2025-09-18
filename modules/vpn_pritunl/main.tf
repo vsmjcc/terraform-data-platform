@@ -28,7 +28,6 @@ resource "aws_instance" "vpn" {
   tags = {
     Name        = "vpn-pritunl-${var.environment}"
     Environment = var.environment
-    Protected   = "true"
   }
 
     lifecycle {
@@ -85,6 +84,7 @@ resource "aws_security_group" "vpn" {
 
   tags = {
     Name = "vpn-pritunl-${var.environment}-sg"
+    Environment = var.environment
   }
 }
 
