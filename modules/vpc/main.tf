@@ -72,20 +72,12 @@ resource "aws_route_table_association" "private" {
 # Permite trafego interno para os endpoints
 ############################################
 
+
 locals {
   interface_endpoints = {
-    secretsmanager = "com.amazonaws.${var.region}.secretsmanager"
-    ssm            = "com.amazonaws.${var.region}.ssm"
-    ssmmessages    = "com.amazonaws.${var.region}.ssmmessages"
-    ec2messages    = "com.amazonaws.${var.region}.ec2messages"
     logs           = "com.amazonaws.${var.region}.logs"
-    kms            = "com.amazonaws.${var.region}.kms"
     ecr_api        = "com.amazonaws.${var.region}.ecr.api"
     ecr_dkr        = "com.amazonaws.${var.region}.ecr.dkr"
-    sqs            = "com.amazonaws.${var.region}.sqs"
-    sns            = "com.amazonaws.${var.region}.sns"
-    lambda         = "com.amazonaws.${var.region}.lambda"
-    sts            = "com.amazonaws.${var.region}.sts"
   }
 }
 
@@ -95,7 +87,7 @@ resource "aws_vpc_endpoint" "interface" {
   vpc_id            = aws_vpc.this.id
   service_name      = each.value
   vpc_endpoint_type = "Interface"
-  subnet_ids        = aws_subnet.private[*].id
+  subnet_ids        = [aws_subnet.private[0].id]
   security_group_ids = [aws_security_group.vpc_endpoints.id]
 
   private_dns_enabled = true

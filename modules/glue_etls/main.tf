@@ -47,6 +47,10 @@ resource "aws_glue_catalog_database" "silver_cx" {
   name = "silver_cx"
 }
 
+resource "aws_glue_catalog_database" "gold_cx" {
+  name = "gold_cx"
+}
+
 resource "aws_glue_catalog_database" "silver_offline_analytics" {
   name = "silver_offline_analytics"
 }

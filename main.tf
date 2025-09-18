@@ -156,6 +156,7 @@ module "glue_etls" {
 
   bronze_bucket      = module.buckets.bronze_bucket_name
   silver_bucket      = module.buckets.silver_bucket_name
+  gold_bucket        = module.buckets.gold_bucket_name
   etls_bucket        = module.buckets.etls_bucket_name
 }
 

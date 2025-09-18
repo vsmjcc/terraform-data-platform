@@ -31,16 +31,17 @@ module "glue_job_vemco_to_silver" {
 module "glue_crawler_vemco_silver" {
   source        = "../glue_crawler"
   name          = "offline-analytics-vemco-b2s-refine-crawler"
-  database_name = aws_glue_catalog_database.silver_cx.name
+  database_name = aws_glue_catalog_database.silver_offline_analytics.name
 
   s3_target_paths = [
-    "s3://${var.silver_bucket}/domain=offline_analytics/source=vemco/report_hourly",
+    "s3://${var.silver_bucket}/domain=offline_analytics/source=vemco/store_foot_traffic_hourly",
   ]
 
   read_bucket_arns = ["arn:aws:s3:::${var.silver_bucket}"]
   read_prefixes = [
-    "domain=offline_analytics/source=vemco/report_hourly/*"
+    "domain=offline_analytics/source=vemco/store_foot_traffic_hourly/*"
   ]
 
   tags = merge(var.common_tags, { step = "bronze-to-silver" })
 }
+
