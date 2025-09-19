@@ -59,8 +59,8 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "ecs:DescribeServices",
           "ecs:UpdateService",
           "ecs:ListTagsForResource",
-          "ecs:TagResource",      # <—
-          "ecs:UntagResource"     # <— (opcional mas recomendado)
+          "ecs:TagResource",      
+          "ecs:UntagResource"     
         ],
         Resource: "*"
       },
@@ -162,20 +162,22 @@ resource "aws_cloudwatch_event_target" "start" {
   input     = jsonencode({ "action": "start" })
 }
 
-resource "aws_lambda_permission" "allow_events_stop" {
-  statement_id  = "AllowEventBridgeStop"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.this.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.stop.arn
-}
-
 resource "aws_lambda_permission" "allow_events_start" {
   statement_id  = "AllowEventBridgeStart"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this.function_name
+  qualifier     = aws_lambda_alias.start.name   # <-- alias start
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.start.arn
+  source_arn    = aws_cloudwatch_event_rule.start.arn  # <-- regra start
+}
+
+resource "aws_lambda_permission" "allow_events_stop" {
+  statement_id  = "AllowEventBridgeStop"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this.function_name
+  qualifier     = aws_lambda_alias.stop.name    # <-- alias stop
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.stop.arn   # <-- regra stop
 }
 
 output "lambda_name" { value = aws_lambda_function.this.function_name }
