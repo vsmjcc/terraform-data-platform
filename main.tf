@@ -21,10 +21,23 @@ locals {
   key_path = pathexpand("~/.ssh/aws-data-${var.environment}-key.pub")
 }
 
-resource "aws_key_pair" "aws-data-key" {
-  count      = fileexists(local.key_path) ? 1 : 0
+variable "public_key_fallback" {
+  type        = string
+  description = "Opcional: cópia da chave pública para usar quando o arquivo local não existir (após criado)."
+  default     = "" # preencha com a chave atual se quiser evitar ler arquivo
+}
+
+resource "aws_key_pair" "aws_data_key" {
+  # endereço estável (sem count/for_each dinâmico)
   key_name   = var.ssh_key_name
-  public_key = file(local.key_path)
+
+  # 1ª criação: precisa do arquivo; depois, se o arquivo sumir, usa o fallback.
+  public_key = trimspace(try(file(local.key_path), var.public_key_fallback))
+
+  lifecycle {
+    prevent_destroy = true         # NUNCA destruir
+    ignore_changes  = [public_key] # não force update se a chave mudar localmente
+  }
 }
 
 module "vpn_pritunl" {
