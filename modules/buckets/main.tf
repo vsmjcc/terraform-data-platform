@@ -66,6 +66,16 @@ module "etls_bucket" {
   tags = {}
 }
 
+
+module "teste_isa" {
+  source          = "../s3_bucket"
+  environment     = var.environment
+  region          = var.region
+  bucket_name     = "zrzs-${var.environment}-teste_isa"
+  tags = {}
+}
+
+
 locals {
   bucket_modules = {
     bronze          = module.bronze_bucket
