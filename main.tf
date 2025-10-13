@@ -27,7 +27,7 @@ variable "public_key_fallback" {
   default     = "" # preencha com a chave atual se quiser evitar ler arquivo
 }
 
-resource "aws_key_pair" "aws_data_key" {
+resource "aws_key_pair" "aws-data-key" {
   # endereço estável (sem count/for_each dinâmico)
   key_name   = var.ssh_key_name
 
