@@ -19,8 +19,8 @@ module "glue_job_omie_documnets_to_silver" {
 
   # Só o que muda por job. O submódulo já liga logs/metrics/bookmark.
   default_arguments = {
-    "--SOURCE_PATH"           = "s3://${var.bronze_bucket}/domain=finance/source=omie/documnets"
-    "--TARGET_DOCUMENTS_PATH" = "s3://${var.silver_bucket}/domain=finance/source=omie/documnets"
+    "--SOURCE_PATH"           = "s3://${var.bronze_bucket}/domain=finance/source=omie/documents"
+    "--TARGET_DOCUMENTS_PATH" = "s3://${var.silver_bucket}/domain=finance/source=omie/documents"
     "--MODE"                  = "overwrite"
     "--SINCE_DAYS"            = "7"
     # Se precisar, você pode incluir:
