@@ -5,7 +5,7 @@ module "glue_job_omie_documnets_to_silver" {
   name          = "finance-omie-documents-b2s-refine"
 
   script_bucket = var.etls_bucket
-  script_key    = "glue/finance-omie-documnets-b2s-refine.py"
+  script_key    = "glue/finance-omie-documents-b2s-refine.py"
   temp_bucket        = var.etls_bucket
 
   data_buckets = [
