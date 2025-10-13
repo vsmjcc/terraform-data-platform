@@ -17,9 +17,14 @@ module "nat_gateway" {
   public_subnet_id = module.vpc.public_subnet_ids[0]
 }
 
+locals {
+  key_path = pathexpand("~/.ssh/aws-data-${var.environment}-key.pub")
+}
+
 resource "aws_key_pair" "aws-data-key" {
+  count      = fileexists(local.key_path) ? 1 : 0
   key_name   = var.ssh_key_name
-  public_key = file("~/.ssh/aws-data-${var.environment}-key.pub")
+  public_key = file(local.key_path)
 }
 
 module "vpn_pritunl" {
