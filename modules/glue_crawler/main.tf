@@ -14,6 +14,9 @@ locals {
       for p in local.normalized_prefixes : "${b}/${p}"
     ]
   ])
+
+  # >>> NOVO: base do nome da role, removendo o sufixo "-crawler" se existir
+  crawler_role_basename = regexreplace(var.name, "-crawler$", "")
 }
 
 data "aws_iam_policy_document" "crawler_trust" {
@@ -27,7 +30,8 @@ data "aws_iam_policy_document" "crawler_trust" {
 }
 
 resource "aws_iam_role" "this" {
-  name               = "GlueCrawler-${var.name}"
+  # >>> ALTERADO: usa o basename (sem "-crawler") para casar com o DAG
+  name               = "GlueCrawler-${local.crawler_role_basename}"
   assume_role_policy = data.aws_iam_policy_document.crawler_trust.json
   tags               = var.tags
 }
@@ -51,7 +55,6 @@ data "aws_iam_policy_document" "s3_read" {
     resources = local.object_arns
   }
 }
-
 
 resource "aws_iam_policy" "s3_read" {
   name   = "GlueCrawlerS3Read-${var.name}"
