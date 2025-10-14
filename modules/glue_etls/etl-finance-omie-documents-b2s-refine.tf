@@ -1,30 +1,34 @@
-# JOB: Shopify -> Silver
-module "glue_job_omie_documnets_to_silver" {
+# JOB: Omie documents -> Silver
+module "glue_job_omie_documents_to_silver" {
   source = "../glue_job"
 
   name          = "finance-omie-documents-b2s-refine"
-
   script_bucket = var.etls_bucket
   script_key    = "glue/finance-omie-documents-b2s-refine.py"
-  temp_bucket        = var.etls_bucket
 
-  data_buckets = [
-    var.bronze_bucket,
-    var.silver_bucket,
-  ]
+  temp_bucket   = var.etls_bucket
+  data_buckets  = [var.bronze_bucket, var.silver_bucket]
 
   use_vpc            = true
   subnet_ids         = var.private_subnet_ids
   security_group_ids = [local.glue_sg_id]
 
-  # Só o que muda por job. O submódulo já liga logs/metrics/bookmark.
   default_arguments = {
-    "--SOURCE_PATH"           = "s3://${var.bronze_bucket}/domain=finance/source=omie/documents"
-    "--TARGET_DOCUMENTS_PATH" = "s3://${var.silver_bucket}/domain=finance/source=omie/documents"
-    "--MODE"                  = "overwrite"
-    "--SINCE_DAYS"            = "7"
-    # Se precisar, você pode incluir:
-    # "--conf" = "spark.sql.sources.partitionOverwriteMode=dynamic"
+    "--SOURCE_PATH"            = "s3://${var.bronze_bucket}/domain=finance/source=omie/documents"
+    "--TARGET_HEADER_PATH"     = "s3://${var.silver_bucket}/domain=finance/source=omie/documents_header"
+    "--TARGET_ITEMS_PATH"      = "s3://${var.silver_bucket}/domain=finance/source=omie/documents_items"
+    "--TARGET_PAYMENTS_PATH"   = "s3://${var.silver_bucket}/domain=finance/source=omie/documents_payments"
+    "--MODE"                   = "overwrite"
+    "--SINCE_DAYS"             = "7"
+
+    # (opcional) Catálogo Glue — preencha se quiser já atualizar as tabelas:
+    # "--GLUE_DATABASE"          = "finance"
+    # "--GLUE_HEADER_TABLE"      = "omie_documents_header"
+    # "--GLUE_ITEMS_TABLE"       = "omie_documents_items"
+    # "--GLUE_PAYMENTS_TABLE"    = "omie_documents_payments"
+
+    # (opcional) privacidade
+    # "--ANONYMIZE_SALT"         = var.anonymize_salt
   }
 
   tags = merge(var.common_tags, {
@@ -32,4 +36,3 @@ module "glue_job_omie_documnets_to_silver" {
     Owner = "data-platform"
   })
 }
-
