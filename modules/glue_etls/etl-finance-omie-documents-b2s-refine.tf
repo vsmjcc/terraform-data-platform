@@ -14,21 +14,25 @@ module "glue_job_omie_documents_to_silver" {
   security_group_ids = [local.glue_sg_id]
 
   default_arguments = {
-    "--SOURCE_PATH"            = "s3://${var.bronze_bucket}/domain=finance/source=omie/documents"
-    "--TARGET_HEADER_PATH"     = "s3://${var.silver_bucket}/domain=finance/source=omie/documents_header"
-    "--TARGET_ITEMS_PATH"      = "s3://${var.silver_bucket}/domain=finance/source=omie/documents_items"
-    "--TARGET_PAYMENTS_PATH"   = "s3://${var.silver_bucket}/domain=finance/source=omie/documents_payments"
-    "--MODE"                   = "overwrite"
-    "--SINCE_DAYS"             = "7"
+    # BRONZE (mantido conforme seu pipeline atual)
+    "--SOURCE_PATH"  = "s3://${var.bronze_bucket}/domain=finance/source=omie/omie_documents"
 
-    # (opcional) Catálogo Glue — preencha se quiser já atualizar as tabelas:
-    # "--GLUE_DATABASE"          = "finance"
-    # "--GLUE_HEADER_TABLE"      = "omie_documents_header"
-    # "--GLUE_ITEMS_TABLE"       = "omie_documents_items"
-    # "--GLUE_PAYMENTS_TABLE"    = "omie_documents_payments"
+    # SILVER (novo layout genérico + partição de sistema)
+    "--TARGET_HEADER_PATH"   = "s3://${var.silver_bucket}/domain=finance/source=documents/system=omie/documents_header"
+    "--TARGET_ITEMS_PATH"    = "s3://${var.silver_bucket}/domain=finance/source=documents/system=omie/documents_items"
+    "--TARGET_PAYMENTS_PATH" = "s3://${var.silver_bucket}/domain=finance/source=documents/system=omie/documents_payments"
+
+    "--MODE"       = "overwrite"
+    "--SINCE_DAYS" = "7"
+
+    # (opcional) Se o job também registra as tabelas no Glue Catalog:
+    "--GLUE_DATABASE"       = "finance"
+    "--GLUE_HEADER_TABLE"   = "documents_header"
+    "--GLUE_ITEMS_TABLE"    = "documents_items"
+    "--GLUE_PAYMENTS_TABLE" = "documents_payments"
 
     # (opcional) privacidade
-    # "--ANONYMIZE_SALT"         = var.anonymize_salt
+    # "--ANONYMIZE_SALT"   = var.anonymize_salt
   }
 
   tags = merge(var.common_tags, {
