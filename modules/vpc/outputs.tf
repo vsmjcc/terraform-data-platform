@@ -13,3 +13,7 @@ output "private_subnet_ids" {
 output "private_subnet_cidrs" {
   value = [for subnet in aws_subnet.private : subnet.cidr_block]
 }
+
+output "private_aws_route_table_id" {
+  value = aws_route_table.private.id
+}

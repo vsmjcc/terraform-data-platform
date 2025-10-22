@@ -50,6 +50,28 @@ module "vpn_pritunl" {
   environment  = var.environment
 }
 
+module "ec2_superset" {
+  source        = "./modules/ec2-superset"
+  environment   = var.environment
+  vpc_id        = module.vpc.vpc_id
+  subnet_id     = module.vpc.private_subnet_ids[0]
+  ami_id        = "ami-080e1f13689e07408"
+  instance_type = "t3.medium"
+  key_name      = var.ssh_key_name
+  vpn_security_group_id = module.vpn_pritunl.security_group_id
+  enable_alb             = true
+  alb_certificate_arn    = module.dns.dns_zones["data_zerezes"].certificate_arn
+  alb_public_subnet_ids  = module.vpc.public_subnet_ids
+  allowed_cidrs_https    = ["0.0.0.0/0"]
+
+  create_dns_record = true
+  dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
+  dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
+}
+
+# dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
+#   dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
+#   dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
 
 resource "aws_service_discovery_private_dns_namespace" "internal" {
   name        = "zerezes.local"
@@ -222,6 +244,31 @@ module "env_scheduler" {
   tags = {
     Project     = "data-platform"
     Environment = "dev"
+  }
+}
+
+
+
+module "vpc_peering" {
+  source = "./modules/vpc_peering"
+
+  # VPCs e CIDRs
+  requester_vpc_id   = module.vpc.vpc_id
+  requester_vpc_cidr = var.vpc_cidr_block 
+
+  peer_vpc_id     = "vpc-08a0e8e9a408c4f7d"
+  peer_vpc_cidr   = "10.25.48.0/22"
+  peer_account_id = "219219235757"
+
+  # Rotas no REQUESTER (só do seu lado)
+  requester_private_route_table_ids = [
+    module.vpc.private_aws_route_table_id
+  ]
+
+  manage_peer_side = false
+  providers        = { 
+    aws      = aws
+    aws.peer = aws.peer
   }
 }
 
