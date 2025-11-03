@@ -18,6 +18,37 @@ resource "aws_iam_role" "task_execution_role" {
   })
 }
 
+# Policy mínima para ler o Data Catalog do Glue (sa-east-1)
+resource "aws_iam_role_policy" "glue_catalog_read" {
+  name = "GlueCatalogReadForAmundsen"
+  role = aws_iam_role.task_execution_role.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Sid    = "GlueCatalogRead",
+      Effect = "Allow",
+      Action = [
+        "glue:SearchTables",
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:GetTableVersion",
+        "glue:GetTableVersions",
+        "glue:GetPartition",
+        "glue:GetPartitions",
+        "glue:GetUserDefinedFunctions",
+        "glue:GetTags"
+      ],
+      Resource = [
+        "arn:aws:glue:${var.aws_region}:414669981241:catalog",
+        "arn:aws:glue:${var.aws_region}:414669981241:database/*",
+        "arn:aws:glue:${var.aws_region}:414669981241:table/*"
+      ]
+    }]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "ssm_exec_policy" {
   role       = aws_iam_role.task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
@@ -147,8 +178,8 @@ resource "aws_ecs_task_definition" "airflow_scheduler" {
   family                   = "airflow-${var.environment}-scheduler"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = "256"
-  memory                   = "512"
+  cpu                      = "512"
+  memory                   = "1024"
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_execution_role.arn
 

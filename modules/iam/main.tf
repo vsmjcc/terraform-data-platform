@@ -51,7 +51,11 @@ resource "aws_iam_policy" "ecs_deploy_policy" {
       {
         Effect = "Allow",
         Action = "iam:PassRole",
-        Resource = "arn:aws:iam::414669981241:role/airflow-dev-task-execution-role",
+        Resource = [
+          "arn:aws:iam::414669981241:role/airflow-dev-task-execution-role",
+          "arn:aws:iam::414669981241:role/*-task-execution-role",
+          "arn:aws:iam::414669981241:role/*-task-role"
+        ],
         Condition = {
           StringEquals = {
             "iam:PassedToService" = "ecs-tasks.amazonaws.com"
@@ -61,6 +65,7 @@ resource "aws_iam_policy" "ecs_deploy_policy" {
     ]
   })
 }
+
 
 # Policy para deploy de Lambdas
 resource "aws_iam_policy" "lambda_deploy_policy" {

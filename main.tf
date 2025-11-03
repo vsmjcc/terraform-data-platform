@@ -136,7 +136,12 @@ module "ecs_cluster" {
 
 module "ecr_repositories" {
   source       = "./modules/ecr_repositories"
-  repositories = ["airflow"]
+  repositories = [
+    "airflow", 
+    "amundsen-frontend", 
+    "amundsen-metadata", 
+    "amundsen-search"
+  ]
 }
 
 module "rds_postgres" {
@@ -190,6 +195,141 @@ module "ecs_airflow" {
   dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
 }
 
+
+module "neo4j" {
+  source = "./modules/ecs_neo4j"
+
+  name                = "neo4j"
+  environment         = var.environment
+  vpc_id              = module.vpc.vpc_id
+  aws_region          = var.region
+  cluster_name        = module.ecs_cluster.name
+  private_subnet_ids  = module.vpc.private_subnet_ids
+  
+  # # Este é o SG da sua aplicação Amundsen (Metadata/Databuilder)
+  # allowed_security_groups = [module.amundsen_app.security_group_id] 
+
+  # Vem do seu setup de Cloud Map
+  service_discovery_namespace_id   = aws_service_discovery_private_dns_namespace.internal.id
+  service_discovery_namespace_name = "zerezes.local"
+
+}
+
+
+module "elasticsearch" {
+  source = "./modules/ecs_elasticsearch" # Atualize para o caminho do seu novo módulo
+
+  # --- Variáveis de Nomenclatura e Ambiente ---
+  name        = "elasticsearch" # O 'default' no variable.tf já é esse, mas é bom ser explícito
+  environment = var.environment
+  aws_region  = var.region
+
+  # --- Variáveis de Rede e Cluster (iguais ao neo4j) ---
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnet_ids
+  cluster_name       = module.ecs_cluster.name
+
+  # --- Service Discovery (iguais ao neo4j) ---
+  service_discovery_namespace_id   = aws_service_discovery_private_dns_namespace.internal.id
+  service_discovery_namespace_name = "zerezes.local" # Mantenha o mesmo namespace
+
+  # --- IMPORTANTE: Grupos de Segurança ---
+  # Assim como o neo4j, você precisará liberar o tráfego dos serviços do Amundsen
+  # Quando você criar os serviços, descomente e adicione os SGs corretos aqui:
+  # allowed_security_groups = [
+  #   module.amundsen_search_service.security_group_id,
+  #   module.amundsen_databuilder.security_group_id
+  # ]
+
+  # --- Opcionais (já têm defaults no module) ---
+  # task_cpu     = 2048 # 2 vCPU
+  # task_memory  = 4096 # 4 GB
+  # es_java_opts = "-Xms1g -Xmx1g"
+}
+
+
+module "amundsen_services" {
+  source = "./modules/ecs_amundsen"
+
+  # --- Comuns ---
+  environment     = var.environment
+  aws_region      = var.region
+  vpc_id          = module.vpc.vpc_id
+  vpc_cidr_block  = var.vpc_cidr_block
+  private_subnet_ids = module.vpc.private_subnet_ids
+  public_subnet_ids  = module.vpc.public_subnet_ids
+  cluster_name       = module.ecs_cluster.name
+
+  # --- Service Discovery ---
+  service_discovery_namespace_id   = aws_service_discovery_private_dns_namespace.internal.id
+  service_discovery_namespace_name = "zerezes.local"
+
+  # --- Conexão Neo4j (Vem do módulo neo4j) ---
+  neo4j_host                = module.neo4j.neo4j_host
+  neo4j_password_secret_arn = module.neo4j.neo4j_password_secret_arn
+  neo4j_sg_id               = module.neo4j.neo4j_security_group_id
+  
+  # --- Conexão ES (Vem do módulo elasticsearch) ---
+  es_host                = module.elasticsearch.elasticsearch_host
+  es_password_secret_arn = module.elasticsearch.elasticsearch_password_secret_arn
+  es_sg_id               = module.elasticsearch.elasticsearch_security_group_id
+
+  # --- Configurações do Frontend ---
+  # frontend_public_ip     = true # OK para teste
+  frontend_allowed_cidrs = ["0.0.0.0/0"] # OK para teste
+
+  # --- Configurações de DNS (NOVAS, vindas do seu módulo DNS) ---
+  dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
+  dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
+  dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
+
+  # --- Configurações OIDC (Exemplo) ---
+  # oidc_enabled        = true
+  # oidc_client_id      = "meu-client-id-do-google"
+  # oidc_client_secret  = "meu-client-secret"
+  # oidc_discovery_url  = "https://accounts.google.com/.well-known/openid-configuration"
+}
+
+
+
+# module "ecs_amundsen" {
+#   source = "./modules/ecs_amundsen"
+
+#   # Igual ao Airflow
+#   cluster_name        = module.ecs_cluster.name
+#   private_subnet_ids  = module.vpc.private_subnet_ids
+#   public_subnet_ids   = module.vpc.public_subnet_ids
+#   vpc_id              = module.vpc.vpc_id
+
+#   environment         = var.environment
+#   aws_region          = var.region
+
+#   # (Opcional) se você não precisa, não passe
+#   # task_exec_role_arn = module.iam.task_execution_role_arn
+
+#   # Credencial Neo4j
+#   neo4j_password      = "var.neo4j_password"
+
+#   # DNS/Cert – exatamente como no Airflow
+#   dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
+#   dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
+#   dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
+
+#   # FQDN público será amundsen.${dns_zone_name}
+#   frontend_subdomain  = "amundsen"
+# }
+
+
+
+module "glue_schema" {
+  source = "./modules/glue_schema"
+
+  environment        = var.environment
+  bronze_bucket      = module.buckets.bronze_bucket_name
+  silver_bucket      = module.buckets.silver_bucket_name
+  gold_bucket        = module.buckets.gold_bucket_name
+  etls_bucket        = module.buckets.etls_bucket_name
+}
 
 module "glue_etls" {
   source = "./modules/glue_etls"
@@ -272,5 +412,116 @@ module "vpc_peering" {
   }
 }
 
+
+
+resource "aws_security_group_rule" "allow_amundsen_search_to_es" {
+  # Isso é uma regra de ENTRADA (ingress)
+  type                     = "ingress"
+  
+  # Aplica a regra no Security Group do Elasticsearch:
+  security_group_id        = module.elasticsearch.elasticsearch_security_group_id
+  
+  # Permite tráfego VINDO DO Security Group do Search:
+  source_security_group_id = module.amundsen_services.search_security_group_id
+
+  # Para a porta 9200
+  from_port                = 9200
+  to_port                  = 9200
+  protocol                 = "tcp"
+  
+  description              = "Allow Amundsen Search service to access ES"
+}
+
+resource "aws_security_group_rule" "allow_metadata_to_neo4j" {
+  # Isso é uma regra de ENTRADA (ingress)
+  type                     = "ingress"
+  
+  # Aplica a regra no Security Group do Neo4j:
+  security_group_id        = module.neo4j.neo4j_security_group_id
+  
+  # Permite tráfego VINDO DO Security Group do Metadata:
+  source_security_group_id = module.amundsen_services.metadata_security_group_id
+
+  # Para a porta 7687 (Porta Bolt do Neo4j)
+  from_port                = 7687
+  to_port                  = 7687
+  protocol                 = "tcp"
+  
+  description              = "Allow Amundsen Metadata service to access Neo4j"
+}
+
+resource "aws_security_group_rule" "allow_airflow_to_neo4j" {
+  # Isso é uma regra de ENTRADA (ingress)
+  type                     = "ingress"
+  
+  # Aplica a regra no Security Group do Neo4j:
+  security_group_id        = module.neo4j.neo4j_security_group_id
+  
+  # Permite tráfego VINDO DO Security Group do airflow:
+  source_security_group_id = module.ecs_airflow.airflow_sg_id
+
+  # Para a porta 7687 (Porta Bolt do Neo4j)
+  from_port                = 7687
+  to_port                  = 7687
+  protocol                 = "tcp"
+  
+  description              = "Allow airflow service to access Neo4j"
+}
+
+resource "aws_security_group_rule" "allow_vpn_to_neo4j" {
+  # Isso é uma regra de ENTRADA (ingress)
+  type                     = "ingress"
+  
+  # Aplica a regra no Security Group do Neo4j:
+  security_group_id        = module.neo4j.neo4j_security_group_id
+  
+  # Permite tráfego VINDO DO Security Group da vpn:
+  source_security_group_id = module.vpn_pritunl.security_group_id
+
+  # Para a porta 7687 (Porta Bolt do Neo4j)
+  from_port                = 7687
+  to_port                  = 7687
+  protocol                 = "tcp"
+  
+  description              = "Allow vpn client to access Neo4j"
+}
+
+
+resource "aws_security_group_rule" "allow_airflow_to_es" {
+  # Isso é uma regra de ENTRADA (ingress)
+  type                     = "ingress"
+  
+  # Aplica a regra no Security Group do Elasticsearch:
+  security_group_id        = module.elasticsearch.elasticsearch_security_group_id
+  
+  # Permite tráfego VINDO DO Security Group do airflow:
+  source_security_group_id = module.ecs_airflow.airflow_sg_id
+
+  # Para a porta 9200
+  from_port                = 9200
+  to_port                  = 9200
+  protocol                 = "tcp"
+  
+  description              = "Allow Amundsen Search service to access ES"
+}
+
+
+resource "aws_security_group_rule" "allow_vpn_to_es" {
+  # Isso é uma regra de ENTRADA (ingress)
+  type                     = "ingress"
+  
+  # Aplica a regra no Security Group do Elasticsearch:
+  security_group_id        = module.elasticsearch.elasticsearch_security_group_id
+  
+  # Permite tráfego VINDO DO Security Group da VPN:
+  source_security_group_id = module.vpn_pritunl.security_group_id
+
+  # Para a porta 9200
+  from_port                = 9200
+  to_port                  = 9200
+  protocol                 = "tcp"
+  
+  description              = "Allow VPN client to access ES"
+}
 
 
