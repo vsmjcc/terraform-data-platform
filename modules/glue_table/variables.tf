@@ -23,7 +23,21 @@ variable "columns" {
 }
 
 variable "partition_keys" {
-  type    = list(object({ name = string, type = string, comment = optional(string) }))
+  # Suporta 0..N partições; cada uma pode ter projection opcional
+  type = list(object({
+    name    = string
+    type    = string
+    comment = optional(string)
+    projection = optional(object({
+      enabled       = optional(bool, true)
+      type          = string              # ex.: "date", "enum", "integer"
+      format        = optional(string)    # ex.: "yyyy-MM-dd"
+      range         = optional(string)    # ex.: "2020-01-01,NOW" | "0,23"
+      interval      = optional(string)    # ex.: "1"
+      interval_unit = optional(string)    # ex.: "DAYS", "HOURS"
+      values        = optional(string)    # ex.: "us-east-1,us-west-2" (para enum)
+    }))
+  }))
   default = []
 }
 

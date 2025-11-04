@@ -1,12 +1,109 @@
-resource "aws_glue_catalog_database" "silver_cx2" {
-  name = "silver_cx2"
+resource "aws_glue_catalog_database" "silver_cx" {
+  name = "silver_cx"
 }
   
+resource "aws_glue_catalog_database" "silver_commerce" {
+  name = "silver_commerce"
+}
+
+resource "aws_glue_catalog_database" "silver_marketing" {
+  name = "silver_marketing"
+}
+
+resource "aws_glue_catalog_database" "silver_analytics" {
+  name = "silver_analytics"
+}
+
+resource "aws_glue_catalog_database" "silver_finance" {
+  name = "silver_finance2"
+}
+
+resource "aws_glue_catalog_database" "silver_offline_analytics" {
+  name = "silver_offline_analytics"
+}
+
+resource "aws_glue_catalog_database" "silver_people" {
+  name = "silver_people"
+}
+
+resource "aws_glue_catalog_database" "gold_cx" {
+  name = "gold_cx"
+}
+
+
 module "silver_cx" {
   source = "./silver_cx"
 
   environment   = var.environment
   bucket        = var.silver_bucket
-  database_name = aws_glue_catalog_database.silver_cx2.name
+  database_name = aws_glue_catalog_database.silver_cx.name
   domain        = "customer_experience"
 }
+
+module "silver_commerce" {
+  source = "./silver_commerce"
+
+  environment   = var.environment
+  bucket        = var.silver_bucket
+  database_name = aws_glue_catalog_database.silver_commerce.name
+  domain        = "commerce"
+}
+
+module "silver_marketing" {
+  source = "./silver_marketing"
+
+  environment   = var.environment
+  bucket        = var.silver_bucket
+  database_name = aws_glue_catalog_database.silver_marketing.name
+  domain        = "marketing"
+}
+
+module "silver_analytics" {
+  source = "./silver_analytics"
+
+  environment   = var.environment
+  bucket        = var.silver_bucket
+  database_name = aws_glue_catalog_database.silver_analytics.name
+  domain        = "analytics"
+}
+
+
+module "silver_finance" {
+  source = "./silver_finance"
+
+  environment   = var.environment
+  bucket        = var.silver_bucket
+  database_name = aws_glue_catalog_database.silver_finance.name
+  domain        = "silver_finance"
+}
+
+
+module "silver_offline_analytics" {
+  source = "./silver_offline_analytics"
+
+  environment   = var.environment
+  bucket        = var.silver_bucket
+  database_name = aws_glue_catalog_database.silver_offline_analytics.name
+  domain        = "offline_analytics"
+}
+
+
+module "silver_people" {
+  source = "./silver_people"
+
+  environment   = var.environment
+  bucket        = var.silver_bucket
+  database_name = aws_glue_catalog_database.silver_people.name
+  domain        = "people"
+}
+
+module "gold_cx" {
+  source = "./gold_cx"
+
+  environment   = var.environment
+  bucket        = var.gold_bucket
+  database_name = aws_glue_catalog_database.gold_cx.name
+  domain        = "customer_experience"
+}
+
+

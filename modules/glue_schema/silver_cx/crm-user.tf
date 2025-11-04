@@ -131,6 +131,68 @@ locals {
         { name = "ingested_at",                 type = "timestamp", comment = "Ingestão no Data Lake" }
       ]
       partition_keys = []
+    },
+
+    nps = {
+      description = "Respostas NPS (Typeform) em nível de submissão."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=nps/"
+      columns = [
+        { name = "source",                       type = "string", comment = "Fonte (ex.: typeform)" },
+        { name = "dataset",                      type = "string", comment = "Nome do dataset (ex.: nps)" },
+        { name = "hash",                         type = "string", comment = "Hash do evento" },
+        { name = "request_id",                   type = "string", comment = "Request ID" },
+        { name = "event_id",                     type = "string", comment = "Event ID" },
+        { name = "event_type",                   type = "string", comment = "Tipo do evento" },
+        { name = "form_id",                      type = "string", comment = "ID do formulário" },
+        { name = "token",                        type = "string", comment = "Token de submissão" },
+        { name = "landed_at",                    type = "string", comment = "Data/hora de entrada (string)" },
+        { name = "submitted_at",                 type = "string", comment = "Data/hora de envio (string)" },
+        { name = "hidden_closedat",              type = "string", comment = "Hidden: closedAt" },
+        { name = "hidden_createdat",             type = "string", comment = "Hidden: createdAt" },
+        { name = "hidden_customerid",            type = "string", comment = "Hidden: customerId" },
+        { name = "hidden_email",                 type = "string", comment = "Hidden: email" },
+        { name = "hidden_name",                  type = "string", comment = "Hidden: name" },
+        { name = "hidden_ordernumber",           type = "string", comment = "Hidden: orderNumber" },
+        { name = "hidden_paymentauthorizedat",   type = "string", comment = "Hidden: paymentAuthorizedAt" },
+        { name = "hidden_phonenumber",           type = "string", comment = "Hidden: phoneNumber" },
+        { name = "hidden_seller",                type = "string", comment = "Hidden: seller" },
+        { name = "hidden_sellerid",              type = "string", comment = "Hidden: sellerId" },
+        { name = "hidden_shopifycustomerid",     type = "string", comment = "Hidden: shopifyCustomerId" },
+        { name = "hidden_store",                 type = "string", comment = "Hidden: store" },
+        { name = "hidden_storeid",               type = "string", comment = "Hidden: storeId" },
+        { name = "ending_id",                    type = "string", comment = "Ending ID do Typeform" },
+        { name = "ending_ref",                   type = "string", comment = "Ending ref do Typeform" }
+      ]
+      partition_keys = [
+        { name = "ingestion_ts", type = "string", comment = "Partição por timestamp de ingestão (string)" }
+      ]
+    }
+
+    nps_answers = {
+      description = "Respostas detalhadas por pergunta (Typeform NPS)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=nps_answers/"
+      columns = [
+        { name = "definition_form_id",   type = "string", comment = "ID do formulário" },
+        { name = "definition_form_title",type = "string", comment = "Título do formulário" },
+        { name = "field_id",             type = "string", comment = "ID do campo" },
+        { name = "field_ref",            type = "string", comment = "Ref do campo" },
+        { name = "field_type",           type = "string", comment = "Tipo do campo" },
+        { name = "field_title",          type = "string", comment = "Título do campo" },
+        { name = "choice_id",            type = "string", comment = "ID da opção" },
+        { name = "choice_ref",           type = "string", comment = "Ref da opção" },
+        { name = "choice_label",         type = "string", comment = "Rótulo da opção" },
+        { name = "answer_type",          type = "string", comment = "Tipo de resposta" },
+        { name = "answer_number",        type = "bigint", comment = "Valor numérico (NPS etc.)" },
+        { name = "answer_text",          type = "string", comment = "Texto da resposta" },
+        { name = "answer_choice_id",     type = "string", comment = "ID da opção respondida" },
+        { name = "answer_choice_label",  type = "string", comment = "Rótulo da opção respondida" },
+        { name = "answer_choice_ref",    type = "string", comment = "Ref da opção respondida" },
+        { name = "answer_field_id",      type = "string", comment = "ID do campo respondido" },
+        { name = "answer_field_type",    type = "string", comment = "Tipo do campo respondido" },
+        { name = "answer_field_ref",     type = "string", comment = "Ref do campo respondido" },
+        { name = "nps_classificacao",    type = "string", comment = "Classificação (detrator/neutral/promotor)" }
+      ]
+      partition_keys = []
     }
 
 
@@ -150,69 +212,3 @@ module "crm_tables" {
   parameters     = { classification = "parquet", compressionType = "snappy" }
 }
 
-
-
-
-# resource "aws_glue_catalog_table" "crm_user2" {
-#   name          = "crm_user"
-#   database_name = var.database_name
-#   description   = "Usuários do CRM (Kustomer) - Silver"
-#   table_type    = "EXTERNAL_TABLE"
-
-#   parameters = {
-#     classification  = "parquet"
-#     compressionType = "snappy"
-#   }
-
-#   storage_descriptor {
-#     location      = "s3://${var.bucket}/domain=${var.domain}/source=crm/dataset=crm_user/"
-#     input_format  = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
-#     output_format = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
-
-#     ser_de_info {
-#       name                  = "crm_user_serde"
-#       serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
-#     }
-
-#     columns {
-#       name    = "user_id"
-#       type    = "string"
-#       comment = "ID original do usuário"
-#     }
-#     columns {
-#       name    = "display_name"
-#       type    = "string"
-#       comment = "Nome de exibição do usuário"
-#     }
-#     columns {
-#       name    = "email"
-#       type    = "string"
-#       comment = "E-mail corporativo"
-#     }
-#     columns {
-#       name    = "created_at"
-#       type    = "timestamp"
-#       comment = "Data de criação do usuário"
-#     }
-#     columns {
-#       name    = "updated_at"
-#       type    = "timestamp"
-#       comment = "Última atualização no sistema"
-#     }
-#     columns {
-#       name    = "deleted_at"
-#       type    = "timestamp"
-#       comment = "Data de exclusão"
-#     }
-#     columns {
-#       name    = "source_system"
-#       type    = "string"
-#       comment = "Origem dos dados (ex.: kustomer)"
-#     }
-#     columns {
-#       name    = "ingested_at"
-#       type    = "timestamp"
-#       comment = "Data de ingestão no Data Lake"
-#     }
-#   }
-# }

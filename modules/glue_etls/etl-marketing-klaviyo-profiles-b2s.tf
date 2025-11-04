@@ -1,11 +1,11 @@
-# JOB: foot_traffic bronze -> Silver
-module "glue_job_foot_traffic_to_silver" {
+# JOB: cdp profiles bronze -> Silver
+module "glue_job_klaviyo_profiles_to_silver" {
   source = "../glue_job"
 
-  name          = "offline-analytics-foot_traffic-b2s-refine"
+  name          = "marketing-klaviyo-profiles-b2s-refine"
 
   script_bucket = var.etls_bucket
-  script_key    = "glue/offline-analytics-foot_traffic-b2s-refine.py"
+  script_key    = "glue/marketing-klaviyo-profiles-b2s-refine.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [

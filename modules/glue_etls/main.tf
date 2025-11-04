@@ -26,36 +26,36 @@ locals {
   glue_sg_id = var.glue_sg_id != null ? var.glue_sg_id : aws_security_group.glue[0].id
 }
 
-# Catálogo (uma vez)
-resource "aws_glue_catalog_database" "silver_commerce" {
-  name = "silver_commerce"
-}
+# # Catálogo (uma vez)
+# resource "aws_glue_catalog_database" "silver_commerce" {
+#   name = "silver_commerce"
+# }
 
-resource "aws_glue_catalog_database" "silver_marketing" {
-  name = "silver_marketing"
-}
+# resource "aws_glue_catalog_database" "silver_marketing" {
+#   name = "silver_marketing"
+# }
 
-resource "aws_glue_catalog_database" "silver_analytics" {
-  name = "silver_analytics"
-}
+# resource "aws_glue_catalog_database" "silver_analytics" {
+#   name = "silver_analytics"
+# }
 
 resource "aws_glue_catalog_database" "silver_finance" {
   name = "silver_finance"
 }
 
-resource "aws_glue_catalog_database" "silver_cx" {
-  name = "silver_cx"
-}
+# # resource "aws_glue_catalog_database" "silver_cx" {
+# #   name = "silver_cx"
+# # }
 
-resource "aws_glue_catalog_database" "gold_cx" {
-  name = "gold_cx"
-}
+# resource "aws_glue_catalog_database" "gold_cx" {
+#   name = "gold_cx"
+# }
 
-resource "aws_glue_catalog_database" "silver_offline_analytics" {
-  name = "silver_offline_analytics"
-}
+# resource "aws_glue_catalog_database" "silver_offline_analytics" {
+#   name = "silver_offline_analytics"
+# }
 
-resource "aws_glue_catalog_database" "silver_people" {
-  name = "silver_people"
-}
+# resource "aws_glue_catalog_database" "silver_people" {
+#   name = "silver_people"
+# }
 

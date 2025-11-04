@@ -32,22 +32,22 @@ module "glue_job_typeform_nps_to_gold" {
 }
 
 
-# CRAWLER: Typeform (gold)
-module "glue_crawler_typeform_gold" {
-  source        = "../glue_crawler"
-  name          = "customer-experience-typeform-nps-s2g-refine-crawler"
-  database_name = aws_glue_catalog_database.gold_cx.name
+# # CRAWLER: Typeform (gold)
+# module "glue_crawler_typeform_gold" {
+#   source        = "../glue_crawler"
+#   name          = "customer-experience-typeform-nps-s2g-refine-crawler"
+#   database_name = aws_glue_catalog_database.gold_cx.name
 
-  s3_target_paths = [
-    "s3://${var.gold_bucket}/domain=customer_experience/source=typeform/nps_by_order_date/",
-    "s3://${var.gold_bucket}/domain=customer_experience/source=typeform/nps_by_response_date/",
-  ]
+#   s3_target_paths = [
+#     "s3://${var.gold_bucket}/domain=customer_experience/source=typeform/nps_by_order_date/",
+#     "s3://${var.gold_bucket}/domain=customer_experience/source=typeform/nps_by_response_date/",
+#   ]
 
-  read_bucket_arns = ["arn:aws:s3:::${var.gold_bucket}"]
-  read_prefixes = [
-    "domain=customer_experience/source=typeform/nps_by_order_date/*",
-    "domain=customer_experience/source=typeform/nps_by_response_date/*",
-  ]
+#   read_bucket_arns = ["arn:aws:s3:::${var.gold_bucket}"]
+#   read_prefixes = [
+#     "domain=customer_experience/source=typeform/nps_by_order_date/*",
+#     "domain=customer_experience/source=typeform/nps_by_response_date/*",
+#   ]
 
-  tags = merge(var.common_tags, { step = "silver-to-gold" })
-}
+#   tags = merge(var.common_tags, { step = "silver-to-gold" })
+# }
