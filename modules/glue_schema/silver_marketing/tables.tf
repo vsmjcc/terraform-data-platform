@@ -58,7 +58,73 @@ locals {
         }
       ]
     }
-  }
+
+    ads_facebook_campaign_insights_daily = {
+      description = "Métricas diárias de campanhas do Facebook Ads (Insights) por campanha, particionadas por report_date."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=facebook_ads/dataset=insights_campaign_daily/"
+
+      columns = [
+        # Identificação e datas
+        { name = "date_start",      type = "timestamp", comment = "Início do período (geralmente à 00:00 do dia)" },
+        { name = "date_stop",       type = "timestamp", comment = "Fim do período (geralmente à 23:59 do dia)" },
+
+        # Conta / campanha
+        { name = "account_id",      type = "string",    comment = "ID da conta de anúncios" },
+        { name = "account_name",    type = "string",    comment = "Nome da conta de anúncios" },
+        { name = "campaign_id",     type = "string",    comment = "ID da campanha" },
+        { name = "campaign_name",   type = "string",    comment = "Nome da campanha" },
+        { name = "buying_type",     type = "string",    comment = "Tipo de compra (ex.: AUCTION)" },
+        { name = "objective",       type = "string",    comment = "Objetivo da campanha" },
+
+        # Métricas principais
+        { name = "impressions",             type = "bigint",   comment = "Impressões" },
+        { name = "reach",                   type = "bigint",   comment = "Alcance" },
+        { name = "clicks",                  type = "bigint",   comment = "Cliques totais" },
+        { name = "inline_link_clicks",      type = "bigint",   comment = "Cliques no link" },
+        { name = "unique_clicks",           type = "bigint",   comment = "Cliques únicos" },
+        { name = "spend",                   type = "double",   comment = "Gasto (moeda da conta)" },
+        { name = "cpc",                     type = "double",   comment = "Custo por clique" },
+        { name = "cpm",                     type = "double",   comment = "Custo por mil impressões" },
+        { name = "ctr",                     type = "double",   comment = "Taxa de cliques (%)" },
+        { name = "frequency",               type = "double",   comment = "Frequência" },
+
+        # Quebras/ações (listas do Graph API)
+        { name = "actions",                 type = "array<struct<action_type:string,value:double>>",         comment = "Ações agregadas (ex.: offsite_conversion, link_click)" },
+        { name = "action_values",           type = "array<struct<action_type:string,value:double>>",         comment = "Valores associados às ações (ex.: value de compras)" },
+        { name = "conversions",             type = "array<struct<action_type:string,value:double>>",         comment = "Conversões por tipo" },
+
+        # Rankings de qualidade (quando disponíveis)
+        { name = "quality_ranking",         type = "string",   comment = "Ranking de qualidade" },
+        { name = "engagement_rate_ranking", type = "string",   comment = "Ranking de taxa de engajamento" },
+        { name = "conversion_rate_ranking", type = "string",   comment = "Ranking de taxa de conversão" },
+
+        # Moeda e país (se vierem do endpoint/conta)
+        { name = "account_currency",        type = "string",   comment = "Moeda da conta (ex.: BRL)" },
+        { name = "account_country",         type = "string",   comment = "País da conta" },
+
+        # Metadados do pipeline
+        { name = "source_system",           type = "string",   comment = "Sistema de origem (facebook_ads)" },
+        { name = "ingestion_date",          type = "date",     comment = "Dia em que o dado entrou na bronze" },
+        { name = "run_id",                  type = "string",   comment = "ID de execução/ingestão" }
+      ]
+
+      # Partição por report_date (projeção no módulo)
+      partition_keys = [
+        {
+          name    = "report_date"
+          type    = "date"
+          comment = "Dia do relatório (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+  }  
 }
 
 module "tables" {
