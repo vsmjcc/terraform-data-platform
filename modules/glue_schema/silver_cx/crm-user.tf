@@ -131,7 +131,165 @@ locals {
         { name = "ingested_at",                 type = "timestamp", comment = "Ingestão no Data Lake" }
       ]
       partition_keys = []
-    },
+    }
+
+    crm_conversations = {
+      description = "Conversas do CRM (Kustomer) - Silver"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=crm/dataset=crm_conversations/"
+      columns = [
+        # Identidade & chaves
+        { name = "conversation_id",             type = "string",           comment = "ID da conversa (origem Kustomer)" },
+        { name = "customer_id",                 type = "string",           comment = "ID do cliente associado" },
+        { name = "org_id",                      type = "string",           comment = "ID da organização (tenant)" },
+        { name = "brand_id",                    type = "string",           comment = "ID da marca" },
+        { name = "queue_id",                    type = "string",           comment = "ID da fila (routing)" },
+        { name = "modified_by_id",              type = "string",           comment = "Usuário que modificou por último" },
+        { name = "ended_by_id",                 type = "string",           comment = "Usuário que encerrou a conversa" },
+
+        # Metadados básicos
+        { name = "name",                        type = "string",           comment = "Nome/título da conversa" },
+        { name = "preview",                     type = "string",           comment = "Prévia da conversa" },
+        { name = "channels",                    type = "array<string>",    comment = "Canais da conversa (ex.: instagram-comment, whatsapp)" },
+        { name = "status",                      type = "string",           comment = "Status atual (ex.: open, done, snoozed)" },
+        { name = "ended",                       type = "boolean",          comment = "Indicador de conversa encerrada" },
+        { name = "ended_reason",                type = "string",           comment = "Motivo do encerramento" },
+        { name = "priority",                    type = "int",              comment = "Prioridade atribuída" },
+        { name = "spam",                        type = "boolean",          comment = "Marcada como spam na origem" },
+
+        # Contagens
+        { name = "message_count",               type = "int",              comment = "Total de mensagens" },
+        { name = "note_count",                  type = "int",              comment = "Total de notas" },
+        { name = "outbound_message_count",      type = "int",              comment = "Total de mensagens enviadas (outbound)" },
+        { name = "inbound_message_count",       type = "int",              comment = "Total de mensagens recebidas (inbound)" },
+
+        # Atribuições
+        { name = "assigned_users",              type = "array<string>",    comment = "Usuários atribuídos" },
+        { name = "assigned_teams",              type = "array<string>",    comment = "Times atribuídos" },
+
+        # Timestamps principais
+        { name = "created_at",                  type = "timestamp",        comment = "Criação da conversa" },
+        { name = "updated_at",                  type = "timestamp",        comment = "Última atualização" },
+        { name = "modified_at",                 type = "timestamp",        comment = "Última modificação (se diferente de updated_at)" },
+        { name = "last_activity_at",            type = "timestamp",        comment = "Última atividade" },
+        { name = "ended_at",                    type = "timestamp",        comment = "Data/hora do encerramento" },
+        { name = "last_message_at",             type = "timestamp",        comment = "Data/hora da última mensagem (qualquer direção)" },
+        { name = "last_received_at",            type = "timestamp",        comment = "Data/hora da última mensagem recebida (inbound)" },
+
+        # Abertura/SLAs agregados
+        { name = "open_status_at",              type = "timestamp",        comment = "Timestamp de abertura (statusAt)" },
+        { name = "total_open_time_ms",          type = "bigint",           comment = "Tempo total aberta (ms)" },
+        { name = "total_open_business_time_ms", type = "bigint",           comment = "Tempo aberto em horário de negócio (ms)" },
+
+        # SLA (resumo)
+        { name = "sla_name",                    type = "string",           comment = "Nome da política de SLA aplicada" },
+        { name = "sla_version",                 type = "string",           comment = "Versão da política de SLA" },
+        { name = "sla_status",                  type = "string",           comment = "Status do SLA (ex.: done, breached)" },
+        { name = "sla_breached",                type = "boolean",          comment = "Indica se houve violação de SLA" },
+        { name = "sla_first_breach_at",         type = "timestamp",        comment = "Primeiro momento de violação de SLA" },
+        { name = "sla_first_response_breach_at",type = "timestamp",        comment = "Breach previsto/real do first response" },
+
+        # Primeiro inbound (recorte útil)
+        { name = "first_message_in_id",         type = "string",           comment = "ID da primeira mensagem inbound" },
+        { name = "first_message_in_sent_at",    type = "timestamp",        comment = "Envio da primeira mensagem inbound" },
+        { name = "first_message_in_channel",    type = "string",           comment = "Canal da primeira mensagem inbound" },
+        { name = "first_message_in_media_type", type = "string",           comment = "Tipo de mídia do primeiro inbound (quando houver)" },
+        { name = "first_message_in_media_url",  type = "string",           comment = "URL da mídia do primeiro inbound" },
+        { name = "first_message_in_media_permalink", type = "string",      comment = "Permalink da mídia do primeiro inbound" },
+        { name = "first_message_in_media_caption",   type = "string",      comment = "Legenda/caption do primeiro inbound" },
+
+        # Último inbound (recorte útil)
+        { name = "last_message_in_id",          type = "string",           comment = "ID da última mensagem inbound" },
+        { name = "last_message_in_sent_at",     type = "timestamp",        comment = "Envio da última mensagem inbound" },
+        { name = "last_message_in_channel",     type = "string",           comment = "Canal da última mensagem inbound" },
+
+        # Governança
+        { name = "source_system",               type = "string",           comment = "Origem (ex.: kustomer)" },
+        { name = "ingested_at",                 type = "timestamp",        comment = "Data/hora de ingestão no Data Lake" }
+      ]
+      partition_keys = [] # manter sem partição por ora
+    }
+
+    crm_messages = {
+      description = "Mensagens do CRM (Kustomer) - Silver"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=crm/dataset=crm_messages/"
+
+      columns = [
+        # Identidade
+        { name = "message_id",            type = "string",    comment = "ID da mensagem (origem Kustomer)" },
+        { name = "external_id",           type = "string",    comment = "ID externo da mensagem (quando houver)" },
+
+        # Relacionamentos
+        { name = "org_id",                type = "string",    comment = "ID da organização (tenant)" },
+        { name = "customer_id",           type = "string",    comment = "ID do cliente associado" },
+        { name = "conversation_id",       type = "string",    comment = "ID da conversa associada" },
+        { name = "created_by_id",         type = "string",    comment = "Usuário que criou (quando aplicável)" },
+        { name = "modified_by_id",        type = "string",    comment = "Usuário que modificou (quando aplicável)" },
+
+        # Canal / app / direção
+        { name = "channel",               type = "string",    comment = "Canal (ex.: instagram, instagram-comment, whatsapp, email)" },
+        { name = "app",                   type = "string",    comment = "Aplicação de origem (ex.: instagram, twilio_whatsapp, postmark)" },
+        { name = "direction",             type = "string",    comment = "in | out" },
+        { name = "direction_type",        type = "string",    comment = "Tipo de direção (ex.: initial-in, response-out, followup-in)" },
+
+        # Conteúdo
+        { name = "subject",               type = "string",    comment = "Assunto (para e-mail)" },
+        { name = "preview",               type = "string",    comment = "Prévia/trecho da mensagem" },
+        { name = "size",                  type = "int",       comment = "Tamanho aproximado (quando fornecido)" },
+
+        # Meta (normalizado para campos simples)
+        { name = "meta_from",             type = "string",    comment = "Remetente/Origem (user/telefone/email, quando disponível)" },
+        { name = "meta_to",               type = "string",    comment = "Destinatário (user/telefone/email, quando disponível)" },
+        { name = "meta_reply_to",         type = "string",    comment = "ReplyTo / referência (quando aplicável)" },
+        { name = "meta_message_type",     type = "string",    comment = "Tipo de mensagem (ex.: storyMention, image)" },
+        { name = "meta_media_type",       type = "string",    comment = "Tipo de mídia (ex.: CAROUSEL_ALBUM, image)" },
+        { name = "meta_media_url",        type = "string",    comment = "URL da mídia (quando houver)" },
+        { name = "meta_media_permalink",  type = "string",    comment = "Permalink da mídia (quando houver)" },
+        { name = "meta_media_caption",    type = "string",    comment = "Legenda/caption da mídia (quando houver)" },
+        { name = "meta_permalink",        type = "string",    comment = "Permalink (casos IG/FB story/message)" },
+
+        # E-mail (listas já achatadas para praticidade)
+        { name = "meta_to_emails",        type = "array<string>", comment = "Lista de e-mails em 'to' (e-mail)" },
+        { name = "meta_cc_emails",        type = "array<string>", comment = "Lista de e-mails em 'cc' (e-mail)" },
+        { name = "meta_bcc_emails",       type = "array<string>", comment = "Lista de e-mails em 'bcc' (e-mail)" },
+
+        # Status + tempos
+        { name = "status",                type = "string",    comment = "Status na origem (ex.: received, sent)" },
+        { name = "response_time_ms",      type = "bigint",    comment = "responseTime em milissegundos (quando fornecido)" },
+        { name = "response_business_time_ms", type = "bigint", comment = "responseBusinessTime em milissegundos (quando fornecido)" },
+
+        # Atribuições
+        { name = "assigned_teams",        type = "array<string>", comment = "Times atribuídos" },
+        { name = "assigned_users",        type = "array<string>", comment = "Usuários atribuídos" },
+
+        # Flags
+        { name = "auto",                  type = "boolean",   comment = "Mensagem automática (bot/macros)" },
+        { name = "redacted",              type = "boolean",   comment = "Indica se foi redigida/mascarada na origem" },
+
+        # Timestamps
+        { name = "sent_at",               type = "timestamp", comment = "Envio/chegada (origem)" },
+        { name = "created_at",            type = "timestamp", comment = "Criação do registro na origem" },
+        { name = "updated_at",            type = "timestamp", comment = "Última atualização na origem" },
+        { name = "modified_at",           type = "timestamp", comment = "Última modificação (quando aplicável)" },
+        { name = "first_read_at",         type = "timestamp", comment = "Primeira leitura (quando disponível)" },
+
+        # Diversos
+        { name = "rev",                   type = "int",       comment = "Versão do registro (rev)" },
+        { name = "reactions",             type = "array<string>", comment = "Reações (quando houver)" },
+        { name = "custom_fields_json",    type = "string",    comment = "Campos custom (JSON serializado)" },
+        { name = "intent_detections_json",type = "string",    comment = "Intent detections (JSON serializado)" },
+        { name = "attachments",           type = "array<string>", comment = "IDs dos anexos associados à mensagem" },
+
+
+        # Governança
+        { name = "source_system",         type = "string",    comment = "Origem (ex.: kustomer)" },
+        { name = "ingested_at",           type = "timestamp", comment = "Ingestão no Data Lake" }
+      ]
+
+      # Mensagens tendem a ter grande volume: particionar por data de envio ajuda muito no custo do Athena
+      partition_keys = [
+        { name = "sent_at_date", type = "string", comment = "Partição YYYY-MM-DD derivada de sent_at (UTC)" }
+      ]
+    }
 
     nps = {
       description = "Respostas NPS (Typeform) em nível de submissão."

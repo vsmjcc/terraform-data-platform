@@ -67,6 +67,17 @@ module "etls_bucket" {
 }
 
 
+module "files_bucket" {
+  source          = "../s3_bucket"
+  environment     = var.environment
+  region          = var.region
+  bucket_name     = "zrzs-${var.environment}-data-lake-files"
+  versioning_enabled = true
+  force_destroy      = true
+  tags = {}
+}
+
+
 locals {
   bucket_modules = {
     bronze          = module.bronze_bucket
@@ -75,5 +86,6 @@ locals {
     packages        = module.packages_bucket
     athena_results  = module.athena_results_bucket
     etls            = module.etls_bucket
+    files           = module.files_bucket
   }
 }

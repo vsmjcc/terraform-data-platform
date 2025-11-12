@@ -561,8 +561,8 @@ resource "aws_iam_policy" "airflow_data_lake_access_bronze" {
           "s3:ListBucket"
         ],
         Resource = [
-          "arn:aws:s3:::zrzs-dev-data-lake-bronze",
-          "arn:aws:s3:::zrzs-dev-data-lake-bronze/*"
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-bronze",
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-bronze/*"
         ]
       }
     ]
@@ -590,10 +590,10 @@ resource "aws_iam_policy" "airflow_data_lake_access_silver_gold" {
           "s3:DeleteObject"
         ],
         Resource = [
-          "arn:aws:s3:::zrzs-dev-data-lake-silver",
-          "arn:aws:s3:::zrzs-dev-data-lake-silver/*",
-          "arn:aws:s3:::zrzs-dev-data-lake-gold",
-          "arn:aws:s3:::zrzs-dev-data-lake-gold/*"
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-silver",
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-silver/*",
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-gold",
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-gold/*"
         ]
       }
     ]
@@ -603,6 +603,33 @@ resource "aws_iam_policy" "airflow_data_lake_access_silver_gold" {
 resource "aws_iam_role_policy_attachment" "attach_airflow_data_lake_access_silver_gold" {
   role       = aws_iam_role.task_execution_role.name
   policy_arn = aws_iam_policy.airflow_data_lake_access_silver_gold.arn
+}
+
+resource "aws_iam_policy" "airflow_data_lake_access_files" {
+  name = "airflow-${var.environment}-data-lake-access-files"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-files",
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-files/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_airflow_data_lake_access-files" {
+  role       = aws_iam_role.task_execution_role.name
+  policy_arn = aws_iam_policy.airflow_data_lake_access_files.arn
 }
 
 
@@ -667,7 +694,7 @@ resource "aws_iam_role_policy_attachment" "attach_airflow_glue_logs" {
 
 # O role que o Airflow usa nas tasks (o que aparece no erro)
 data "aws_iam_role" "airflow_task_exec" {
-  name = "airflow-dev-task-execution-role"
+  name = "airflow-${var.environment}-task-execution-role"
 }
 
 
