@@ -52,7 +52,7 @@ resource "aws_iam_policy" "ecs_deploy_policy" {
         Effect = "Allow",
         Action = "iam:PassRole",
         Resource = [
-          "arn:aws:iam::414669981241:role/airflow-dev-task-execution-role",
+          "arn:aws:iam::414669981241:role/airflow-${var.environment}-task-execution-role",
           "arn:aws:iam::414669981241:role/*-task-execution-role",
           "arn:aws:iam::414669981241:role/*-task-role"
         ],
@@ -91,7 +91,7 @@ resource "aws_iam_policy" "lambda_deploy_policy" {
 
 resource "aws_iam_policy" "s3_dag_upload_policy" {
   name        = "zerezes-app-s3-upload-policy"
-  description = "Permite o upload de DAGs no bucket zrzs-dev-packages"
+  description = "Permite o upload de DAGs no bucket zrzs-${var.environment}-packages"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -102,7 +102,7 @@ resource "aws_iam_policy" "s3_dag_upload_policy" {
           "s3:PutObject",
           "s3:PutObjectAcl"
         ],
-        Resource = "arn:aws:s3:::zrzs-dev-packages/airflow-dags/*"
+        Resource = "arn:aws:s3:::zrzs-${var.environment}-packages/airflow-dags/*"
       }
     ]
   })
@@ -116,7 +116,7 @@ resource "aws_iam_role_policy_attachment" "attach_s3_dag_upload_policy" {
 
 resource "aws_iam_policy" "s3_etls_glue_upload_policy" {
   name        = "zerezes-etls-glue-s3-upload-policy"
-  description = "Permite o upload e leitura dos scripts Glue no bucket zrzs-dev-etls"
+  description = "Permite o upload e leitura dos scripts Glue no bucket zrzs-${var.environment}-etls"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -128,14 +128,14 @@ resource "aws_iam_policy" "s3_etls_glue_upload_policy" {
           "s3:PutObjectAcl",
           "s3:GetObject"
         ],
-        Resource = "arn:aws:s3:::zrzs-dev-etls/glue/*"
+        Resource = "arn:aws:s3:::zrzs-${var.environment}-etls/glue/*"
       },
       {
         Effect = "Allow",
         Action = [
           "s3:ListBucket"
         ],
-        Resource = "arn:aws:s3:::zrzs-dev-etls",
+        Resource = "arn:aws:s3:::zrzs-${var.environment}-etls",
         Condition = {
           StringLike = {
             "s3:prefix" = [

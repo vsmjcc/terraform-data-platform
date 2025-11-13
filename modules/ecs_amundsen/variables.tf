@@ -120,7 +120,7 @@ variable "oidc_discovery_url" {
 # --- Imagens (com defaults) ---
 variable "image_metadata" {
   type    = string
-  default = "amundsendev/amundsen-metadata:3.13.0"
+  default = "414669981241.dkr.ecr.us-east-1.amazonaws.com/amundsen-metadata:latest"
 }
 variable "image_search" {
   type    = string

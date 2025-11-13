@@ -69,8 +69,8 @@ resource "aws_iam_role_policy" "lambda_s3_access" {
           "s3:ListBucket"
         ],
         Resource = [
-          "arn:aws:s3:::zrzs-dev-packages",
-          "arn:aws:s3:::zrzs-dev-packages/*"
+          "arn:aws:s3:::zrzs-${var.environment}-packages",
+          "arn:aws:s3:::zrzs-${var.environment}-packages/*"
         ]
       }
     ]

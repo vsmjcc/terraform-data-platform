@@ -12,7 +12,7 @@ variable "s3_target_paths" {
 
 # IAM/S3
 variable "read_bucket_arns" {
-  type = list(string) # ex: ["arn:aws:s3:::zrzs-dev-data-lake-silver"]
+  type = list(string) # ex: ["arn:aws:s3:::zrzs-${var.environment}-data-lake-silver"]
 }
 
 variable "read_prefixes" {

@@ -38,16 +38,7 @@ resource "aws_security_group" "ec2" {
   description = "SG da EC2 ${local.name}"
   vpc_id      = var.vpc_id
 
-  dynamic "ingress" {
-    for_each = var.vpn_security_group_id == null ? [] : [var.vpn_security_group_id]
-    content {
-      description     = "SSH 22 via VPN"
-      from_port       = 22
-      to_port         = 22
-      protocol        = "tcp"
-      security_groups = [ingress.value]
-    }
-  }
+  # Sem ingress inline: todas as regras de entrada são via aws_security_group_rule.
 
   egress {
     from_port   = 0
@@ -58,6 +49,18 @@ resource "aws_security_group" "ec2" {
 
   tags = merge(local.tags, { Name = "${local.name}-ec2-sg" })
 }
+
+resource "aws_security_group_rule" "ec2_ssh_from_vpn" {
+  count                    = var.vpn_security_group_id == null ? 0 : 1
+  type                     = "ingress"
+  description              = "SSH 22 via VPN"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.ec2.id
+  source_security_group_id = var.vpn_security_group_id
+}
+
 
 resource "aws_instance" "this" {
   ami                         = var.ami_id

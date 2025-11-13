@@ -3,14 +3,14 @@ resource "aws_vpc" "this" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "zerezes-data-dev-vpc"
+    Name = "zerezes-data-${var.environment}-vpc"
   }
 }
 
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
   tags = {
-    Name = "zerezes-data-dev-igw"
+    Name = "zerezes-data-${var.environment}-igw"
   }
 }
 
@@ -47,14 +47,6 @@ resource "aws_route_table_association" "public" {
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
-
-  dynamic "route" {
-    for_each = var.nat_gateway_id != null ? [var.nat_gateway_id] : []
-    content {
-      cidr_block     = "0.0.0.0/0"
-      nat_gateway_id = route.value
-    }
-  }
 
   tags = {
     Name = "${var.environment}-private-rt"

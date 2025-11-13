@@ -15,6 +15,9 @@
     dns_zone_id         = var.dns_zones["data_zerezes"].zone_id
     dns_certificate_arn = var.dns_zones["data_zerezes"].certificate_arn
 
+    environment           = var.environment
+    region                = var.region
+
     environment_variables = {
       STAGE     = var.environment
       LOG_LEVEL = "debug"
@@ -39,6 +42,9 @@ module "shopify_orders_lambda" {
   enable_custom_domain = true
   dns_zone_id         = var.dns_zones["data_zerezes"].zone_id
   dns_certificate_arn = var.dns_zones["data_zerezes"].certificate_arn
+
+  environment           = var.environment
+  region                = var.region
 
   environment_variables = {
     STAGE                   = var.environment
@@ -65,6 +71,9 @@ module "shopify_products_lambda" {
   dns_zone_id         = var.dns_zones["data_zerezes"].zone_id
   dns_certificate_arn = var.dns_zones["data_zerezes"].certificate_arn
 
+  environment           = var.environment
+  region                = var.region
+
   environment_variables = {
     STAGE                   = var.environment
     LOG_LEVEL               = "debug"
@@ -89,6 +98,9 @@ module "shopify_customers_lambda" {
   enable_custom_domain = true
   dns_zone_id         = var.dns_zones["data_zerezes"].zone_id
   dns_certificate_arn = var.dns_zones["data_zerezes"].certificate_arn
+
+  environment           = var.environment
+  region                = var.region
 
   environment_variables = {
     STAGE                   = var.environment
@@ -122,8 +134,11 @@ module "airflow_dags_sync_lambda" {
   efs_security_group_id = var.volumes["airflow_dags"].security_group_id
   allow_efs_ingress     = true
 
+  environment           = var.environment
+  region                = var.region
+
   environment_variables = {
-    DAG_BUCKET      = "zrzs-dev-packages"
+    DAG_BUCKET      = "zrzs-${var.environment}-packages"
     DAG_DESTINATION = "/mnt/efs"
   }
 }

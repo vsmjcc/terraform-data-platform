@@ -1,3 +1,14 @@
+variable "environment" {
+  description = "Ambiente (ex: dev, prod)"
+  type        = string
+}
+
+variable "region" {
+  description = "AWS Region"
+  type        = string
+  default     = "us-east-1"
+}
+
 variable "function_name" {
   description = "Nome da função Lambda"
   type        = string

@@ -52,26 +52,6 @@ resource "aws_vpc_peering_connection_options" "peer_opts" {
   }
 }
 
-# -------------------------------
-# Rotas no requester (A -> B)
-# -------------------------------
-resource "aws_route" "requester_routes_to_peer" {
-  for_each                  = toset(var.requester_private_route_table_ids)
-  route_table_id            = each.value
-  destination_cidr_block    = var.peer_vpc_cidr
-  vpc_peering_connection_id = aws_vpc_peering_connection.this.id
-}
-
-# -------------------------------
-# Rotas no peer (B -> A) (gerenciado)
-# -------------------------------
-resource "aws_route" "peer_routes_to_requester" {
-  provider                  = aws.peer
-  for_each                  = var.manage_peer_side ? toset(var.peer_private_route_table_ids) : toset([])
-  route_table_id            = each.value
-  destination_cidr_block    = var.requester_vpc_cidr
-  vpc_peering_connection_id = aws_vpc_peering_connection.this.id
-}
 
 # -------------------------------
 # Regras de SG para o RDS (mesma região)

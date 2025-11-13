@@ -69,34 +69,12 @@ module "ec2_superset" {
   dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
 }
 
-# dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
-#   dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
-#   dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
 
 resource "aws_service_discovery_private_dns_namespace" "internal" {
   name        = "zerezes.local"
   description = "Internal namespace for service discovery"
   vpc         = module.vpc.vpc_id
 }
-
-# module "vpc_peering" {
-#   source                    = "./modules/vpc_peering"
-#   requester_vpc_id          = module.vpc.vpc_id
-#   accepter_vpc_id           = var.main_account_vpc_id
-#   peer_region               = var.peer_region
-#   peer_owner_id             = var.peer_owner_id
-#   requester_cidr_block      = var.vpc_cidr_block
-#   accepter_cidr_block       = var.main_account_vpc_cidr
-#   requester_route_table_ids = module.vpc.private_route_table_ids
-# }
-
-
-#module "s3_data_lake" {
-#  source        = "./modules/s3_data_lake"
-#  environment   = var.environment
-#  bucket_prefix = var.bucket_prefix
-#  region        = var.region
-#}
 
 module "dns" {
   source = "./modules/dns"
@@ -233,14 +211,6 @@ module "elasticsearch" {
   service_discovery_namespace_id   = aws_service_discovery_private_dns_namespace.internal.id
   service_discovery_namespace_name = "zerezes.local" # Mantenha o mesmo namespace
 
-  # --- IMPORTANTE: Grupos de Segurança ---
-  # Assim como o neo4j, você precisará liberar o tráfego dos serviços do Amundsen
-  # Quando você criar os serviços, descomente e adicione os SGs corretos aqui:
-  # allowed_security_groups = [
-  #   module.amundsen_search_service.security_group_id,
-  #   module.amundsen_databuilder.security_group_id
-  # ]
-
   # --- Opcionais (já têm defaults no module) ---
   # task_cpu     = 2048 # 2 vCPU
   # task_memory  = 4096 # 4 GB
@@ -289,36 +259,6 @@ module "amundsen_services" {
   # oidc_client_secret  = "meu-client-secret"
   # oidc_discovery_url  = "https://accounts.google.com/.well-known/openid-configuration"
 }
-
-
-
-# module "ecs_amundsen" {
-#   source = "./modules/ecs_amundsen"
-
-#   # Igual ao Airflow
-#   cluster_name        = module.ecs_cluster.name
-#   private_subnet_ids  = module.vpc.private_subnet_ids
-#   public_subnet_ids   = module.vpc.public_subnet_ids
-#   vpc_id              = module.vpc.vpc_id
-
-#   environment         = var.environment
-#   aws_region          = var.region
-
-#   # (Opcional) se você não precisa, não passe
-#   # task_exec_role_arn = module.iam.task_execution_role_arn
-
-#   # Credencial Neo4j
-#   neo4j_password      = "var.neo4j_password"
-
-#   # DNS/Cert – exatamente como no Airflow
-#   dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
-#   dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
-#   dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
-
-#   # FQDN público será amundsen.${dns_zone_name}
-#   frontend_subdomain  = "amundsen"
-# }
-
 
 
 module "glue_schema" {
@@ -524,4 +464,34 @@ resource "aws_security_group_rule" "allow_vpn_to_es" {
   description              = "Allow VPN client to access ES"
 }
 
+
+resource "aws_route" "private_default_nat" {
+  route_table_id         = module.vpc.private_aws_route_table_id
+  destination_cidr_block = "0.0.0.0/0"
+
+  nat_gateway_id = module.nat_gateway.nat_gateway_id
+}
+
+
+# # -------------------------------
+# # Rotas no requester (A -> B)
+# # -------------------------------
+# resource "aws_route" "requester_routes_to_peer" {
+#   route_table_id            = module.vpc.private_aws_route_table_id
+#   destination_cidr_block    = "10.25.48.0/22"
+#   vpc_peering_connection_id = module.vpc_peering.peering_id
+# }
+
+
+
+# # # -------------------------------
+# # # Rotas no peer (B -> A) (gerenciado)
+# # # -------------------------------
+# # resource "aws_route" "peer_routes_to_requester" {
+# #   provider                  = aws.peer
+# #   for_each                  = var.manage_peer_side ? toset(var.peer_private_route_table_ids) : toset([])
+# #   route_table_id            = each.value
+# #   destination_cidr_block    = var.requester_vpc_cidr
+# #   vpc_peering_connection_id = module.vpc_peering.peering_id
+# # }
 

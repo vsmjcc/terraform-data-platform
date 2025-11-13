@@ -16,7 +16,7 @@ resource "random_password" "rds_password" {
 }
 
 resource "aws_secretsmanager_secret" "rds_password" {
-  name = "zerezes-data-dev-${var.db_name}-rds-postgres"
+  name = "zerezes-data-${var.environment}-${var.db_name}-rds-postgres"
 }
 
 resource "aws_secretsmanager_secret_version" "rds_password_version" {
@@ -36,7 +36,7 @@ resource "aws_db_subnet_group" "this" {
 }
 
 resource "aws_security_group" "rds" {
-  name        = "rds-dev"
+  name        = "rds-${var.environment}"
   description = "Security group for RDS"
   vpc_id      = var.vpc_id
 
