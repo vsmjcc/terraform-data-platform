@@ -44,9 +44,9 @@ resource "aws_iam_role_policy" "glue_catalog_read" {
         "glue:GetUserDefinedFunctions", "glue:GetTags"
       ],
       Resource = [
-        "arn:aws:glue:${var.aws_region}:414669981241:catalog",
-        "arn:aws:glue:${var.aws_region}:414669981241:database/*",
-        "arn:aws:glue:${var.aws_region}:414669981241:table/*"
+        "arn:aws:glue:${var.aws_region}:${local.account_id}:catalog",
+        "arn:aws:glue:${var.aws_region}:${local.account_id}:database/*",
+        "arn:aws:glue:${var.aws_region}:${local.account_id}:table/*"
       ]
     }]
   })

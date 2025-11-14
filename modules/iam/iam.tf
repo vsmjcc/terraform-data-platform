@@ -7,7 +7,7 @@ resource "aws_iam_role" "app_deploy_role" {
     Statement = [{
       Effect = "Allow",
       Principal = {
-        Federated = "arn:aws:iam::414669981241:oidc-provider/token.actions.githubusercontent.com"
+        Federated = "arn:aws:iam::${local.account_id}:oidc-provider/token.actions.githubusercontent.com"
       },
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
@@ -49,9 +49,9 @@ resource "aws_iam_policy" "ecs_deploy_policy" {
         Effect = "Allow",
         Action = "iam:PassRole",
         Resource = [
-          "arn:aws:iam::414669981241:role/airflow-${var.environment}-task-execution-role",
-          "arn:aws:iam::414669981241:role/*-task-execution-role",
-          "arn:aws:iam::414669981241:role/*-task-role"
+          "arn:aws:iam::${local.account_id}:role/airflow-${var.environment}-task-execution-role",
+          "arn:aws:iam::${local.account_id}:role/*-task-execution-role",
+          "arn:aws:iam::${local.account_id}:role/*-task-role"
         ],
         Condition = {
           StringEquals = {
@@ -78,7 +78,7 @@ resource "aws_iam_policy" "lambda_deploy_policy" {
           "lambda:GetFunctionConfiguration",
           "lambda:InvokeFunction"
         ],
-        Resource = "arn:aws:lambda:us-east-1:414669981241:function:*"
+        Resource = "arn:aws:lambda:us-east-1:${local.account_id}:function:*"
       }
     ]
   })

@@ -258,8 +258,13 @@ module "amundsen_services" {
   # oidc_client_id      = "meu-client-id-do-google"
   # oidc_client_secret  = "meu-client-secret"
   # oidc_discovery_url  = "https://accounts.google.com/.well-known/openid-configuration"
-}
 
+  image_metadata      = "${module.ecr_repositories.repository_urls["amundsen-metadata"]}:latest"
+  # image_search      = "${module.ecr_repositories.repository_urls["amundsen-search"]}:latest"
+  image_frontend      = "${module.ecr_repositories.repository_urls["amundsen-frontend"]}:latest"
+
+
+}
 
 module "glue_schema" {
   source = "./modules/glue_schema"

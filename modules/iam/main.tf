@@ -1,4 +1,3 @@
-# main.tf
 terraform {
   required_version = ">= 1.0"
   required_providers {
@@ -14,3 +13,7 @@ provider "aws" {
 }
 
 data "aws_caller_identity" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+}

@@ -1,3 +1,4 @@
+
 # --- IAM Role de Execução (Usada por todos os 3 serviços) ---
 resource "aws_iam_role" "task_execution" {
   name = "amundsen-services-${var.environment}-task-execution-role"
