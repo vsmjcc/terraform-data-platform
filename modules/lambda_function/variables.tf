@@ -65,7 +65,7 @@ variable "environment_variables" {
 }
 
 variable "log_retention_in_days" {
-  description = "Retention for the Lambda CloudWatch Logs group"
+  description = "Retention for the Lambda CloudWatch Logs group group"
   type        = number
   default     = 30
 }

@@ -10,10 +10,10 @@ output "lambda_arn" {
 output "http_api_url" {
   value = (
     length(aws_apigatewayv2_domain_name.custom) > 0
-    ? format("https://%s", aws_apigatewayv2_domain_name.custom[0].domain_name)
+    ? "https://${aws_apigatewayv2_domain_name.custom[0].domain_name}"
     : (
         length(aws_apigatewayv2_api.this) > 0
-        ? aws_apigatewayv2_api.this[0].api_endpoint
+        ? "${aws_apigatewayv2_api.this[0].api_endpoint}"
         : null
       )
   )

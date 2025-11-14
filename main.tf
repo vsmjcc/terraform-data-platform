@@ -328,6 +328,18 @@ module "env_scheduler" {
 }
 
 
+# provider "aws" {
+#   region = "us-east-1"
+#   # conta requester
+# }
+
+# provider "aws" {
+#   alias  = "peer"
+#   region = "us-east-1"
+#   # assume_role { ... } ou profile
+#   # conta peer
+# }
+
 
 module "vpc_peering" {
   source = "./modules/vpc_peering"
@@ -346,7 +358,8 @@ module "vpc_peering" {
   ]
 
   manage_peer_side = false
-  providers        = { 
+
+  providers = {
     aws      = aws
     aws.peer = aws.peer
   }
@@ -494,4 +507,5 @@ resource "aws_route" "private_default_nat" {
 # #   destination_cidr_block    = var.requester_vpc_cidr
 # #   vpc_peering_connection_id = module.vpc_peering.peering_id
 # # }
+
 

@@ -1,6 +1,5 @@
-
 output "peering_id" {
-  value       = aws_vpc_peering_connection.this.id
+  value       = local.peering_id
   description = "ID do peering (use para operações manuais no peer, se necessário)."
 }
 
@@ -9,21 +8,21 @@ output "acceptance_instructions" {
   value = var.manage_peer_side ? null : <<EOT
 [PARCIAL] Aceitar peering na conta peer (zerezes):
 
-1) Console: VPC -> Peering connections -> Selecione ${aws_vpc_peering_connection.this.id} -> Accept.
+1) Console: VPC -> Peering connections -> Selecione ${local.peering_id} -> Accept.
 
 OU via CLI na conta peer:
-aws ec2 accept-vpc-peering-connection --vpc-peering-connection-id ${aws_vpc_peering_connection.this.id}
+aws ec2 accept-vpc-peering-connection --vpc-peering-connection-id ${local.peering_id}
 
 2) Habilitar DNS remoto no peering (peer side):
 aws ec2 modify-vpc-peering-connection-options \
-  --vpc-peering-connection-id ${aws_vpc_peering_connection.this.id} \
+  --vpc-peering-connection-id ${local.peering_id} \
   --accepter-peering-connection-options AllowDnsResolutionFromRemoteVpc=true
 
 3) Criar rotas (peer -> requester) nas RTs privadas do peer:
 for RT in <rtb-PEER-1> <rtb-PEER-2>; do
   aws ec2 create-route --route-table-id $RT \
     --destination-cidr-block ${var.requester_vpc_cidr} \
-    --vpc-peering-connection-id ${aws_vpc_peering_connection.this.id} || true
+    --vpc-peering-connection-id ${local.peering_id} || true
 done
 
 4) (Opcional) Abrir SG do RDS (peer):

@@ -17,3 +17,4 @@ output "private_subnet_cidrs" {
 output "private_aws_route_table_id" {
   value = aws_route_table.private.id
 }
+

@@ -1,3 +1,4 @@
+# variables.tf
 variable "requester_vpc_id" {
   description = "VPC ID na conta requester (zerezes-data-dev)"
   type        = string

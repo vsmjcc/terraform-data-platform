@@ -12,6 +12,5 @@ main_account_vpc_id  = "vpc-xxxxxxxxxxxx"
 main_account_vpc_cidr = "10.10.0.0/16"
 peer_region          = "us-east-1"
 peer_owner_id        = "111111111111"
-ssh_key_name   		 = "aws-data-dev-key"
-vpn_cidr			 = "192.168.235.0/24"
+ssh_key_name   		   = "aws-data-dev-key"
 

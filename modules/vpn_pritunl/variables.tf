@@ -1,8 +1,30 @@
-variable "ami_id" {}
-variable "instance_type" {
-  default = "t3.micro"
+variable "ami_id" {
+  description = "AMI ID para Ubuntu 22.04 (com SSM Agent)"
+  type        = string
 }
-variable "subnet_id" {}
-variable "vpc_id" {}
-variable "key_name" {}
-variable "environment" {}
+
+variable "instance_type" {
+  description = "Tipo da instância"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "subnet_id" {
+  description = "Subnet pública onde a instância será lançada"
+  type        = string
+}
+
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
+}
+
+variable "key_name" {
+  description = "Nome da chave SSH"
+  type        = string
+}
+
+variable "environment" {
+  description = "Ambiente (dev, prod, etc)"
+  type        = string
+}
