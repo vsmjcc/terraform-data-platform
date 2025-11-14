@@ -332,20 +332,6 @@ module "env_scheduler" {
   }
 }
 
-
-# provider "aws" {
-#   region = "us-east-1"
-#   # conta requester
-# }
-
-# provider "aws" {
-#   alias  = "peer"
-#   region = "us-east-1"
-#   # assume_role { ... } ou profile
-#   # conta peer
-# }
-
-
 module "vpc_peering" {
   source = "./modules/vpc_peering"
 
@@ -489,28 +475,5 @@ resource "aws_route" "private_default_nat" {
 
   nat_gateway_id = module.nat_gateway.nat_gateway_id
 }
-
-
-# # -------------------------------
-# # Rotas no requester (A -> B)
-# # -------------------------------
-# resource "aws_route" "requester_routes_to_peer" {
-#   route_table_id            = module.vpc.private_aws_route_table_id
-#   destination_cidr_block    = "10.25.48.0/22"
-#   vpc_peering_connection_id = module.vpc_peering.peering_id
-# }
-
-
-
-# # # -------------------------------
-# # # Rotas no peer (B -> A) (gerenciado)
-# # # -------------------------------
-# # resource "aws_route" "peer_routes_to_requester" {
-# #   provider                  = aws.peer
-# #   for_each                  = var.manage_peer_side ? toset(var.peer_private_route_table_ids) : toset([])
-# #   route_table_id            = each.value
-# #   destination_cidr_block    = var.requester_vpc_cidr
-# #   vpc_peering_connection_id = module.vpc_peering.peering_id
-# # }
 
 
