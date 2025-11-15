@@ -125,7 +125,7 @@ module "ecr_repositories" {
 module "rds_postgres" {
   source           = "./modules/rds_postgres"
 
-  identifier       = "zerezes-data-dev-airflow-db"
+  identifier       = "zerezes-data-${var.environment}-airflow-db"
   environment         = var.environment
   db_name          = "airflow"
   username         = "airflow"
@@ -310,9 +310,11 @@ module "iam" {
 module "env_scheduler" {
   source = "./modules/env-scheduler"
 
-  name_prefix   = "dev-scheduler"
+  count  = var.environment == "dev" ? 1 : 0
+
+  name_prefix   = "${var.environment}-scheduler"
   tag_key       = "Environment"
-  tag_values    = ["dev"]
+  tag_values    = [var.environment]
 
   # 08:00 BR = 11:00 UTC | 20:00 BR = 23:00 UTC
   start_cron_utc = "cron(0 11 ? * MON-FRI *)"
@@ -325,10 +327,10 @@ module "env_scheduler" {
 
   ecs_desired_default_on_start = 1
   asg_default_on_start = { min = 1, max = 1, desired = 1 }
-
+  
   tags = {
     Project     = "data-platform"
-    Environment = "dev"
+    Environment = var.environment
   }
 }
 
@@ -339,9 +341,9 @@ module "vpc_peering" {
   requester_vpc_id   = module.vpc.vpc_id
   requester_vpc_cidr = var.vpc_cidr_block 
 
-  peer_vpc_id     = "vpc-08a0e8e9a408c4f7d"
-  peer_vpc_cidr   = "10.25.48.0/22"
-  peer_account_id = "219219235757"
+  peer_vpc_id     = var.peer_zerezes_vpc_id
+  peer_vpc_cidr   = var.peer_zerezes_vpc_cidr
+  peer_account_id = var.peer_zerezes_account_id
 
   # Rotas no REQUESTER (só do seu lado)
   requester_private_route_table_ids = [

@@ -1,10 +1,6 @@
 variable "vpc_cidr_block" {}
 variable "private_subnets" { type = list(string) }
 variable "public_subnets" { type = list(string) }
-variable "main_account_vpc_id" {}
-variable "main_account_vpc_cidr" {}
-variable "peer_region" {}
-variable "peer_owner_id" {}
 
 variable "environment" {
   description = "Ambiente (ex: dev, prod)"
@@ -37,4 +33,17 @@ variable "ssh_key_name" {
   type        = string
 }
 
+variable "peer_zerezes_account_id" {
+  description = "id of zerezes account"
+  type        = string
+}
 
+variable "peer_zerezes_vpc_id" {
+  description = "vpc_id of zerezes account"
+  type        = string
+}
+
+variable "peer_zerezes_vpc_cidr" {
+  description = "cidr of zerezes account"
+  type        = string
+}

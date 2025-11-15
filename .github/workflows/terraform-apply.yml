@@ -15,15 +15,30 @@ jobs:
       id-token: write
       contents: read
 
+    env:
+      AWS_REGION: us-east-1
+      DEV_ACCOUNT_ID: "414669981241"
+      PROD_ACCOUNT_ID: "999999999999" # TODO: trocar pelo ID da conta PROD
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Set AWS Account ID by branch
+        id: set-account
+        run: |
+          BRANCH_NAME="${{ github.ref_name }}"
+          if [ "$BRANCH_NAME" = "prod" ]; then
+            echo "AWS_ACCOUNT_ID=${{ env.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
+          else
+            echo "AWS_ACCOUNT_ID=${{ env.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
+          fi
+
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::414669981241:role/terraform-deploy-role
-          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/terraform-deploy-role
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
