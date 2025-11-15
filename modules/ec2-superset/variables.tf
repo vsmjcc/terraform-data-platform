@@ -131,3 +131,8 @@ variable "dns_evaluate_target_health" {
 	default = false 
 }
 
+variable "enable_vpn_ssh" {
+  type        = bool
+  description = "Se true, cria regra de SSH 22 a partir do SG da VPN"
+  default     = false
+}

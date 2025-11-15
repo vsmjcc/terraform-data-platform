@@ -6,7 +6,7 @@ resource "aws_db_instance" "this" {
   instance_class          = "db.t3.micro"
   allocated_storage       = 20
   db_subnet_group_name    = aws_db_subnet_group.this.name
-  vpc_security_group_ids  = ["sg-04a2c216598d1a112", aws_security_group.rds.id]
+  vpc_security_group_ids  = [aws_security_group.rds.id]
   publicly_accessible     = false
   storage_encrypted       = false
   db_name                 = var.db_name

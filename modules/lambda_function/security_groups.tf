@@ -18,7 +18,7 @@ resource "aws_security_group" "lambda" {
 }
 
 resource "aws_security_group_rule" "allow_lambda_to_efs" {
-  count = var.allow_efs_ingress && var.efs_security_group_id != null && length(var.subnet_ids) > 0 ? 1 : 0
+  count = var.allow_efs_ingress ? 1 : 0
 
   type                     = "ingress"
   from_port                = 2049

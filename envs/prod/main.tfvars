@@ -15,3 +15,4 @@ peer_zerezes_account_id = "219219235757"
 
 ssh_key_name  = "aws-data-prod-key"
 
+public_zone_name   = "zerezes.digital"

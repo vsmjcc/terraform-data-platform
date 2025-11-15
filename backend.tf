@@ -1,8 +1,3 @@
 terraform {
-  backend "s3" {
-    bucket         = "terraform-state-zerezes-data"
-    key            = "data-platform/dev/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "terraform-lock"
-  }
+  backend "s3" {}
 }

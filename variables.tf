@@ -47,3 +47,9 @@ variable "peer_zerezes_vpc_cidr" {
   description = "cidr of zerezes account"
   type        = string
 }
+
+variable "public_zone_name" {
+  description = "domain name"
+  type        = string
+}
+

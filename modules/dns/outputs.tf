@@ -10,3 +10,8 @@ output "dns_zones" {
   }
 }
 
+
+output "data_zerezes_name_servers" {
+  description = "Name servers da hosted zone data.zerezes.digital para delegação na conta principal"
+  value       = module.dns_data_zerezes.name_servers
+}

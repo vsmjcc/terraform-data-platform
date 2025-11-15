@@ -55,6 +55,13 @@ output "volumes_info" {
 }
 
 
+
+output "data_zerezes_name_servers" {
+  description = "dns name_servers"
+  value       = module.dns.data_zerezes_name_servers
+}
+
+
 output "dns_info" {
   description = "dados dos dns"
   value       = module.dns.dns_zones
@@ -73,6 +80,7 @@ output "superset_generated_secret_key" {
   value       = module.ec2_superset.generated_secret_key
   sensitive   = true
 }
+
 
 
 

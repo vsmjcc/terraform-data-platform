@@ -58,6 +58,7 @@ module "ec2_superset" {
   ami_id        = "ami-080e1f13689e07408"
   instance_type = "t3.medium"
   key_name      = var.ssh_key_name
+  enable_vpn_ssh        = true
   vpn_security_group_id = module.vpn_pritunl.security_group_id
   enable_alb             = true
   alb_certificate_arn    = module.dns.dns_zones["data_zerezes"].certificate_arn
@@ -78,6 +79,7 @@ resource "aws_service_discovery_private_dns_namespace" "internal" {
 
 module "dns" {
   source = "./modules/dns"
+  public_zone_name = var.public_zone_name
 }
 
 

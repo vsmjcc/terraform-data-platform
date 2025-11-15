@@ -45,7 +45,7 @@ resource "aws_security_group" "ec2" {
 }
 
 resource "aws_security_group_rule" "ec2_ssh_from_vpn" {
-  count                    = var.vpn_security_group_id == null ? 0 : 1
+  count                    = var.enable_vpn_ssh ? 1 : 0
   type                     = "ingress"
   description              = "SSH 22 via VPN"
   from_port                = 22

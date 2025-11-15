@@ -26,7 +26,11 @@ resource "aws_efs_file_system" "neo4j_data" {
 }
 
 resource "aws_efs_mount_target" "neo4j_data" {
-  for_each       = toset(var.private_subnet_ids)
+  for_each = {
+    for idx, subnet_id in var.private_subnet_ids :
+    idx => subnet_id
+  }
+  
   file_system_id = aws_efs_file_system.neo4j_data.id
   subnet_id      = each.value
   security_groups = [aws_security_group.efs.id]

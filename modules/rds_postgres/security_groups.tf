@@ -18,7 +18,11 @@ resource "aws_security_group" "rds" {
 }
 
 resource "aws_security_group_rule" "rds_ingress_private_subnets" {
-  for_each          = toset(local.private_subnet_cidrs)
+  for_each = {
+    for idx, cidr in local.private_subnet_cidrs :
+    idx => cidr
+  }
+
   type              = "ingress"
   from_port         = 5432
   to_port           = 5432

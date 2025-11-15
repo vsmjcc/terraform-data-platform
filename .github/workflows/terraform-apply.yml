@@ -18,7 +18,7 @@ jobs:
     env:
       AWS_REGION: us-east-1
       DEV_ACCOUNT_ID: "414669981241"
-      PROD_ACCOUNT_ID: "999999999999" # TODO: trocar pelo ID da conta PROD
+      PROD_ACCOUNT_ID: "151632973153"
 
     steps:
       - name: Checkout Repository
