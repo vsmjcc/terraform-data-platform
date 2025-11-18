@@ -87,9 +87,7 @@ resource "aws_ecs_task_definition" "frontend" {
 
         { name = "ALLOWED_DOMAIN", value = "zerezes.com.br" },
         { name = "GOOGLE_SA_JSON_PATH", value = "/app/google-sa.json" },
-        { name = "GOOGLE_ADMIN_SUBJECT", value = "isabella.tessarotto@zerezes.com.br" },
-        { name = "REQUEST_SESSION_TIMEOUT_SEC", value = "15" },
-        { name = "REQUIRED_GROUP", value = "amundsen-dev-sec@zerezes.com.br" }
+        { name = "REQUEST_SESSION_TIMEOUT_SEC", value = "15" }
       ],
 
 
@@ -105,6 +103,14 @@ resource "aws_ecs_task_definition" "frontend" {
         {
           name      = "GOOGLE_SA_JSON"
           valueFrom = "${aws_secretsmanager_secret.amundsen.arn}:google_sa_json::"
+        },
+        {
+          name      = "REQUIRED_GROUP"
+          valueFrom = "${aws_secretsmanager_secret.amundsen.arn}:required_group::"
+        },
+        {
+          name      = "GOOGLE_ADMIN_SUBJECT"
+          valueFrom = "${aws_secretsmanager_secret.amundsen.arn}:google_admin_subject::"
         }
       ],
 

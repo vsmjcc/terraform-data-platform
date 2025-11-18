@@ -72,6 +72,8 @@ resource "aws_secretsmanager_secret_version" "amundsen" {
     oidc_client_secret = ""
     oidc_discovery_url = ""
     google_sa_json     = ""
+    required_group     = ""
+    google_admin_subject= "amundsen-${var.environment}-sec@zerezes.com.br"
   })
 
   lifecycle {

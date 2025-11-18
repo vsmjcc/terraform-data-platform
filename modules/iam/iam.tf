@@ -1,4 +1,16 @@
 
+resource "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
+
+  client_id_list = [
+    "sts.amazonaws.com"
+  ]
+
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1"
+  ]
+}
+
 resource "aws_iam_role" "app_deploy_role" {
   name = "zerezes-app-deploy-role"
 
@@ -113,12 +125,12 @@ resource "aws_iam_policy" "s3_etls_glue_upload_policy" {
       {
         Effect = "Allow",
         Action = ["s3:PutObject", "s3:PutObjectAcl", "s3:GetObject"],
-        Resource = "arn:aws:s3:::zrzs-dev-etls/glue/*"
+        Resource = "arn:aws:s3:::zrzs-${var.environment}-etls/glue/*"
       },
       {
         Effect = "Allow",
         Action = "s3:ListBucket",
-        Resource = "arn:aws:s3:::zrzs-dev-etls",
+        Resource = "arn:aws:s3:::zrzs-${var.environment}-etls",
         Condition = {
           StringLike = { "s3:prefix" = ["glue/*"] }
         }

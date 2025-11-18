@@ -114,7 +114,7 @@ module "shopify_customers_lambda" {
 module "airflow_dags_sync_lambda" {
   source             = "../lambda_function"
   function_name      = "airflow-dags-sync-to-efs"
-  handler            = "handler.lambda_handler"
+  handler            = "main.handler"
   runtime            = "python3.11"
   timeout            = 300
   memory_size        = 512
