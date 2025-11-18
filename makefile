@@ -6,16 +6,19 @@ AWS_PROFILE_PROD=zerezes-data-prod
 TFVARS_DEV=envs/dev/main.tfvars
 TFVARS_PROD=envs/prod/main.tfvars
 
+BACKEND_DEV=envs/dev/backend-dev.hcl
+BACKEND_PROD=envs/prod/backend-prod.hcl
+
+
 ##########
 # Dev
 ##########
 
-init-dev:
+login-dev:
 	aws sso login --profile $(AWS_PROFILE_DEV)
-	AWS_PROFILE=$(AWS_PROFILE_DEV) terraform init -reconfigure
 
 init-dev:
-	AWS_PROFILE=$(AWS_PROFILE_DEV) terraform init -reconfigure
+	AWS_PROFILE=$(AWS_PROFILE_DEV) terraform init -backend-config=$(BACKEND_DEV) -reconfigure
 
 plan-dev:
 	AWS_PROFILE=$(AWS_PROFILE_DEV) terraform plan -var-file=$(TFVARS_DEV)
@@ -37,7 +40,7 @@ login-prod:
 	aws sso login --profile $(AWS_PROFILE_PROD)
 
 init-prod:
-	AWS_PROFILE=$(AWS_PROFILE_PROD) terraform init -reconfigure
+	AWS_PROFILE=$(AWS_PROFILE_PROD) terraform init -backend-config=$(BACKEND_PROD) -reconfigure
 
 plan-prod:
 	AWS_PROFILE=$(AWS_PROFILE_PROD) terraform plan -var-file=$(TFVARS_PROD)
