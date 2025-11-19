@@ -19,13 +19,7 @@ module "glue_job_shopify_customers_to_silver" {
 
   # Só o que muda por job. O submódulo já liga logs/metrics/bookmark.
   default_arguments = {
-    "--SOURCE_PATH"           = "s3://${var.bronze_bucket}/domain=commerce/source=shopify/customers"
-    "--TARGET_CUSTOMERS_PATH" = "s3://${var.silver_bucket}/domain=commerce/source=shopify/customers"
-    "--TARGET_ADDRESSES_PATH" = "s3://${var.silver_bucket}/domain=commerce/source=shopify/customer_addresses"
-    "--MODE"                  = "overwrite"
-    "--SINCE_DAYS"            = "7"
-    # Se precisar, você pode incluir:
-    # "--conf" = "spark.sql.sources.partitionOverwriteMode=dynamic"
+
   }
 
   tags = merge(var.common_tags, {
@@ -33,24 +27,3 @@ module "glue_job_shopify_customers_to_silver" {
     Owner = "data-platform"
   })
 }
-
-
-# # CRAWLER: Shopify (silver)
-# module "glue_crawler_shopify_silver" {
-#   source       = "../glue_crawler"
-#   name         = "commerce-shopify-customers-b2s-refine-crawler"
-#   database_name = aws_glue_catalog_database.silver_commerce.name
-
-#   s3_target_paths = [
-#     "s3://${var.silver_bucket}/domain=commerce/source=shopify/customers/",
-#     "s3://${var.silver_bucket}/domain=commerce/source=shopify/customer_addresses/",
-#   ]
-
-#   read_bucket_arns = ["arn:aws:s3:::${var.silver_bucket}"]
-#   read_prefixes = [
-#     "domain=commerce/source=shopify/customers/*",
-#     "domain=commerce/source=shopify/customer_addresses/*",
-#   ]
-
-#   tags = merge(var.common_tags, { step = "bronze-to-silver" })
-# }

@@ -113,7 +113,7 @@ module "shopify_customers_lambda" {
 
 module "airflow_dags_sync_lambda" {
   source             = "../lambda_function"
-  function_name      = "airflow-dags-sync-to-efs"
+  function_name      = "dags-sync-to-efs"
   handler            = "main.handler"
   runtime            = "python3.11"
   timeout            = 300
@@ -149,6 +149,6 @@ locals {
     shopify_orders    = module.shopify_orders_lambda
     shopify_products  = module.shopify_products_lambda
     shopify_customers = module.shopify_customers_lambda
-    airflow_dags_sync = module.airflow_dags_sync_lambda
+    # airflow_dags_sync = module.airflow_dags_sync_lambda
   }
 }

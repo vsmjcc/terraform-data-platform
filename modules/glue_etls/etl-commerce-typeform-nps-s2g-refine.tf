@@ -18,11 +18,6 @@ module "glue_job_typeform_nps_to_gold" {
   security_group_ids = [local.glue_sg_id]
 
   default_arguments = {
-    "--SOURCE_PATH"         = "s3://${var.silver_bucket}/domain=customer_experience/source=typeform/dataset=nps"
-    "--TARGET_NPS_PATH"     = "s3://${var.gold_bucket}/domain=customer_experience/source=typeform/dataset=nps"
-    "--TARGET_ANSWERS_PATH" = "s3://${var.gold_bucket}/domain=customer_experience/source=typeform/dataset=nps_answers"
-    "--MODE"                = "overwrite"
-    "--SINCE_DAYS"          = "7"
   }
 
   tags = merge(var.common_tags, {
@@ -31,23 +26,3 @@ module "glue_job_typeform_nps_to_gold" {
   })
 }
 
-
-# # CRAWLER: Typeform (gold)
-# module "glue_crawler_typeform_gold" {
-#   source        = "../glue_crawler"
-#   name          = "customer-experience-typeform-nps-s2g-refine-crawler"
-#   database_name = aws_glue_catalog_database.gold_cx.name
-
-#   s3_target_paths = [
-#     "s3://${var.gold_bucket}/domain=customer_experience/source=typeform/nps_by_order_date/",
-#     "s3://${var.gold_bucket}/domain=customer_experience/source=typeform/nps_by_response_date/",
-#   ]
-
-#   read_bucket_arns = ["arn:aws:s3:::${var.gold_bucket}"]
-#   read_prefixes = [
-#     "domain=customer_experience/source=typeform/nps_by_order_date/*",
-#     "domain=customer_experience/source=typeform/nps_by_response_date/*",
-#   ]
-
-#   tags = merge(var.common_tags, { step = "silver-to-gold" })
-# }
