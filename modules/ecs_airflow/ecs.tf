@@ -28,8 +28,11 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
         { name = "AIRFLOW__LOGGING__REMOTE_LOGGING", value = "true" },
         { name = "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER", value = "s3://${module.airflow_logs_bucket.bucket_name}" },
         { name = "AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID", value = "aws_default" },
-        { name = "AIRFLOW__CORE__DEFAULT_TIMEZONE", value = "America/Sao_Paulo" }
+        { name = "AIRFLOW__CORE__DEFAULT_TIMEZONE", value = "America/Sao_Paulo" },
+        { name = "AIRFLOW__WEBSERVER__BASE_URL", value = "https://airflow.${var.dns_zone_name}" },
+        { name = "AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX", value = "true" }
       ]
+      
       secrets = [{
         name      = "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN"
         valueFrom = aws_secretsmanager_secret.sqlalchemy_conn.arn

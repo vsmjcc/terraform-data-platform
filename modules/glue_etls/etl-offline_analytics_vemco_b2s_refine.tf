@@ -13,8 +13,8 @@ module "glue_job_foot_traffic_to_silver" {
     var.silver_bucket,
   ]
 
-  worker_type = "G.8X"
-  number_of_workers = 8
+  # worker_type = "G.8X"
+  # number_of_workers = 8
 
   use_vpc            = true
   subnet_ids         = var.private_subnet_ids

@@ -14,8 +14,8 @@ resource "aws_glue_catalog_database" "silver_analytics" {
   name = "silver_analytics"
 }
 
-resource "aws_glue_catalog_database" "silver_finance" {
-  name = "silver_finance2"
+resource "aws_glue_catalog_database" "silver_erp" {
+  name = "silver_erp"
 }
 
 resource "aws_glue_catalog_database" "silver_offline_analytics" {
@@ -29,6 +29,7 @@ resource "aws_glue_catalog_database" "silver_people" {
 resource "aws_glue_catalog_database" "gold_cx" {
   name = "gold_cx"
 }
+
 
 
 module "silver_cx" {
@@ -68,13 +69,13 @@ module "silver_analytics" {
 }
 
 
-module "silver_finance" {
-  source = "./silver_finance"
+module "silver_erp" {
+  source = "./silver_erp"
 
   environment   = var.environment
   bucket        = var.silver_bucket
-  database_name = aws_glue_catalog_database.silver_finance.name
-  domain        = "silver_finance"
+  database_name = aws_glue_catalog_database.silver_erp.name
+  domain        = "silver_erp"
 }
 
 

@@ -39,9 +39,9 @@ locals {
 #   name = "silver_analytics"
 # }
 
-resource "aws_glue_catalog_database" "silver_finance" {
-  name = "silver_finance"
-}
+# resource "aws_glue_catalog_database" "silver_finance" {
+#   name = "silver_finance"
+# }
 
 # # resource "aws_glue_catalog_database" "silver_cx" {
 # #   name = "silver_cx"
