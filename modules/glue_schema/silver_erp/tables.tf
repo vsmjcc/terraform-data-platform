@@ -152,8 +152,335 @@ locals {
         }
       ]
     }
+
+    omie_sellers = {
+      description = "Vendedores cadastrados no Omie (ERP) - Silver (estado atual, 1 linha por vendedor)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_sellers/"
+
+      columns = [
+        # Identificação básica
+        { name = "seller_id",        type = "bigint",   comment = "ID interno do vendedor no Omie (codigo)" },
+        { name = "seller_code",      type = "string",   comment = "Código de integração / identificação do vendedor (codInt)" },
+        { name = "seller_name",      type = "string",   comment = "Nome do vendedor (nome)" },
+
+        # Contato
+        { name = "email",            type = "string",   comment = "E-mail do vendedor (email)" },
+
+        # Comissão
+        { name = "commission_rate",  type = "double",   comment = "Percentual de comissão do vendedor (comissao)" },
+
+        # Permissões / flags de uso
+        { name = "can_invoice_orders", type = "boolean", comment = "Se o vendedor pode faturar pedido (fatura_pedido: 'S'/'N')" },
+        { name = "can_view_orders",    type = "boolean", comment = "Se o vendedor pode visualizar pedidos (visualiza_pedido: 'S'/'N')" },
+        { name = "is_inactive",        type = "boolean", comment = "Se o vendedor está inativo no Omie (inativo: 'S'/'N')" },
+
+        # Metadados de ingestão / origem
+        { name = "ingestion_run_id", type = "string",    comment = "ID da execução de ingestão (run_id)" },
+        { name = "generated_at",     type = "timestamp", comment = "Data/hora de geração do arquivo pelo conector (generated_at)" },
+        { name = "source_cnpj",      type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
+        { name = "source_system",    type = "string",    comment = "Sistema de origem (ex: 'omie')" }
+      ]
+
+      # Partição por data de ingestão (histórico na bronze; silver pode ser snapshot atual)
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Data de ingestão dos vendedores (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    omie_bank_accounts = {
+      description = "Contas bancárias / correntes cadastradas no Omie (ERP) - Silver (estado atual, 1 linha por conta)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_bank_accounts/"
+
+      columns = [
+        # Identificação básica
+        { name = "bank_account_id",     type = "bigint",   comment = "ID interno da conta no Omie (nCodCC)" },
+        { name = "integration_code",    type = "string",   comment = "Código de integração da conta (cCodCCInt)" },
+        { name = "description",         type = "string",   comment = "Descrição / nome da conta (descricao)" },
+
+        # Banco e agência
+        { name = "bank_code",           type = "string",   comment = "Código do banco (codigo_banco)" },
+        { name = "agency_code",         type = "string",   comment = "Código da agência (codigo_agencia)" },
+        { name = "account_number",      type = "string",   comment = "Número da conta corrente (numero_conta_corrente)" },
+
+        # Tipo de conta
+        { name = "account_type_code",   type = "string",   comment = "Tipo da conta (tipo_conta_corrente: CC, CA, CX, CR, AC, AD, CV...)" },
+        { name = "account_group_type",  type = "string",   comment = "Tipo/grupo da conta (tipo: CC=Conta Corrente, CA=Aplicação, CX=Caixa, CR=Cartão de Crédito, AC=Conta de Adquirente, AD=Adiantamento, CV=Conta de Vales, etc.)" },
+
+        # Situação / uso
+        { name = "is_blocked",          type = "boolean",  comment = "Conta bloqueada (bloqueado: 'S'/'N')" },
+        { name = "is_inactive",         type = "boolean",  comment = "Conta inativa (inativo: 'S'/'N')" },
+        { name = "exclude_from_cashflow", type = "boolean", comment = "Excluir do fluxo de caixa (nao_fluxo: 'S'/'N')" },
+        { name = "exclude_from_summary",  type = "boolean", comment = "Excluir de relatórios/resumos financeiros (nao_resumo: 'S'/'N')" },
+
+        # Configuração de cobrança / boletos
+        { name = "billing_enabled",     type = "boolean",  comment = "Conta habilitada para cobrança/boletos (cobr_sn: 'S'/'N')" },
+        { name = "boleto_enabled",      type = "boolean",  comment = "Conta habilitada para emissão de boletos (bol_sn: 'S'/'N')" },
+        { name = "boleto_instr_1",      type = "string",   comment = "Instrução de boleto 1 (bol_instr1)" },
+        { name = "boleto_instr_2",      type = "string",   comment = "Instrução de boleto 2 (bol_instr2)" },
+        { name = "boleto_instr_3",      type = "string",   comment = "Instrução de boleto 3 (bol_instr3)" },
+        { name = "boleto_instr_4",      type = "string",   comment = "Instrução de boleto 4 (bol_instr4)" },
+
+        # Parâmetros financeiros básicos
+        { name = "interest_rate",       type = "double",   comment = "Percentual de juros para cobrança (per_juros)" },
+        { name = "fine_rate",           type = "double",   comment = "Percentual de multa para cobrança (per_multa)" },
+        { name = "recomposition_days",  type = "int",      comment = "Dias para recomposição (dias_rcomp)" },
+
+        # Pix
+        { name = "pix_enabled",         type = "boolean",  comment = "Conta habilitada para Pix (pix_sn: 'S'/'N')" },
+
+        # PDV / adquirência (quando usado em cartão / TEF / adquirente)
+        { name = "pdv_category",        type = "string",   comment = "Categoria da conta no PDV/contábil (pdv_categoria)" },
+        { name = "pdv_send",            type = "boolean",  comment = "Enviar vendas/lançamentos para essa conta (pdv_enviar: 'S'/'N')" },
+        { name = "pdv_settlement_days", type = "int",      comment = "Dias de vencimento/repasse padrão (pdv_dias_venc)" },
+        { name = "pdv_max_installments",type = "int",      comment = "Número máximo de parcelas (pdv_num_parcelas)" },
+        { name = "pdv_installment_limit", type = "int",    comment = "Limite de parcelas permitido (pdv_limite_pacelas)" },
+        { name = "pdv_sync_detail",     type = "boolean",  comment = "Sincronizar analítico/detalhado (pdv_sincr_analitica: 'S'/'N')" },
+        { name = "pdv_tef_type",        type = "int",      comment = "Tipo de TEF / integração PDV (pdv_tipo_tef)" },
+        { name = "pdv_admin_code",      type = "bigint",   comment = "Código da administradora / adquirente (pdv_cod_adm)" },
+        { name = "pdv_admin_fee",       type = "double",   comment = "Taxa administrativa da adquirente (pdv_taxa_adm)" },
+        { name = "pdv_store_fee",       type = "double",   comment = "Taxa da loja (pdv_taxa_loja)" },
+
+        # Saldos / limites
+        { name = "opening_balance",     type = "double",   comment = "Saldo inicial cadastrado na abertura (saldo_inicial)" },
+        { name = "opening_balance_date",type = "date",     comment = "Data do saldo inicial (saldo_data)" },
+        { name = "credit_limit",        type = "double",   comment = "Limite de crédito / cheque especial (valor_limite)" },
+
+        # Contato / relacionamento (opcionalmente úteis)
+        { name = "manager_name",        type = "string",   comment = "Nome do gerente da conta (nome_gerente)" },
+        { name = "phone",               type = "string",   comment = "Telefone de contato (telefone)" },
+        { name = "email",               type = "string",   comment = "E-mail de contato (email)" },
+
+        # Observações
+        { name = "notes",               type = "string",   comment = "Observações gerais da conta (observacao)" },
+
+        # Datas / autoria (montadas na silver a partir de data_inc/hora_inc e data_alt/hora_alt)
+        { name = "created_at",          type = "timestamp", comment = "Data/hora de inclusão da conta no Omie (data_inc + hora_inc)" },
+        { name = "created_by",          type = "string",    comment = "Usuário que incluiu a conta no Omie (user_inc)" },
+        { name = "updated_at",          type = "timestamp", comment = "Data/hora da última alteração (data_alt + hora_alt)" },
+        { name = "updated_by",          type = "string",    comment = "Usuário da última alteração (user_alt)" },
+
+        # Metadados de ingestão / origem
+        { name = "ingestion_run_id",    type = "string",    comment = "ID da execução de ingestão (run_id)" },
+        { name = "generated_at",        type = "timestamp", comment = "Data/hora de geração do arquivo pelo conector (generated_at)" },
+        { name = "source_cnpj",         type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
+        { name = "source_system",       type = "string",    comment = "Sistema de origem (ex: 'omie')" }
+      ]
+
+      # Partição por data de ingestão (histórico por batch na bronze; aqui você pode manter se quiser reprocessar fácil)
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Data de ingestão das contas (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    omie_fiscal_coupons_header = {
+      description = "Cabeçalho de cupons fiscais do Omie (uma linha por cupom, com totais e vínculos a cliente/vendedor)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_header/"
+
+      columns = [
+        # Identificação básica
+        { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
+        { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
+        { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
+        { name = "coupon_series",      type = "string",    comment = "Série do cupom (nSerieCupom)" },
+        { name = "coupon_model",       type = "string",    comment = "Modelo do cupom (cModeloCupom, ex.: 65)" },
+
+        # Datas / horários de emissão
+        { name = "emission_date",      type = "date",      comment = "Data de emissão do cupom (dDtEmissaoCupom)" },
+        { name = "emission_time",      type = "string",    comment = "Hora de emissão do cupom (cHrEmissaoCupom, HH:MM:SS)" },
+        { name = "emission_datetime",  type = "timestamp", comment = "Data/hora de emissão do cupom (construído na silver)" },
+
+        # Contingência e status
+        { name = "is_contingency",     type = "boolean",   comment = "Indicador de contingência (cContingencia = 'S'/'N')" },
+        { name = "is_cancelled",       type = "boolean",   comment = "Cupom cancelado? (info.cCupomCancelado)" },
+        { name = "is_returned",        type = "boolean",   comment = "Cupom devolvido? (info.cCupomDevolvido)" },
+
+        # Vínculos
+        { name = "client_id",          type = "bigint",    comment = "ID do cliente no Omie (idCliente)" },
+        { name = "seller_id",          type = "bigint",    comment = "ID do vendedor no Omie (idVendedor)" },
+        { name = "cash_register_seq",  type = "bigint",    comment = "Sequência do caixa (seqCaixa)" },
+        { name = "coupon_seq",         type = "bigint",    comment = "Sequência do cupom (seqCupom)" },
+
+        # Totais do cupom
+        { name = "amount_total",       type = "double",    comment = "Valor total do cupom (nValorCupom)" },
+        { name = "amount_tax_icms",    type = "double",    comment = "Valor de ICMS do cupom (nValorICMS)" },
+        { name = "amount_tax_pis",     type = "double",    comment = "Valor de PIS do cupom (nValorPIS)" },
+        { name = "amount_tax_cofins",  type = "double",    comment = "Valor de COFINS do cupom (nValorCOFINS)" },
+        { name = "amount_fee",         type = "double",    comment = "Valor de taxa adicional (nValorTaxa)" },
+
+        # Auditoria Omie (inclusão/alteração)
+        { name = "created_date",       type = "date",      comment = "Data de inclusão do cupom no Omie (info.dDtInclusao)" },
+        { name = "created_time",       type = "string",    comment = "Hora de inclusão do cupom no Omie (info.cHrInclusao)" },
+        { name = "created_at",         type = "timestamp", comment = "Data/hora de inclusão no Omie (derivado)" },
+        { name = "created_by",         type = "string",    comment = "Usuário que incluiu (info.uInc)" },
+
+        { name = "updated_date",       type = "date",      comment = "Data de alteração do cupom no Omie (info.dDtAlteracao)" },
+        { name = "updated_time",       type = "string",    comment = "Hora de alteração do cupom no Omie (info.cHrAlteracao)" },
+        { name = "updated_at",         type = "timestamp", comment = "Data/hora de alteração no Omie (derivado)" },
+        { name = "updated_by",         type = "string",    comment = "Usuário que alterou (info.uAlt)" },
+
+        # Metadados de ingestão
+        { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
+        { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
+        { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
+        { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Data de ingestão do batch (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    omie_fiscal_coupons_items = {
+      description = "Itens de cupons fiscais do Omie (uma linha por cupom x item)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_items/"
+
+      columns = [
+        # Chave do cupom (FK)
+        { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
+        { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
+        { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
+
+        # Identificação do item
+        { name = "item_id",            type = "bigint",    comment = "ID interno do item no Omie (idItem)" },
+        { name = "item_sequence",      type = "bigint",    comment = "Sequência do item no cupom (nSequencia)" },
+
+        # Produto
+        { name = "product_id",         type = "bigint",    comment = "ID do produto no Omie (idProduto)" },
+        { name = "product_code",       type = "string",    comment = "Código do produto (cCodigo / emiProduto)" },
+        { name = "product_name",       type = "string",    comment = "Descrição do produto (xProd)" },
+        { name = "unit",               type = "string",    comment = "Unidade de medida (cUn)" },
+        { name = "ncm",                type = "string",    comment = "Código NCM do item (cNCM)" },
+        { name = "cfop",               type = "string",    comment = "CFOP do item (cCFOP)" },
+
+        # Quantidade e valores
+        { name = "quantity",           type = "double",    comment = "Quantidade (nQuant)" },
+        { name = "unit_price",         type = "double",    comment = "Preço unitário (vUnit)" },
+        { name = "item_amount",        type = "double",    comment = "Valor do item (vItem)" },
+        { name = "discount_amount",    type = "double",    comment = "Desconto no item (vDesc)" },
+        { name = "addition_amount",    type = "double",    comment = "Acréscimo no item (vAcresc)" },
+        { name = "other_amount",       type = "double",    comment = "Outros valores (nValorOutros)" },
+
+        # Tributação no item
+        { name = "icms_rate",          type = "double",    comment = "Alíquota ICMS do item (nAliqICMS)" },
+        { name = "pis_rate",           type = "double",    comment = "Alíquota PIS do item (nAliqPIS)" },
+        { name = "cofins_rate",        type = "double",    comment = "Alíquota COFINS do item (nAliqCOFINS)" },
+
+        { name = "icms_amount",        type = "double",    comment = "Valor ICMS do item (nValorICMS)" },
+        { name = "pis_amount",         type = "double",    comment = "Valor PIS do item (nValorPIS)" },
+        { name = "cofins_amount",      type = "double",    comment = "Valor COFINS do item (nValorCOFINS)" },
+
+        # Status do item
+        { name = "is_cancelled",       type = "boolean",   comment = "Item cancelado? (cCupomCancelado)" },
+        { name = "is_returned",        type = "boolean",   comment = "Item devolvido? (cCupomDevolvido)" },
+
+        # Metadados de ingestão
+        { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
+        { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
+        { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
+        { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Data de ingestão do batch (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    omie_fiscal_coupons_payments = {
+      description = "Pagamentos de cupons fiscais do Omie (uma linha por cupom x parcela/pagamento)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_payments/"
+
+      columns = [
+        # Chave do cupom (FK)
+        { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
+        { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
+        { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
+
+        # Identificação da parcela
+        { name = "payment_sequence",   type = "bigint",    comment = "Sequência do pagamento (nSequencia)" },
+        { name = "installment_code",   type = "string",    comment = "Identificação da parcela (cNumParcela, ex.: 001/003)" },
+
+        # Título / documento
+        { name = "title_id",           type = "bigint",    comment = "Código do título financeiro (nCodTitulo)" },
+        { name = "doc_type",           type = "string",    comment = "Tipo de documento/pagamento (cTipoDoc, ex.: CRD, CRC)" },
+
+        # Conta corrente
+        { name = "bank_account_id",    type = "bigint",    comment = "ID da conta corrente no Omie (idContaCorrente)" },
+        { name = "account_category",   type = "string",    comment = "Categoria da conta / centro de custo (cCategoria)" },
+
+        # Valores e vencimento
+        { name = "due_date",           type = "date",      comment = "Data de vencimento da parcela (dDtVencimento)" },
+        { name = "document_amount",    type = "double",    comment = "Valor do documento/parcela (nValorDocumento)" },
+        { name = "fee_amount",         type = "double",    comment = "Valor de taxa (nValorTaxa)" },
+
+        # Metadados de ingestão
+        { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
+        { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
+        { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
+        { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Data de ingestão do batch (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
   }
 }
+
 
 module "tables" {
   source = "../../../modules/glue_table" 
