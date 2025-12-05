@@ -67,19 +67,19 @@ output "dns_info" {
   value       = module.dns.dns_zones
 }
 
-output "superset_https_url" {
-  value       = module.ec2_superset.https_url
-}
+# output "superset_https_url" {
+#   value       = module.ec2_superset.https_url
+# }
 
-output "superset_generated_admin_password" {
-  value       = module.ec2_superset.generated_admin_password
-  sensitive   = true
-}
+# output "superset_generated_admin_password" {
+#   value       = module.ec2_superset.generated_admin_password
+#   sensitive   = true
+# }
 
-output "superset_generated_secret_key" {
-  value       = module.ec2_superset.generated_secret_key
-  sensitive   = true
-}
+# output "superset_generated_secret_key" {
+#   value       = module.ec2_superset.generated_secret_key
+#   sensitive   = true
+# }
 
 
 
