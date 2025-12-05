@@ -123,7 +123,7 @@ resource "aws_security_group" "shopify_app" {
 
 # --- LOAD BALANCER ---
 resource "aws_lb" "shopify" {
-  name               = "shopify-protheus-compare-${var.environment}-alb"
+  name               = "shopify-protheus-comp-${var.environment}-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.shopify_alb.id]
@@ -194,7 +194,9 @@ resource "aws_ecs_task_definition" "shopify" {
         { name = "SHOPIFY_SHOP_URL",   valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:SHOPIFY_SHOP_URL::" },
         { name = "INVOICE_API_URL",    valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_URL::" },
         { name = "APP_USER_ADMIN",     valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:APP_USER_ADMIN::" },
-        { name = "APP_USER_ISA",       valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:APP_USER_ISA::" }
+        { name = "APP_USER_ISA",       valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:APP_USER_ISA::" },
+        { name = "INVOICE_API_USER",   valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_USER::" },
+        { name = "INVOICE_API_PASS",   valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_PASS::" }
       ],
 
       logConfiguration = {
