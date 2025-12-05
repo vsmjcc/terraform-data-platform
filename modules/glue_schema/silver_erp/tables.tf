@@ -478,8 +478,175 @@ locals {
         }
       ]
     }
+
+    omie_documents = {
+      description = "Omie fiscal documents (todos os modelos retornados por /contador/xml/ListarDocumentos). Uma linha por documento."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=documents/"
+
+      columns = [
+        # Linhagem / metadados de ingestão
+        { name = "source",            type = "string",            comment = "Fonte do dado (ex.: omie)" },
+        { name = "dataset",           type = "string",            comment = "Nome do dataset de origem (ex.: omie_documents)" },
+        { name = "run_id",            type = "string",            comment = "Identificador da execução de ingestão no bronze" },
+        { name = "ingestion_ts",      type = "timestamp",         comment = "Timestamp de ingestão no bronze" },
+
+        # Identificador canônico
+        { name = "document_id",       type = "string",            comment = "ID interno canônico (hash da chave ou do payload)" },
+
+        # Chave / modelo / numeração
+        { name = "document_key",      type = "string",            comment = "Chave fiscal do documento (ex.: chave NF-e/NFC-e), quando existir" },
+        { name = "reference_key",     type = "string",            comment = "Chave da nota referenciada (refNFe) em devoluções/complementos" }, # NOVO
+        { name = "model_code",        type = "string",            comment = "Modelo fiscal: 55=NF-e, 65=NFC-e, 59=CF-e-SAT, etc." },
+        { name = "document_type",     type = "string",            comment = "Document type: NF-e, NFC-e, CF-e-SAT, etc." },
+        
+        { name = "operation_code",    type = "string",            comment = "Código de operação no Omie (ex.: cOperacao da API, quando disponível)" },
+        { name = "serie",             type = "string",            comment = "Série do documento" },
+        { name = "number",            type = "string",            comment = "Número do documento (nNF, número do cupom, etc.)" },
+        { name = "purchase_order",    type = "string",            comment = "Número do pedido de compra/venda (xPed)" }, # NOVO
+
+        # Status / ambiente
+        { name = "status_code",       type = "string",            comment = "Código de status informado pelo Omie/SEFAZ (ex.: cStatus)" },
+        { name = "status_desc",       type = "string",            comment = "Descrição do status, se derivada (ex.: 'Autorizado o uso da NF-e')" },
+        { name = "environment",       type = "string",            comment = "Ambiente: 1=produção, 2=homologação, outro conforme XML" },
+        { name = "environment_desc",  type = "string",            comment = "Descrição do ambiente: Produção, Homologação" }, # NOVO
+
+        # Datas
+        { name = "issue_datetime_raw",type = "string",            comment = "Data/hora de emissão no formato original (ex.: 2025-11-24T12:40:49-03:00)" },
+        { name = "issue_datetime",    type = "timestamp",         comment = "Data/hora de emissão normalizada" },
+        { name = "issue_date",        type = "date",              comment = "Data de emissão (YYYY-MM-DD)" },
+
+        # Direção / finalidade / flags fiscais (quando vierem no XML – NF-e/NFC-e)
+        { name = "direction",         type = "string",            comment = "Sentido da operação (tpNF: 0=entrada, 1=saída), quando disponível" },
+        { name = "direction_desc",    type = "string",            comment = "Descrição do sentido: Entrada, Saída" }, # NOVO
+        { name = "purpose",           type = "string",            comment = "Finalidade da NF (finNFe: 1=normal, 2=complementar, 3=ajuste, 4=devolução)" },
+        { name = "purpose_desc",      type = "string",            comment = "Descrição da finalidade: Normal, Complementar, Ajuste, Devolução" }, # NOVO
+        { name = "presence_indicator",type = "string",            comment = "Indicador de presença (indPres), quando existir" },
+        { name = "presence_desc",     type = "string",            comment = "Descrição da presença: Presencial, Internet, etc." }, # NOVO
+        { name = "is_final_consumer", type = "boolean",           comment = "Indicador de consumidor final (indFinal), quando existir" },
+        
+        # Logística / Transporte
+        { name = "freight_mode",      type = "string",            comment = "Modalidade do frete (modFrete)" }, # NOVO
+        { name = "freight_mode_desc", type = "string",            comment = "Descrição do frete: CIF, FOB, Sem Frete, etc." }, # NOVO
+
+        # Emitente
+        { name = "issuer_cnpj",       type = "string",            comment = "CNPJ do emitente" },
+        { name = "issuer_name",       type = "string",            comment = "Nome/Razão social do emitente" },
+        { name = "issuer_state",      type = "string",            comment = "UF do emitente, quando disponível" },
+        { name = "issuer_city_code",  type = "string",            comment = "Código IBGE do município do emitente, quando disponível" },
+        # Endereço Emitente (Novos)
+        { name = "issuer_address",    type = "string",            comment = "Logradouro do emitente (xLgr)" },
+        { name = "issuer_number",     type = "string",            comment = "Número do endereço do emitente (nro)" },
+        { name = "issuer_neighborhood", type = "string",          comment = "Bairro do emitente (xBairro)" },
+        { name = "issuer_zipcode",    type = "string",            comment = "CEP do emitente (CEP)" },
+
+        # Destinatário / consumidor
+        { name = "recipient_cnpj",    type = "string",            comment = "CNPJ do destinatário (quando PJ)" },
+        { name = "recipient_cpf",     type = "string",            comment = "CPF do destinatário (quando PF)" },
+        { name = "recipient_name",    type = "string",            comment = "Nome do destinatário ou consumidor" },
+        { name = "recipient_state",   type = "string",            comment = "UF do destinatário, quando disponível" },
+        { name = "recipient_city_code", type = "string",          comment = "Código IBGE do município do destinatário, quando disponível" },
+        # Endereço Destinatário (Novos)
+        { name = "recipient_address", type = "string",            comment = "Logradouro do destinatário (xLgr)" },
+        { name = "recipient_number",  type = "string",            comment = "Número do endereço do destinatário (nro)" },
+        { name = "recipient_neighborhood", type = "string",       comment = "Bairro do destinatário (xBairro)" },
+        { name = "recipient_zipcode", type = "string",            comment = "CEP do destinatário (CEP)" },
+
+        # Natureza / CFOP agregado (opcional)
+        { name = "operation_nature",  type = "string",            comment = "Natureza da operação (natOp) do XML, quando houver" },
+        { name = "observation",       type = "string",            comment = "Observação do documento" },
+        
+        # Totais (em nível de documento – sempre que existirem)
+        { name = "total_products",    type = "decimal(18,2)",     comment = "Valor total dos produtos (vProd) do XML" },
+        { name = "total_discounts",   type = "decimal(18,2)",     comment = "Valor total de descontos (vDesc) do XML" },
+        { name = "total_invoice",     type = "decimal(18,2)",     comment = "Valor total da nota (vNF) do XML" },
+        { name = "total_freight",     type = "decimal(18,2)",     comment = "Valor total do frete (vFrete)" }, # NOVO
+        { name = "total_insurance",   type = "decimal(18,2)",     comment = "Valor total do seguro (vSeg)" }, # NOVO
+        { name = "total_expenses",    type = "decimal(18,2)",     comment = "Valor total de outras despesas (vOutro)" }, # NOVO
+        { name = "total_payments",    type = "decimal(18,2)",     comment = "Soma dos pagamentos (vPag) registrados no XML" },
+
+        # Campos “raw” vindos direto do Omie (úteis para auditoria)
+        { name = "raw_id_omie",       type = "string",            comment = "ID do documento no Omie (ex.: nIdNF, nIdCupom, nIdReceb)" },
+        { name = "raw_number_omie",   type = "string",            comment = "Número do documento informado pelo Omie (nNumero)" },
+        { name = "raw_value_omie",    type = "decimal(18,2)",     comment = "Valor do documento informado pelo Omie (nValor)" },
+        { name = "raw_status_omie",   type = "string",            comment = "Status do documento informado pelo Omie (cStatus)" }
+      ]
+
+      partition_keys = [
+        { name = "created_date",      type = "string",            comment = "Partição por data lógica de criação (issue_date ou fallback), formato YYYY-MM-DD" }
+      ]
+    }
+
+    omie_document_items = {
+      description = "Itens dos documentos fiscais Omie (NF-e, NFC-e e demais modelos que possuam itens). Uma linha por item."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=document_items/"
+
+      columns = [
+        { name = "document_id",    type = "string",        comment = "ID interno do documento (chave estrangeira para omie_documents.document_id)" },
+
+        # Identificação do item
+        { name = "item_number",    type = "int",           comment = "Número sequencial do item (nItem)" },
+        { name = "product_code",   type = "string",        comment = "Código do produto (cProd)" },
+        { name = "product_name",   type = "string",        comment = "Descrição do produto (xProd)" },
+        { name = "ncm",            type = "string",        comment = "NCM do produto" },
+        { name = "cfop",           type = "string",        comment = "CFOP do item" },
+
+        # Quantidade / valores
+        { name = "quantity",       type = "double",        comment = "Quantidade comercializada (qCom)" },
+        { name = "unit",           type = "string",        comment = "Unidade comercial (uCom)" },
+        { name = "unit_price",     type = "decimal(18,2)", comment = "Valor unitário (vUnCom)" },
+        { name = "total_price",    type = "decimal(18,2)", comment = "Valor total do item (vProd)" },
+        { name = "discount_value", type = "decimal(18,2)", comment = "Desconto no item (vDesc)" },
+
+        # Impostos (Novos)
+        { name = "origin",         type = "string",        comment = "Origem da mercadoria (orig)" },
+        { name = "origin_desc",    type = "string",        comment = "Descrição da origem: Nacional, Importada, etc." }, # NOVO
+        { name = "cst_icms",       type = "string",        comment = "CST do ICMS" },
+        { name = "icms_rate",      type = "decimal(18,2)", comment = "Alíquota do ICMS (pICMS)" },
+        { name = "icms_base",      type = "decimal(18,2)", comment = "Base de cálculo do ICMS (vBC)" },
+        { name = "icms_value",     type = "decimal(18,2)", comment = "Valor do ICMS (vICMS)" },
+        { name = "pis_cst",        type = "string",        comment = "CST do PIS" },
+        { name = "pis_value",      type = "decimal(18,2)", comment = "Valor do PIS (vPIS)" },
+        { name = "cofins_cst",     type = "string",        comment = "CST do COFINS" },
+        { name = "cofins_value",   type = "decimal(18,2)", comment = "Valor do COFINS (vCOFINS)" },
+
+        # Metadados extras que você queira derivar
+        { name = "is_gift",        type = "boolean",       comment = "Flag para itens brinde/cortesia, se derivado" }
+      ]
+
+      partition_keys = [
+        { name = "created_date",   type = "string",        comment = "Partição alinhada com omie_documents (YYYY-MM-DD)" }
+      ]
+    }
+
+    omie_document_payments = {
+      description = "Pagamentos dos documentos fiscais Omie (formas de pagamento por documento)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=document_payments/"
+
+      columns = [
+        { name = "document_id",    type = "string",        comment = "ID interno do documento (FK para omie_documents.document_id)" },
+
+        { name = "payment_seq",    type = "int",           comment = "Sequência do pagamento no documento" },
+        { name = "payment_type",   type = "string",        comment = "Tipo de pagamento (tPag - ex.: 01=dinh., 03=cartão, 90=sem pagamento, 99=outros)" },
+        { name = "payment_desc",   type = "string",        comment = "Descrição do tipo de pagamento: Dinheiro, Cartão, Boleto, etc." }, # NOVO
+        { name = "amount",         type = "decimal(18,2)", comment = "Valor do pagamento (vPag)" },
+
+        # Campos específicos de cartão quando existirem
+        { name = "card_brand",     type = "string",        comment = "Bandeira do cartão (tBand)" },
+        { name = "card_auth_code", type = "string",        comment = "Código de autorização (cAut)" },
+
+        # Outros campos genéricos caso apareçam em SAT ou modelos diferentes
+        { name = "payment_info_raw", type = "string",      comment = "Campo texto/JSON com informações adicionais de pagamento específicas de cada modelo, se necessário" }
+      ]
+
+      partition_keys = [
+        { name = "created_date",   type = "string",        comment = "Partição alinhada com omie_documents (YYYY-MM-DD)" }
+      ]
+    }
+
   }
 }
+
+
 
 
 module "tables" {
