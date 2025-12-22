@@ -121,7 +121,8 @@ module "ecr_repositories" {
     "amundsen-frontend", 
     "amundsen-metadata", 
     "amundsen-search",
-    "shopify-protheus-compare"
+    "shopify-protheus-compare",
+    "mocks"
   ]
 }
 
@@ -293,6 +294,37 @@ module "shopify_protheus_compare" {
   app_port  = 8501
   
 }
+
+module "mocks" {
+  count  = var.environment == "dev" ? 1 : 0
+  source = "./modules/ecs_mocks"
+
+  # Ambiente / Região
+  environment = var.environment
+  aws_region  = var.region
+
+  # Infra base
+  vpc_id             = module.vpc.vpc_id
+  public_subnet_ids  = module.vpc.public_subnet_ids
+  private_subnet_ids = module.vpc.private_subnet_ids
+  cluster_name       = module.ecs_cluster.name
+
+  # DNS (ex: mocks.data.zerezes.dev)
+  dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
+  dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
+  dns_certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
+
+  # Aplicação / Mocks
+  app_name  = "mocks"
+  app_image = "${module.ecr_repositories.repository_urls["mocks"]}:latest"
+  app_port  = 3100
+
+  allowed_cidrs = ["0.0.0.0/0"]
+
+  cpu    = 256
+  memory = 512
+}
+
 
 module "glue_schema" {
   source = "./modules/glue_schema"
@@ -504,6 +536,20 @@ resource "aws_route" "private_default_nat" {
   destination_cidr_block = "0.0.0.0/0"
 
   nat_gateway_id = module.nat_gateway.nat_gateway_id
+}
+
+
+resource "aws_athena_workgroup" "primary" {
+  name  = "primary"
+  state = "ENABLED"
+
+  configuration {
+    enforce_workgroup_configuration = true
+
+    result_configuration {
+      output_location = "s3://zrzs-${var.environment}-athena-results/"
+    }
+  }
 }
 
 

@@ -63,6 +63,7 @@ resource "aws_iam_policy" "ecs_deploy_policy" {
         Resource = [
           "arn:aws:iam::${local.account_id}:role/airflow-${var.environment}-task-execution-role",
           "arn:aws:iam::${local.account_id}:role/*-task-execution-role",
+          "arn:aws:iam::${local.account_id}:role/*-execution-role",
           "arn:aws:iam::${local.account_id}:role/*-task-role"
         ],
         Condition = {
