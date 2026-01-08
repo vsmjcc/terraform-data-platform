@@ -220,3 +220,54 @@ resource "aws_iam_role_policy_attachment" "attach_airflow_glue_logs" {
   role       = aws_iam_role.task_execution_role.name
   policy_arn = aws_iam_policy.airflow_glue_logs.arn
 }
+
+
+# ---------- Athena (execução de query) - INLINE (não conta no limite 10) ----------
+resource "aws_iam_role_policy" "airflow_athena_inline" {
+  name = "AirflowAthenaQueryInline"
+  role = aws_iam_role.task_execution_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AthenaQueryExecution",
+        Effect = "Allow",
+        Action = [
+          "athena:StartQueryExecution",
+          "athena:GetQueryExecution",
+          "athena:GetQueryResults",
+          "athena:StopQueryExecution",
+          "athena:GetWorkGroup"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "AthenaResultsBucketList",
+        Effect = "Allow",
+        Action = [
+          "s3:GetBucketLocation",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          "arn:aws:s3:::zrzs-${var.environment}-athena-results"
+        ]
+      },
+      {
+        Sid    = "AthenaResultsBucketObjectsRW",
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:AbortMultipartUpload",
+          "s3:ListMultipartUploadParts"
+        ],
+        Resource = [
+          "arn:aws:s3:::zrzs-${var.environment}-athena-results/*"
+        ]
+      }
+    ]
+  })
+}
+
+
