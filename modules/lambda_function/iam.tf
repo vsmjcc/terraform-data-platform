@@ -40,6 +40,15 @@ resource "aws_iam_role_policy" "lambda_s3_access" {
   })
 }
 
+resource "aws_iam_role_policy" "lambda_inline_extra" {
+  for_each = var.inline_policies
+
+  name = "${var.function_name}-${each.key}"
+  role = aws_iam_role.lambda_role.id
+
+  policy = each.value
+}
+
 # Adiciona permissão VPC se subnets forem fornecidas
 resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
   count      = length(var.subnet_ids) > 0 ? 1 : 0
