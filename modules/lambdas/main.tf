@@ -120,7 +120,7 @@ module "invoice_search_lambda" {
 
   # === CHAPADO DEV ===
   s3_bucket          = "zrzs-dev-packages"
-  s3_key             = "invoice-search/invoice-search.zip"
+  s3_key             = "empty-lambda.zip"
 
   enable_http_api      = true
   public_access        = true

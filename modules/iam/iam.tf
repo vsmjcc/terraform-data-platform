@@ -152,3 +152,26 @@ resource "aws_iam_policy" "bronze_write_policy" {
     }]
   })
 }
+
+# Permissão pra ler/gravar watermarks do zextract no DynamoDB
+resource "aws_iam_role_policy" "airflow_zextract_watermarks_inline" {
+  name = "zextract-watermarks-ddb-inline"
+  role = "airflow-${var.environment}-task-execution-role"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "ZextractWatermarksRW",
+        Effect = "Allow",
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DescribeTable"
+        ],
+        Resource = "arn:aws:dynamodb:us-east-1:${local.account_id}:table/zextract-watermarks"
+      }
+    ]
+  })
+}

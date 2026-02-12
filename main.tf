@@ -422,9 +422,8 @@ module "vpc_peering" {
 module "zextract_watermarks" {
   source = "./modules/dynamodb"
 
-  name      = "zextract-watermarks"
-  hash_key  = "pk"
-  range_key = "sk"
+  name     = "zextract-watermarks"
+  hash_key = "key"
 
   billing_mode = "PAY_PER_REQUEST"
   enable_pitr  = true
@@ -434,7 +433,6 @@ module "zextract_watermarks" {
     env     = var.environment
   }
 }
-
 
 
 resource "aws_security_group_rule" "allow_amundsen_search_to_es" {
