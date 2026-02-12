@@ -135,3 +135,9 @@ variable "dns_certificate_arn" {
   type        = string
   default     = null
 }
+
+variable "inline_policies" {
+  description = "Policies inline adicionais para anexar na role da Lambda. Map(nome => policy_json)"
+  type        = map(string)
+  default     = {}
+}
