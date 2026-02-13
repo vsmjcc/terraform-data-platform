@@ -24,14 +24,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set AWS Account ID by target branch
-        id: set-account
+      - name: Choose env (dev/prod) from base branch
+        id: env
+        shell: bash
         run: |
-          BRANCH_NAME="${{ github.base_ref }}"
-          if [ "$BRANCH_NAME" = "prod" ]; then
-            echo "AWS_ACCOUNT_ID=${{ env.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
+          if [ "${{ github.base_ref }}" = "prod" ]; then
+            echo "ENV=prod" >> "$GITHUB_ENV"
+            echo "AWS_ACCOUNT_ID=${{ env.PROD_ACCOUNT_ID }}" >> "$GITHUB_ENV"
           else
-            echo "AWS_ACCOUNT_ID=${{ env.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
+            echo "ENV=dev" >> "$GITHUB_ENV"
+            echo "AWS_ACCOUNT_ID=${{ env.DEV_ACCOUNT_ID }}" >> "$GITHUB_ENV"
           fi
 
       - name: Configure AWS Credentials via OIDC
@@ -43,17 +45,24 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Terraform Init
-        run: terraform init -reconfigure
+      - name: Install make
+        run: sudo apt-get update && sudo apt-get install -y make
 
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
+      - name: Terraform Init (via Make)
         run: |
-          BRANCH_NAME=${{ github.base_ref }}
-          if [ "$BRANCH_NAME" = "prod" ]; then
-            terraform plan -var-file=envs/prod/main.tfvars
+          if [ "${{ env.ENV }}" = "prod" ]; then
+            make init-prod
           else
-            terraform plan -var-file=envs/dev/main.tfvars
+            make init-dev
+          fi
+
+      - name: Terraform Validate (via Make)
+        run: make validate
+
+      - name: Terraform Plan (via Make)
+        run: |
+          if [ "${{ env.ENV }}" = "prod" ]; then
+            make plan-prod
+          else
+            make plan-dev
           fi
