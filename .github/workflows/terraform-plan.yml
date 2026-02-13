@@ -24,15 +24,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Choose env (dev/prod) from base branch
+      - name: Set env/account by target branch (base_ref)
         shell: bash
         run: |
-          if [ "${{ github.base_ref }}" = "prod" ]; then
+          BRANCH_NAME="${{ github.base_ref }}"
+          if [ "$BRANCH_NAME" = "prod" ]; then
             echo "ENV=prod" >> "$GITHUB_ENV"
             echo "AWS_ACCOUNT_ID=${{ env.PROD_ACCOUNT_ID }}" >> "$GITHUB_ENV"
+            echo "TFVARS_FILE=envs/prod/main.tfvars" >> "$GITHUB_ENV"
+            echo "BACKEND_FILE=envs/prod/backend-prod.hcl" >> "$GITHUB_ENV"
           else
             echo "ENV=dev" >> "$GITHUB_ENV"
             echo "AWS_ACCOUNT_ID=${{ env.DEV_ACCOUNT_ID }}" >> "$GITHUB_ENV"
+            echo "TFVARS_FILE=envs/dev/main.tfvars" >> "$GITHUB_ENV"
+            echo "BACKEND_FILE=envs/dev/backend-dev.hcl" >> "$GITHUB_ENV"
           fi
 
       - name: Configure AWS Credentials via OIDC
@@ -52,32 +57,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Install make
-        run: sudo apt-get update && sudo apt-get install -y make
+      - name: Terraform Init (with backend config)
+        run: terraform init -backend-config=${{ env.BACKEND_FILE }} -reconfigure
 
-      - name: Ensure AWS_PROFILE is empty (OIDC)
-        shell: bash
-        run: |
-          echo "AWS_PROFILE=" >> "$GITHUB_ENV"
-          unset AWS_PROFILE
+      - name: Terraform Validate
+        run: terraform validate
 
-      - name: Terraform Init (via Make)
-        shell: bash
-        run: |
-          if [ "${{ env.ENV }}" = "prod" ]; then
-            make init-prod AWS_PROFILE=
-          else
-            make init-dev AWS_PROFILE=
-          fi
-
-      - name: Terraform Validate (via Make)
-        run: make validate
-
-      - name: Terraform Plan (via Make)
-        shell: bash
-        run: |
-          if [ "${{ env.ENV }}" = "prod" ]; then
-            make plan-prod AWS_PROFILE=
-          else
-            make plan-dev AWS_PROFILE=
-          fi
+      - name: Terraform Plan
+        run: terraform plan -var-file=${{ env.TFVARS_FILE }}
