@@ -30,6 +30,9 @@ resource "aws_glue_catalog_database" "gold_cx" {
   name = "gold_cx"
 }
 
+resource "aws_glue_catalog_database" "gold_analytics" {
+  name = "gold_analytics"
+}
 
 
 module "silver_cx" {
@@ -107,4 +110,12 @@ module "gold_cx" {
   domain        = "customer_experience"
 }
 
+module "gold_analytics" {
+  source = "./gold_analytics"
+
+  environment   = var.environment
+  bucket        = var.gold_bucket
+  database_name = aws_glue_catalog_database.gold_analytics.name
+  domain        = "analytics"
+}
 
