@@ -24,14 +24,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set AWS Account ID by branch
-        id: set-account
+      - name: Choose env (dev/prod) from branch
+        shell: bash
         run: |
-          BRANCH_NAME="${{ github.ref_name }}"
-          if [ "$BRANCH_NAME" = "prod" ]; then
-            echo "AWS_ACCOUNT_ID=${{ env.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
+          if [ "${{ github.ref_name }}" = "prod" ]; then
+            echo "ENV=prod" >> "$GITHUB_ENV"
+            echo "AWS_ACCOUNT_ID=${{ env.PROD_ACCOUNT_ID }}" >> "$GITHUB_ENV"
           else
-            echo "AWS_ACCOUNT_ID=${{ env.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
+            echo "ENV=dev" >> "$GITHUB_ENV"
+            echo "AWS_ACCOUNT_ID=${{ env.DEV_ACCOUNT_ID }}" >> "$GITHUB_ENV"
           fi
 
       - name: Configure AWS Credentials via OIDC
@@ -40,17 +41,34 @@ jobs:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/terraform-deploy-role
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Guardrail - confirm AWS account
+        run: |
+          echo "Expected AWS_ACCOUNT_ID=${{ env.AWS_ACCOUNT_ID }}"
+          ACTUAL=$(aws sts get-caller-identity --query Account --output text)
+          echo "Actual AWS Account=$ACTUAL"
+          test "$ACTUAL" = "${{ env.AWS_ACCOUNT_ID }}"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Terraform Init
-        run: terraform init -reconfigure
+      - name: Install make
+        run: sudo apt-get update && sudo apt-get install -y make
 
-      - name: Terraform Apply
+      - name: Terraform Init (via Make)
         run: |
-          BRANCH_NAME=${{ github.ref_name }}
-          if [ "$BRANCH_NAME" = "prod" ]; then
-            terraform apply -auto-approve -var-file=envs/prod/main.tfvars
+          if [ "${{ env.ENV }}" = "prod" ]; then
+            make init-prod
           else
-            terraform apply -auto-approve -var-file=envs/dev/main.tfvars
+            make init-dev
+          fi
+
+      - name: Terraform Validate (via Make)
+        run: make validate
+
+      - name: Terraform Apply (via Make)
+        run: |
+          if [ "${{ env.ENV }}" = "prod" ]; then
+            make apply-prod
+          else
+            make apply-dev
           fi
