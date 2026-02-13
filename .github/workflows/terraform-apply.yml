@@ -42,6 +42,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Guardrail - confirm AWS account
+        shell: bash
         run: |
           echo "Expected AWS_ACCOUNT_ID=${{ env.AWS_ACCOUNT_ID }}"
           ACTUAL=$(aws sts get-caller-identity --query Account --output text)
@@ -54,21 +55,29 @@ jobs:
       - name: Install make
         run: sudo apt-get update && sudo apt-get install -y make
 
+      - name: Ensure AWS_PROFILE is empty (OIDC)
+        shell: bash
+        run: |
+          echo "AWS_PROFILE=" >> "$GITHUB_ENV"
+          unset AWS_PROFILE
+
       - name: Terraform Init (via Make)
+        shell: bash
         run: |
           if [ "${{ env.ENV }}" = "prod" ]; then
-            make init-prod
+            make init-prod AWS_PROFILE=
           else
-            make init-dev
+            make init-dev AWS_PROFILE=
           fi
 
       - name: Terraform Validate (via Make)
         run: make validate
 
       - name: Terraform Apply (via Make)
+        shell: bash
         run: |
           if [ "${{ env.ENV }}" = "prod" ]; then
-            make apply-prod
+            make apply-prod AWS_PROFILE=
           else
-            make apply-dev
+            make apply-dev AWS_PROFILE=
           fi
