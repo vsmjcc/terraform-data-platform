@@ -39,18 +39,19 @@ locals {
     ga4_fact_sessions_daily = {
         description = "Fato de sessões GA4 no grão diário por canal e campanha."
         location    = "s3://${var.bucket}/domain=${var.domain}/dataset=ga4_fact_sessions_daily/"
+
         columns = [
             { name = "date",             type = "date",   comment = "Data da sessão" },
             { name = "source_medium_id", type = "bigint", comment = "FK para dim_source_medium" },
             { name = "campaign_id",      type = "bigint", comment = "FK para dim_campaign" },
             { name = "sessions",         type = "bigint", comment = "Quantidade de sessões" }
         ]
+
         partition_keys = [
-            { name = "date", type = "date" }
+            { name = "report_date", type = "date" }
         ]
     }
   }
-
 }
 
 module "tables" {
