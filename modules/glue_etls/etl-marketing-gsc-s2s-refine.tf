@@ -1,16 +1,15 @@
-git# JOB: cdp google_search_console (GSC) metrics -> Silver
+# JOB: GSC Silver (Normalização) -> Silver (Enriquecimento)
 
-module "glue_job_gsc_metrics_to_silver" {
+module "glue_job_gsc_metrics_s2s_refine" {
   source = "../glue_job"
 
-  name = "marketing-gsc-metrics-b2s-refine"
+  name = "marketing-gsc-metrics-s2s-refine"
 
   script_bucket = var.etls_bucket
-  script_key    = "glue/marketing-gsc-metrics-b2s-refine.py"
+  script_key    = "glue/marketing-gsc-metrics-s2s-refine.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [
-    var.bronze_bucket,
     var.silver_bucket,
   ]
 
