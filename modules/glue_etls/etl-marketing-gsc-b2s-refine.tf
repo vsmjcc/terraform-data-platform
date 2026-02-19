@@ -1,4 +1,4 @@
-# JOB: cdp google_search_console (GSC) metrics -> Silver
+git# JOB: cdp google_search_console (GSC) metrics -> Silver
 
 module "glue_job_gsc_metrics_to_silver" {
   source = "../glue_job"

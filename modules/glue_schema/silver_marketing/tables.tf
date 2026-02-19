@@ -124,7 +124,42 @@ locals {
         }
       ]
     }
-  }  
+
+    # Google Search Console – métricas por query/device/site (B2S refine)
+    gsc_metrics = {
+      description = "Métricas do Google Search Console por query, device e site (clicks, impressions), particionadas por report_date."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=google_search_console/dataset=gsc_metrics/"
+
+      columns = [
+        { name = "query",          type = "string", comment = "Termo de busca (normalizado: maiúsculo, sem acentos)" },
+        { name = "device",         type = "string", comment = "Dispositivo (normalizado: DESKTOP, MOBILE, etc.)" },
+        { name = "clicks",         type = "bigint", comment = "Número de cliques" },
+        { name = "impressions",    type = "bigint", comment = "Número de impressões" },
+        { name = "site_url",       type = "string", comment = "URL do site no GSC" },
+        { name = "search_type",    type = "string", comment = "Tipo de busca (ex.: WEB, IMAGE)" },
+        { name = "ingestion_date", type = "date",   comment = "Dia em que o dado entrou na bronze" },
+        { name = "run_id",         type = "string", comment = "ID de execução/ingestão" },
+        { name = "generated_at",   type = "string", comment = "Timestamp de geração do relatório na origem" },
+        { name = "dataset",        type = "string", comment = "Dataset de origem (ex.: nome do property)" },
+        { name = "source",         type = "string", comment = "Fonte (ex.: google_search_console)" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "report_date"
+          type    = "date"
+          comment = "Dia do relatório no GSC (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+  }
 }
 
 module "tables" {
