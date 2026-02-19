@@ -83,3 +83,61 @@ module "glue_job_dim_campaign_s2g" {
     Type  = "dimension"
   })
 }
+
+# ============================================================
+# GOLD - DIM DEVICE (GSC)
+# ============================================================
+
+module "glue_job_dim_device_gsc_s2g" {
+  source = "../glue_job"
+
+  name          = "dim-device-gsc-s2g"
+  script_bucket = var.etls_bucket
+  script_key    = "glue/dimensions/dim_device_gsc.py"
+  temp_bucket   = var.etls_bucket
+
+  data_buckets = [
+    var.silver_bucket,
+    var.gold_bucket,
+  ]
+
+  use_vpc            = true
+  subnet_ids         = var.private_subnet_ids
+  security_group_ids = [local.glue_sg_id]
+
+  default_arguments = {}
+
+  tags = merge(var.common_tags, {
+    Layer = "gold"
+    Type  = "dimension"
+  })
+}
+
+# ============================================================
+# GOLD - DIM QUERY (GSC)
+# ============================================================
+
+module "glue_job_dim_query_gsc_s2g" {
+  source = "../glue_job"
+
+  name          = "dim-query-gsc-s2g"
+  script_bucket = var.etls_bucket
+  script_key    = "glue/dimensions/dim_query_gsc.py"
+  temp_bucket   = var.etls_bucket
+
+  data_buckets = [
+    var.silver_bucket,
+    var.gold_bucket,
+  ]
+
+  use_vpc            = true
+  subnet_ids         = var.private_subnet_ids
+  security_group_ids = [local.glue_sg_id]
+
+  default_arguments = {}
+
+  tags = merge(var.common_tags, {
+    Layer = "gold"
+    Type  = "dimension"
+  })
+}
