@@ -110,6 +110,26 @@ locals {
       ]
     }
 
+    # S2S: produtos Omie refinados (subset de colunas para análise)
+    omie_products_refined = {
+      description = "Produtos Omie refinados (S2S): subset de colunas (identificação, estoque, datas); particionado por ingestion_date."
+      location     = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_products_refined/"
+
+      columns = [
+        { name = "product_id",     type = "bigint",   comment = "ID interno do produto no Omie" },
+        { name = "product_code",   type = "string",  comment = "Código do produto" },
+        { name = "description",    type = "string",  comment = "Descrição do produto" },
+        { name = "stock_quantity", type = "double",  comment = "Quantidade em estoque" },
+        { name = "stock_minimum",  type = "double",  comment = "Estoque mínimo" },
+        { name = "created_at",     type = "timestamp", comment = "Data/hora de inclusão no Omie" },
+        { name = "updated_by",    type = "string",  comment = "Usuário da última alteração" }
+      ]
+
+      partition_keys = [
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão (YYYY-MM-DD)" }
+      ]
+    }
+
     omie_product_characteristics = {
       description = "Características de produtos do Omie (uma linha por produto x característica)."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_product_characteristics/"
@@ -640,6 +660,26 @@ locals {
 
       partition_keys = [
         { name = "created_date",   type = "string",        comment = "Partição alinhada com omie_documents (YYYY-MM-DD)" }
+      ]
+    }
+
+    # S2S: itens de documentos refinados (subset de colunas, partição ingestion_date)
+    omie_document_items_refined = {
+      description = "Itens de documentos Omie refinados (S2S): subset de colunas para análise; particionado por ingestion_date."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=document_items_refined/"
+
+      columns = [
+        { name = "document_id",    type = "string",        comment = "ID interno do documento (FK para omie_documents)" },
+        { name = "product_code",   type = "string",        comment = "Código do produto" },
+        { name = "product_name",   type = "string",        comment = "Descrição do produto" },
+        { name = "quantity",       type = "double",        comment = "Quantidade comercializada" },
+        { name = "unit_price",     type = "decimal(18,2)", comment = "Valor unitário" },
+        { name = "total_price",    type = "decimal(18,2)", comment = "Valor total do item" },
+        { name = "discount_value", type = "decimal(18,2)", comment = "Desconto no item" }
+      ]
+
+      partition_keys = [
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão (YYYY-MM-DD), derivada de created_date na origem" }
       ]
     }
 
