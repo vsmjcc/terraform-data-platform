@@ -675,7 +675,10 @@ locals {
         { name = "quantity",       type = "double",        comment = "Quantidade comercializada" },
         { name = "unit_price",     type = "decimal(18,2)", comment = "Valor unitário" },
         { name = "total_price",    type = "decimal(18,2)", comment = "Valor total do item" },
-        { name = "discount_value", type = "decimal(18,2)", comment = "Desconto no item" }
+        { name = "discount_value", type = "decimal(18,2)", comment = "Desconto no item" },
+        { name = "issue_datetime_raw", type = "string",   comment = "Data/hora de emissão no formato original da origem" },
+        { name = "issue_datetime",    type = "timestamp", comment = "Data/hora de emissão do documento" },
+        { name = "issue_date",         type = "date",      comment = "Data de emissão (YYYY-MM-DD)" }
       ]
 
       partition_keys = [
