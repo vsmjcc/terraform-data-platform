@@ -7,7 +7,7 @@ module "glue_job_ga4_sessions_fact_to_gold" {
 
   name          = "analytics-ga4-sessions-fact-s2g"
   script_bucket = var.etls_bucket
-  script_key    = "glue/analytics-ga4-sessions-fact-s2g.py"
+  script_key    = "glue/facts/analytics-ga4-sessions-fact-s2g.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [
