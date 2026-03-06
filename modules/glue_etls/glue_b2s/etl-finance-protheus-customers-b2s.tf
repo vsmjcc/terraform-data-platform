@@ -1,5 +1,5 @@
 module "glue_job_protheus_customers_b2s" {
-  source = "../glue_job"
+  source = "../../glue_job"
 
   name          = "finance-protheus-customers-b2s-glue"
 
@@ -14,7 +14,7 @@ module "glue_job_protheus_customers_b2s" {
 
   use_vpc            = true
   subnet_ids         = var.private_subnet_ids
-  security_group_ids = [local.glue_sg_id]
+  security_group_ids = [var.glue_sg_id]
 
   default_arguments = {}
 
