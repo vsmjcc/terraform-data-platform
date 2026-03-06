@@ -18,6 +18,10 @@ resource "aws_glue_catalog_database" "silver_erp" {
   name = "silver_erp"
 }
 
+resource "aws_glue_catalog_database" "silver_enriched" {
+  name = "silver_enriched"
+}
+
 resource "aws_glue_catalog_database" "silver_offline_analytics" {
   name = "silver_offline_analytics"
 }
@@ -83,6 +87,15 @@ module "silver_erp" {
   bucket        = var.silver_bucket
   database_name = aws_glue_catalog_database.silver_erp.name
   domain        = "silver_erp"
+}
+
+module "silver_enriched" {
+  source = "./silver_enriched"
+
+  environment   = var.environment
+  bucket        = var.silver_bucket
+  database_name = aws_glue_catalog_database.silver_enriched.name
+  domain        = "silver_enriched"
 }
 
 
