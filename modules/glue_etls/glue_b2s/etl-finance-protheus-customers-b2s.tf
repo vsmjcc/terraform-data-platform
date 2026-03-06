@@ -4,7 +4,7 @@ module "glue_job_protheus_customers_b2s" {
   name          = "finance-protheus-customers-b2s-glue"
 
   script_bucket = var.etls_bucket
-  script_key    = "glue/etl-glue-b2s/finance-protheus-customers-b2s-glue.py"
+  script_key    = "glue/glue-b2s/finance-protheus-customers-b2s-glue.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [
