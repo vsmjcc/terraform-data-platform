@@ -122,6 +122,7 @@ locals {
         { name = "stock_quantity", type = "double",  comment = "Quantidade em estoque" },
         { name = "stock_minimum",  type = "double",  comment = "Estoque mínimo" },
         { name = "created_at",     type = "timestamp", comment = "Data/hora de inclusão no Omie" },
+        { name = "launch_end_date",     type = "date", comment = "Data de fim do período no Omie" },
         { name = "updated_by",    type = "string",  comment = "Usuário da última alteração" }
       ]
 
