@@ -25,6 +25,7 @@ resource "aws_glue_job" "this" {
       "--TempDir"                          = "s3://${var.temp_bucket}/${var.temp_prefix}"
       "--enable-continuous-cloudwatch-log" = "true"
       "--enable-metrics"                   = "true"
+      "--enable-glue-datacatalog"          = "true"
       "--job-bookmark-option"              = "job-bookmark-enable"
       "--conf"                             = "spark.sql.sources.partitionOverwriteMode=dynamic"
     },
