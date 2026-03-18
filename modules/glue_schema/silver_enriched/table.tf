@@ -1,5 +1,40 @@
 locals {
-  tables = {}
+  tables = {
+    orders = {
+      description = "Orders Shopify refinadas (S2S Enriched) - Silver Enriched"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=orders/"
+      columns = [
+        { name = "order_id",          type = "string",        comment = "ID do pedido" },
+        { name = "created_at",        type = "timestamp",     comment = "Data/hora de criação" },
+        { name = "updated_at",        type = "timestamp",     comment = "Data/hora da última atualização" },
+        { name = "processed_at",      type = "timestamp",     comment = "Data/hora de processamento" },
+        { name = "cancelled_at",      type = "timestamp",     comment = "Data/hora de cancelamento" },
+        { name = "closed_at",         type = "timestamp",     comment = "Data/hora de fechamento" },
+
+        { name = "order_name",       type = "string",        comment = "Nome/identificador do pedido" },
+        { name = "order_number",     type = "bigint",        comment = "Número do pedido" },
+        { name = "number_internal",  type = "bigint",        comment = "Número interno" },
+
+        { name = "financial_status", type = "string",        comment = "Status financeiro" },
+        { name = "fulfillment_status", type = "string",      comment = "Status de fulfillment" },
+        { name = "confirmed",         type = "boolean",       comment = "Pedido confirmado" },
+
+        { name = "currency",           type = "string",       comment = "Moeda" },
+        { name = "subtotal_price",     type = "decimal(18,2)", comment = "Subtotal" },
+        { name = "total_price",        type = "decimal(18,2)", comment = "Total" },
+        { name = "total_discounts",    type = "decimal(18,2)", comment = "Total de descontos" },
+        { name = "current_total_discounts", type = "decimal(18,2)", comment = "Descontos atuais" },
+        { name = "current_total_price", type = "decimal(18,2)", comment = "Total atual" },
+
+        { name = "discount_codes",    type = "array<string>", comment = "Discount codes (estrutura original)" },
+        { name = "refunds",           type = "array<string>", comment = "Refunds (estrutura original)" }
+      ]
+
+      partition_keys = [
+        { name = "order_date", type = "date", comment = "Partição por data do pedido (YYYY-MM-DD)" }
+      ]
+    }
+  }
 }
 
 module "tables" {
