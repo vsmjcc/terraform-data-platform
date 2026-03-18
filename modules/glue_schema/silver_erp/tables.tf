@@ -875,6 +875,91 @@ locals {
           }
         }
       ]
+    }
+    
+    omie_customers = {
+      description = "Customers from Omie ERP refined in Silver (one row per customer, latest version by customer_key)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_customers/"
+
+      columns = [
+        # Source / lineage
+        { name = "domain",              type = "string",    comment = "Logical data domain from source envelope" },
+        { name = "source",              type = "string",    comment = "Source system name (omie)" },
+        { name = "dataset",             type = "string",    comment = "Dataset name from source envelope" },
+        { name = "run_id",              type = "string",    comment = "Ingestion run identifier" },
+        { name = "generated_at",        type = "string",    comment = "Source file generation timestamp from bronze envelope" },
+        { name = "source_cnpj",         type = "string",    comment = "Source company CNPJ used during extraction (matriz account)" },
+        { name = "source_date_from_br", type = "string",    comment = "Original extraction start date in Brazilian format (DD/MM/YYYY)" },
+        { name = "source_date_to_br",   type = "string",    comment = "Original extraction end date in Brazilian format (DD/MM/YYYY)" },
+        { name = "source_page_number",  type = "bigint",    comment = "Source page number from Omie pagination" },
+        { name = "source_total_pages",  type = "bigint",    comment = "Total number of pages informed by Omie for the extraction" },
+
+        # Customer identifiers
+        { name = "customer_key",            type = "string",    comment = "Business key used for deduplication (coalesce of Omie ID, integration ID, document or email)" },
+        { name = "customer_omie_id",        type = "string",    comment = "Internal customer identifier in Omie" },
+        { name = "customer_integration_id", type = "string",    comment = "Customer integration identifier from Omie" },
+        { name = "customer_document",       type = "string",    comment = "Customer CPF or CNPJ digits only" },
+
+        # Customer profile
+        { name = "customer_name",           type = "string",    comment = "Customer legal name / full name" },
+        { name = "customer_trade_name",     type = "string",    comment = "Customer trade name / short name" },
+        { name = "customer_person_type",    type = "string",    comment = "Customer person type (PF or PJ)" },
+        { name = "customer_email",          type = "string",    comment = "Customer e-mail in lowercase" },
+        { name = "customer_contact_name",   type = "string",    comment = "Customer contact name" },
+
+        # Contact
+        { name = "customer_phone_area_code", type = "string",   comment = "Phone area code (DDD)" },
+        { name = "customer_phone_number",    type = "string",   comment = "Phone number digits only" },
+
+        # Address
+        { name = "address_street",          type = "string",    comment = "Street / address line" },
+        { name = "address_number",          type = "string",    comment = "Address number" },
+        { name = "address_complement",      type = "string",    comment = "Address complement" },
+        { name = "address_neighborhood",    type = "string",    comment = "Address neighborhood" },
+        { name = "address_city",            type = "string",    comment = "Address city" },
+        { name = "address_state",           type = "string",    comment = "Address state (UF)" },
+        { name = "address_zipcode",         type = "string",    comment = "ZIP code digits only" },
+        { name = "address_country_code",    type = "string",    comment = "Country code from Omie" },
+        { name = "city_code",               type = "string",    comment = "IBGE city code" },
+
+        # Registrations
+        { name = "state_registration",      type = "string",    comment = "State registration" },
+        { name = "municipal_registration",  type = "string",    comment = "Municipal registration" },
+
+        # Status flags
+        { name = "is_inactive",             type = "boolean",   comment = "Whether customer is inactive in Omie" },
+        { name = "is_billing_blocked",      type = "boolean",   comment = "Whether customer billing is blocked" },
+        { name = "is_delete_blocked",       type = "boolean",   comment = "Whether customer deletion is blocked" },
+        { name = "is_foreign",              type = "boolean",   comment = "Whether customer is foreign" },
+        { name = "send_attachments",        type = "boolean",   comment = "Whether attachments should be sent" },
+        { name = "is_imported_via_api",     type = "boolean",   comment = "Whether customer was imported via API" },
+
+        # ERP timestamps / authorship
+        { name = "created_at_erp",          type = "timestamp", comment = "Customer creation timestamp in Omie ERP" },
+        { name = "updated_at_erp",          type = "timestamp", comment = "Customer last update timestamp in Omie ERP" },
+        { name = "created_by_erp",          type = "string",    comment = "User that created the customer in Omie" },
+        { name = "updated_by_erp",          type = "string",    comment = "User that last updated the customer in Omie" },
+        { name = "created_date",            type = "date",      comment = "Date portion of created_at_erp" },
+        { name = "updated_date",            type = "date",      comment = "Date portion of updated_at_erp" },
+
+        # Tags
+        { name = "customer_tags",           type = "string",    comment = "Customer tags concatenated by pipe" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Ingestion date of the refined Omie customers batch (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
     }   
 
   }
