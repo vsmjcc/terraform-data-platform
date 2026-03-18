@@ -824,10 +824,61 @@ locals {
       ]
     }
 
+    omie_stocks = {
+      description = "Snapshot de estoque do Omie por produto, local de estoque e data de posição."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_stocks/"
+
+      columns = [
+        # Identificação do produto
+        { name = "product_id",          type = "bigint",    comment = "ID interno do produto no Omie (produto.nCodProd)" },
+        { name = "product_code",        type = "string",    comment = "Código do produto (produto.cCodigo)" },
+        { name = "product_description", type = "string",    comment = "Descrição do produto (produto.cDescricao)" },
+        { name = "unit",                type = "string",    comment = "Unidade do produto (produto.cUnidade)" },
+
+        # Métricas de estoque
+        { name = "stock_balance",       type = "double",    comment = "Saldo em estoque (produto.nSaldo)" },
+        { name = "reserved_stock",      type = "double",    comment = "Estoque reservado (produto.nSaldoReservado)" },
+        { name = "available_stock",     type = "double",    comment = "Estoque disponível (produto.nSaldoDisponivel)" },
+        { name = "blocked_stock",       type = "double",    comment = "Estoque bloqueado (produto.nSaldoBloqueado)" },
+        { name = "in_transit_stock",    type = "double",    comment = "Estoque em trânsito (produto.nSaldoEmTransito)" },
+
+        # Valores
+        { name = "stock_value",         type = "double",    comment = "Valor do estoque (produto.nValorEstoque)" },
+        { name = "average_cost",        type = "double",    comment = "Custo médio (produto.nCustoMedio)" },
+        { name = "sale_price",          type = "double",    comment = "Preço de venda (produto.nPrecoVenda)" },
+
+        # Local de estoque
+        { name = "warehouse_location_id",   type = "bigint", comment = "ID do local de estoque (_local_estoque.codigo_local_estoque ou produto.nCodLocalEstoque)" },
+        { name = "warehouse_location_code", type = "string", comment = "Código do local de estoque (_local_estoque.codigo ou produto.cCodLocalEstoque)" },
+
+        # Data de posição
+        { name = "position_date",       type = "date",      comment = "Data da posição do estoque, derivada de date_range_br.start, produto.dDataPosicao ou ingestion_date" },
+
+        # Metadados
+        { name = "run_id",              type = "string",    comment = "Identificador da execução de ingestão" },
+        { name = "generated_at",        type = "timestamp", comment = "Timestamp de geração do payload bruto" },
+        { name = "source_cnpj",         type = "string",    comment = "CNPJ da empresa no Omie" },
+        { name = "source_system",       type = "string",    comment = "Sistema de origem, fixado como omie" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Data de ingestão do snapshot de estoque (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }   
+
   }
 }
-
-
 
 
 module "tables" {
