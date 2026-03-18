@@ -51,7 +51,7 @@ locals {
     }
 
     orders = {
-      description = "Pedidos do e-commerce (Shopify), normalizados."
+      description = "Pedidos de e-commerce (Shopify), normalizados."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=orders/"
       columns = [
         # chaves e datas
