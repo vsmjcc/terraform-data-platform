@@ -52,7 +52,7 @@ locals {
 
     orders = {
       description = "Pedidos de e-commerce (Shopify), normalizados."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=orders/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/orders/"
       columns = [
         # chaves e datas
         { name = "order_id",        type = "string",    comment = "ID do pedido (Shopify, como string)" },
@@ -133,7 +133,7 @@ locals {
 
     order_items = {
       description = "Itens dos pedidos do e-commerce (Shopify)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_items/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/order_items/"
       columns = [
         { name = "order_id",      type = "string",        comment = "ID do pedido" },
         { name = "currency",      type = "string",        comment = "Moeda" },
@@ -163,7 +163,7 @@ locals {
 
     order_customers = {
       description = "Clientes associados aos pedidos (Shopify)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_customers/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/order_customers/"
       columns = [
         { name = "order_id",          type = "string",        comment = "ID do pedido" },
         { name = "customer_id",       type = "string",        comment = "ID do cliente" },
@@ -186,7 +186,7 @@ locals {
 
     order_addresses = {
       description = "Endereços de billing/shipping dos pedidos (Shopify)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_addresses/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/order_addresses/"
       columns = [
         { name = "order_id",      type = "string", comment = "ID do pedido" },
         { name = "address_type",  type = "string", comment = "Tipo de endereço (shipping/billing)" },
@@ -213,7 +213,7 @@ locals {
 
     order_discount_codes = {
       description = "Códigos de desconto aplicados nos pedidos."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_discount_codes/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/order_discount_codes/"
       columns = [
         { name = "order_id",   type = "string",        comment = "ID do pedido" },
         { name = "code_pos",   type = "int",           comment = "Posição do código" },
@@ -228,7 +228,7 @@ locals {
 
     order_discount_applications = {
       description = "Aplicações de desconto (discount_applications) por pedido."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_discount_applications/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/order_discount_applications/"
       columns = [
         { name = "order_id",   type = "string",        comment = "ID do pedido" },
         { name = "app_pos",    type = "int",           comment = "Posição da aplicação" },
@@ -248,7 +248,7 @@ locals {
 
     order_payments = {
       description = "Pagamentos associados aos pedidos (gateway names)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_payments/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/order_payments/"
       columns = [
         { name = "order_id",   type = "string", comment = "ID do pedido" },
         { name = "currency",   type = "string", comment = "Moeda" },
@@ -262,7 +262,7 @@ locals {
 
     order_fulfillments = {
       description = "Fulfillments (envios) por pedido."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_fulfillments/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/order_fulfillments/"
       columns = [
         { name = "order_id",         type = "string",    comment = "ID do pedido" },
         { name = "fulfillment_pos",  type = "int",       comment = "Posição do fulfillment" },
@@ -287,7 +287,7 @@ locals {
 
     order_fulfillment_items = {
       description = "Itens dos fulfillments de pedidos."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_fulfillment_items/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/order_fulfillment_items/"
       columns = [
         { name = "order_id",        type = "string",        comment = "ID do pedido" },
         { name = "fulfillment_id",  type = "string",        comment = "ID do fulfillment" },
