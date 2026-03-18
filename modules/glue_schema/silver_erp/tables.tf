@@ -110,6 +110,27 @@ locals {
       ]
     }
 
+    # S2S: produtos Omie refinados (subset de colunas para análise)
+    omie_products_refined = {
+      description = "Produtos Omie refinados (S2S): subset de colunas (identificação, estoque, datas); particionado por ingestion_date."
+      location     = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_products_refined/"
+
+      columns = [
+        { name = "product_id",     type = "bigint",   comment = "ID interno do produto no Omie" },
+        { name = "product_code",   type = "string",  comment = "Código do produto" },
+        { name = "description",    type = "string",  comment = "Descrição do produto" },
+        { name = "stock_quantity", type = "double",  comment = "Quantidade em estoque" },
+        { name = "stock_minimum",  type = "double",  comment = "Estoque mínimo" },
+        { name = "created_at",     type = "timestamp", comment = "Data/hora de inclusão no Omie" },
+        { name = "launch_end_date",     type = "date", comment = "Data de fim do período no Omie" },
+        { name = "updated_by",    type = "string",  comment = "Usuário da última alteração" }
+      ]
+
+      partition_keys = [
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão (YYYY-MM-DD)" }
+      ]
+    }
+
     omie_product_characteristics = {
       description = "Características de produtos do Omie (uma linha por produto x característica)."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_product_characteristics/"
@@ -643,10 +664,221 @@ locals {
       ]
     }
 
+    # S2S: itens de documentos refinados (subset de colunas, partição ingestion_date)
+    omie_document_items_refined = {
+      description = "Itens de documentos Omie refinados (S2S): subset de colunas para análise; particionado por ingestion_date."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=document_items_refined/"
+
+      columns = [
+        { name = "document_id",    type = "string",        comment = "ID interno do documento (FK para omie_documents)" },
+        { name = "product_code",   type = "string",        comment = "Código do produto" },
+        { name = "product_name",   type = "string",        comment = "Descrição do produto" },
+        { name = "quantity",       type = "double",        comment = "Quantidade comercializada" },
+        { name = "unit_price",     type = "decimal(18,2)", comment = "Valor unitário" },
+        { name = "total_price",    type = "decimal(18,2)", comment = "Valor total do item" },
+        { name = "discount_value", type = "decimal(18,2)", comment = "Desconto no item" },
+        { name = "issue_datetime_raw", type = "string",   comment = "Data/hora de emissão no formato original da origem" },
+        { name = "issue_datetime",    type = "timestamp", comment = "Data/hora de emissão do documento" },
+        { name = "issue_date",         type = "date",      comment = "Data de emissão (YYYY-MM-DD)" }
+      ]
+
+      partition_keys = [
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão (YYYY-MM-DD), derivada de created_date na origem" }
+      ]
+    }
+
+        protheus_customers = {
+      description = "Cadastro de clientes do Protheus (SA1010) normalizado para consumo analítico."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=protheus/dataset=protheus_customers/"
+
+      columns = [
+        { name = "source",                 type = "string",   comment = "Sistema de origem (protheus)" },
+        { name = "dataset",                type = "string",   comment = "Dataset lógico (customers)" },
+
+        { name = "customer_document",      type = "string",   comment = "CPF/CNPJ normalizado (somente dígitos)" },
+        { name = "customer_name",          type = "string",   comment = "Nome do cliente" },
+        { name = "customer_name_short",    type = "string",   comment = "Nome reduzido" },
+        { name = "customer_type",          type = "string",   comment = "Tipo pessoa (A1_PESSOA)" },
+
+        { name = "email",                  type = "string",   comment = "Email do cliente" },
+        { name = "phone_country_code",     type = "string",   comment = "DDI" },
+        { name = "phone_area_code",        type = "string",   comment = "DDD" },
+        { name = "phone_number",           type = "string",   comment = "Telefone" },
+
+        { name = "address_street",         type = "string",   comment = "Logradouro" },
+        { name = "address_complement",     type = "string",   comment = "Complemento" },
+        { name = "address_neighborhood",   type = "string",   comment = "Bairro" },
+        { name = "address_city",           type = "string",   comment = "Município" },
+        { name = "address_state",          type = "string",   comment = "UF" },
+        { name = "address_zipcode",        type = "string",   comment = "CEP (somente dígitos)" },
+        { name = "address_country",        type = "string",   comment = "País" },
+        { name = "address_country_code",   type = "string",   comment = "Código do país" },
+        { name = "city_code",              type = "string",   comment = "Código do município (A1_COD_MUN)" },
+
+        { name = "customer_profile",       type = "string",   comment = "Perfil (A1_PERFIL)" },
+        { name = "customer_class",         type = "string",   comment = "Classe (A1_TIPCLI)" },
+
+        { name = "created_at_erp",         type = "date",     comment = "Data de cadastro no ERP (A1_DTCAD)" },
+        { name = "created_time_erp",       type = "string",   comment = "Hora de cadastro no ERP (A1_HRCAD)" },
+        { name = "first_purchase_date_erp",type = "date",     comment = "Primeira compra (A1_PRICOM)" },
+        { name = "last_purchase_date_erp", type = "date",     comment = "Última compra (A1_ULTCOM)" },
+
+        { name = "customer_code",          type = "string",   comment = "Código do cliente no Protheus (A1_COD)" },
+        { name = "customer_store",         type = "string",   comment = "Loja do cliente no Protheus (A1_LOJA)" },
+        { name = "branch",                 type = "string",   comment = "Filial (A1_FILIAL)" },
+
+        { name = "is_deleted",             type = "boolean",  comment = "Registro marcado como deletado (D_E_L_E_T_='*')" },
+        { name = "recno",                  type = "bigint",   comment = "R_E_C_N_O_" },
+        { name = "recdel",                 type = "bigint",   comment = "R_E_C_D_E_L_" },
+        { name = "updated_at_erp",         type = "timestamp",comment = "Timestamp técnico do Protheus (S_T_A_M_P_)" },
+      ]
+
+      partition_keys = [
+        {
+          name    = "created_date"
+          type    = "date"
+          comment = "Data da partição (derivada da ingestion_date da bronze)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    protheus_nf_out = {
+      description = "Notas fiscais de saída (cabeçalho) do Protheus (SF2010) normalizadas."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=protheus/dataset=protheus_nf_out/"
+
+      columns = [
+        { name = "source",         type = "string",   comment = "Sistema de origem (protheus)" },
+        { name = "dataset",        type = "string",   comment = "Dataset lógico (nf_out)" },
+
+        { name = "nf_number",      type = "string",   comment = "Número da NF (F2_DOC)" },
+        { name = "nf_series",      type = "string",   comment = "Série da NF (F2_SERIE)" },
+        { name = "nf_key",         type = "string",   comment = "Chave da NF-e (F2_CHVNFE)" },
+
+        { name = "customer_code",  type = "string",   comment = "Cliente (F2_CLIENTE)" },
+        { name = "customer_store", type = "string",   comment = "Loja do cliente (F2_LOJA)" },
+
+        { name = "issue_date",     type = "date",     comment = "Data de emissão (F2_EMISSAO)" },
+        { name = "total_gross",    type = "double",   comment = "Valor bruto (F2_VALBRUT)" },
+        { name = "freight_value",  type = "double",   comment = "Frete (F2_FRETE)" },
+      ]
+
+      partition_keys = [
+        {
+          name    = "created_date"
+          type    = "date"
+          comment = "Data da partição (derivada da ingestion_date da bronze)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    protheus_nf_out_items = {
+      description = "Notas fiscais de saída (itens) do Protheus (SD2010) normalizadas."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=protheus/dataset=protheus_nf_out_items/"
+
+      columns = [
+        { name = "source",        type = "string", comment = "Sistema de origem (protheus)" },
+        { name = "dataset",       type = "string", comment = "Dataset lógico (nf_out_items)" },
+
+        { name = "nf_number",     type = "string", comment = "Número da NF (D2_DOC)" },
+        { name = "nf_series",     type = "string", comment = "Série da NF (D2_SERIE)" },
+        { name = "item_number",   type = "int",    comment = "Número do item (D2_ITEM)" },
+
+        { name = "product_code",  type = "string", comment = "Código do produto (D2_COD)" },
+        { name = "cfop",          type = "string", comment = "CFOP (D2_CF)" },
+
+        { name = "quantity",      type = "double", comment = "Quantidade (D2_QUANT)" },
+        { name = "unit_price",    type = "double", comment = "Preço unitário (D2_PRUNIT)" },
+        { name = "discount_value",type = "double", comment = "Desconto (D2_DESCON)" },
+        { name = "total_value",   type = "double", comment = "Total do item (D2_TOTAL)" },
+
+        { name = "issue_date",    type = "date",   comment = "Data de emissão (D2_EMISSAO)" },
+      ]
+
+      partition_keys = [
+        {
+          name    = "created_date"
+          type    = "date"
+          comment = "Data da partição (derivada da ingestion_date da bronze)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    omie_stocks = {
+      description = "Snapshot de estoque do Omie por produto, local de estoque e data de posição."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_stocks/"
+
+      columns = [
+        # Identificação do produto
+        { name = "product_id",          type = "bigint",    comment = "ID interno do produto no Omie (produto.nCodProd)" },
+        { name = "product_code",        type = "string",    comment = "Código do produto (produto.cCodigo)" },
+        { name = "product_description", type = "string",    comment = "Descrição do produto (produto.cDescricao)" },
+        { name = "unit",                type = "string",    comment = "Unidade do produto (produto.cUnidade)" },
+
+        # Métricas de estoque
+        { name = "stock_balance",       type = "double",    comment = "Saldo em estoque (produto.nSaldo)" },
+        { name = "reserved_stock",      type = "double",    comment = "Estoque reservado (produto.nSaldoReservado)" },
+        { name = "available_stock",     type = "double",    comment = "Estoque disponível (produto.nSaldoDisponivel)" },
+        { name = "blocked_stock",       type = "double",    comment = "Estoque bloqueado (produto.nSaldoBloqueado)" },
+        { name = "in_transit_stock",    type = "double",    comment = "Estoque em trânsito (produto.nSaldoEmTransito)" },
+
+        # Valores
+        { name = "stock_value",         type = "double",    comment = "Valor do estoque (produto.nValorEstoque)" },
+        { name = "average_cost",        type = "double",    comment = "Custo médio (produto.nCustoMedio)" },
+        { name = "sale_price",          type = "double",    comment = "Preço de venda (produto.nPrecoVenda)" },
+
+        # Local de estoque
+        { name = "warehouse_location_id",   type = "bigint", comment = "ID do local de estoque (_local_estoque.codigo_local_estoque ou produto.nCodLocalEstoque)" },
+        { name = "warehouse_location_code", type = "string", comment = "Código do local de estoque (_local_estoque.codigo ou produto.cCodLocalEstoque)" },
+
+        # Data de posição
+        { name = "position_date",       type = "date",      comment = "Data da posição do estoque, derivada de date_range_br.start, produto.dDataPosicao ou ingestion_date" },
+
+        # Metadados
+        { name = "run_id",              type = "string",    comment = "Identificador da execução de ingestão" },
+        { name = "generated_at",        type = "timestamp", comment = "Timestamp de geração do payload bruto" },
+        { name = "source_cnpj",         type = "string",    comment = "CNPJ da empresa no Omie" },
+        { name = "source_system",       type = "string",    comment = "Sistema de origem, fixado como omie" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Data de ingestão do snapshot de estoque (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }   
+
   }
 }
-
-
 
 
 module "tables" {

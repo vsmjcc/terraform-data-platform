@@ -110,6 +110,104 @@ module "shopify_customers_lambda" {
   }
 }
 
+module "invoice_search_lambda" {
+  source             = "../lambda_function"
+  function_name      = "invoice-search"
+  handler            = "main.handler"
+  runtime            = "python3.11"
+  timeout            = 10
+  memory_size        = 128
+
+  # === CHAPADO DEV ===
+  s3_bucket          = "zrzs-dev-packages"
+  s3_key             = "empty-lambda.zip"
+
+  enable_http_api      = true
+  public_access        = true
+  enable_custom_domain = true
+  dns_zone_id          = var.dns_zones["data_zerezes"].zone_id
+  dns_certificate_arn  = var.dns_zones["data_zerezes"].certificate_arn
+
+  environment          = var.environment
+  region               = var.region
+
+  # === ENV VARS CHAPADAS DEV ===
+  environment_variables = {
+    STAGE     = "dev"
+    LOG_LEVEL = "debug"
+
+    ATHENA_DATABASE   = "silver_erp"
+    ATHENA_WORKGROUP  = "primary"
+    ATHENA_OUTPUT_S3  = "s3://zrzs-dev-athena-results/invoice-search/"
+
+    DOCS_TABLE        = "omie_documents"
+    ITEMS_TABLE       = "omie_document_items"
+    PAYMENTS_TABLE    = "omie_document_payments"
+
+    DEFAULT_PAGE_SIZE = "50"
+    MAX_PAGE_SIZE     = "200"
+
+    API_KEY            = "d9a59303-6fce-4a19-9438-4fe8be44ee11"
+    API_KEY_PARAM_NAME = "api_key"
+  }
+
+  # === PERMISSÕES CHAPADAS DEV (Athena + Glue + S3 results + S3 silver) ===
+  inline_policies = {
+    "invoice-search-athena-glue-s3-dev" = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Sid    = "AthenaRunQueries"
+          Effect = "Allow"
+          Action = [
+            "athena:StartQueryExecution",
+            "athena:GetQueryExecution",
+            "athena:GetQueryResults",
+            "athena:GetWorkGroup"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "GlueCatalogRead"
+          Effect = "Allow"
+          Action = [
+            "glue:GetDatabase",
+            "glue:GetDatabases",
+            "glue:GetTable",
+            "glue:GetTables",
+            "glue:GetPartition",
+            "glue:GetPartitions"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "S3AthenaResultsBucket"
+          Effect = "Allow"
+          Action = ["s3:ListBucket", "s3:GetBucketLocation"]
+          Resource = "arn:aws:s3:::zrzs-dev-athena-results"
+        },
+        {
+          Sid    = "S3AthenaResultsObjects"
+          Effect = "Allow"
+          Action = ["s3:GetObject", "s3:PutObject"]
+          Resource = "arn:aws:s3:::zrzs-dev-athena-results/*"
+        },
+        {
+          Sid    = "S3SilverBucket"
+          Effect = "Allow"
+          Action = ["s3:ListBucket", "s3:GetBucketLocation"]
+          Resource = "arn:aws:s3:::zrzs-dev-data-lake-silver"
+        },
+        {
+          Sid    = "S3SilverReadAll"
+          Effect = "Allow"
+          Action = ["s3:GetObject"]
+          Resource = "arn:aws:s3:::zrzs-dev-data-lake-silver/*"
+        }
+      ]
+    })
+  }
+}
 
 module "airflow_dags_sync_lambda" {
   source             = "../lambda_function"
@@ -149,6 +247,8 @@ locals {
     shopify_orders    = module.shopify_orders_lambda
     shopify_products  = module.shopify_products_lambda
     shopify_customers = module.shopify_customers_lambda
+    invoice_search    = module.invoice_search_lambda
+    
     # airflow_dags_sync = module.airflow_dags_sync_lambda
   }
 }

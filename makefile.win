@@ -1,0 +1,79 @@
+# Makefile.win - Terraform Data Platform (Windows/PowerShell)
+#
+# uso:
+#   make -f Makefile.win login-dev
+#   make -f Makefile.win init-dev
+#   make -f Makefile.win plan-dev
+#   make -f Makefile.win apply-dev
+
+AWS_PROFILE_DEV=zerezes-data-dev
+AWS_PROFILE_PROD=zerezes-data-prod
+
+TFVARS_DEV=envs/dev/main.tfvars
+TFVARS_PROD=envs/prod/main.tfvars
+
+BACKEND_DEV=envs/dev/backend-dev.hcl
+BACKEND_PROD=envs/prod/backend-prod.hcl
+
+POWERSHELL=powershell -NoProfile -ExecutionPolicy Bypass -Command
+
+##########
+# Dev
+##########
+
+login-dev:
+	aws sso login --profile $(AWS_PROFILE_DEV)
+
+init-dev:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_DEV)'; terraform init -backend-config \"$(BACKEND_DEV)\" -reconfigure"
+
+plan-dev:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_DEV)'; terraform plan -var-file \"$(TFVARS_DEV)\""
+
+apply-dev:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_DEV)'; terraform apply -var-file \"$(TFVARS_DEV)\""
+
+destroy-dev:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_DEV)'; terraform destroy -var-file \"$(TFVARS_DEV)\""
+
+refresh-dev:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_DEV)'; terraform refresh -var-file \"$(TFVARS_DEV)\""
+
+##########
+# Prod
+##########
+
+login-prod:
+	aws sso login --profile $(AWS_PROFILE_PROD)
+
+init-prod:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_PROD)'; terraform init -backend-config \"$(BACKEND_PROD)\" -reconfigure"
+
+plan-prod:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_PROD)'; terraform plan -var-file \"$(TFVARS_PROD)\""
+
+apply-prod:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_PROD)'; terraform apply -var-file \"$(TFVARS_PROD)\""
+
+destroy-prod:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_PROD)'; terraform destroy -var-file \"$(TFVARS_PROD)\""
+
+refresh-prod:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_PROD)'; terraform refresh -var-file \"$(TFVARS_PROD)\""
+
+##########
+# Geral
+##########
+
+validate:
+	terraform validate
+
+fmt:
+	terraform fmt -recursive
+
+# (opcional) mostrar qual profile está sendo usado
+whoami-dev:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_DEV)'; aws sts get-caller-identity"
+
+whoami-prod:
+	$(POWERSHELL) "$$env:AWS_PROFILE='$(AWS_PROFILE_PROD)'; aws sts get-caller-identity"

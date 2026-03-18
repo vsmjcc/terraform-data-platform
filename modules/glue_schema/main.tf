@@ -18,6 +18,10 @@ resource "aws_glue_catalog_database" "silver_erp" {
   name = "silver_erp"
 }
 
+resource "aws_glue_catalog_database" "silver_enriched" {
+  name = "silver_enriched"
+}
+
 resource "aws_glue_catalog_database" "silver_offline_analytics" {
   name = "silver_offline_analytics"
 }
@@ -30,6 +34,17 @@ resource "aws_glue_catalog_database" "gold_cx" {
   name = "gold_cx"
 }
 
+resource "aws_glue_catalog_database" "gold_analytics" {
+  name = "gold_analytics"
+}
+
+resource "aws_glue_catalog_database" "gold_marketing" {
+  name = "gold_marketing"
+}
+
+resource "aws_glue_catalog_database" "gold" {
+  name = "gold"
+}
 
 
 module "silver_cx" {
@@ -78,6 +93,15 @@ module "silver_erp" {
   domain        = "silver_erp"
 }
 
+module "silver_enriched" {
+  source = "./silver_enriched"
+
+  environment   = var.environment
+  bucket        = var.silver_bucket
+  database_name = aws_glue_catalog_database.silver_enriched.name
+  domain        = "silver_enriched"
+}
+
 
 module "silver_offline_analytics" {
   source = "./silver_offline_analytics"
@@ -107,4 +131,30 @@ module "gold_cx" {
   domain        = "customer_experience"
 }
 
+module "gold_analytics" {
+  source = "./gold_analytics"
+
+  environment   = var.environment
+  bucket        = var.gold_bucket
+  database_name = aws_glue_catalog_database.gold_analytics.name
+  domain        = "analytics"
+}
+
+module "gold_marketing" {
+  source = "./gold_marketing"
+
+  environment   = var.environment
+  bucket        = var.gold_bucket
+  database_name = aws_glue_catalog_database.gold_marketing.name
+  domain        = "marketing"
+}
+
+module "gold" {
+  source = "./gold"
+
+  environment   = var.environment
+  bucket        = var.gold_bucket
+  database_name = aws_glue_catalog_database.gold.name
+  domain        = "gold"
+}
 

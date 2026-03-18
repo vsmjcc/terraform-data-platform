@@ -67,6 +67,16 @@ output "dns_info" {
   value       = module.dns.dns_zones
 }
 
+output "zextract_table_name" {
+  value = module.zextract_watermarks.table_name
+}
+
+output "zextract_table_arn" {
+  value = module.zextract_watermarks.table_arn
+}
+
+
+
 # output "superset_https_url" {
 #   value       = module.ec2_superset.https_url
 # }
