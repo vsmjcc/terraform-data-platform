@@ -56,7 +56,6 @@ locals {
       columns = [
         # chaves e datas
         { name = "order_id",        type = "string",    comment = "ID do pedido (Shopify, como string)" },
-        { name = "order_date",      type = "date",      comment = "Data do pedido (derivada de created_ts)" },
         { name = "created_at",      type = "timestamp", comment = "Data/hora de criação" },
         { name = "updated_at",      type = "timestamp", comment = "Data/hora da última atualização" },
         { name = "processed_at",    type = "timestamp", comment = "Data/hora de processamento" },
@@ -137,7 +136,6 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_items/"
       columns = [
         { name = "order_id",      type = "string",        comment = "ID do pedido" },
-        { name = "order_date",    type = "date",          comment = "Data do pedido" },
         { name = "currency",      type = "string",        comment = "Moeda" },
         { name = "item_pos",      type = "int",           comment = "Posição do item na lista" },
         { name = "item_id",       type = "string",        comment = "ID do item" },
@@ -168,7 +166,6 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_customers/"
       columns = [
         { name = "order_id",          type = "string",        comment = "ID do pedido" },
-        { name = "order_date",        type = "date",          comment = "Data do pedido" },
         { name = "customer_id",       type = "string",        comment = "ID do cliente" },
         { name = "email",             type = "string",        comment = "Email" },
         { name = "first_name",        type = "string",        comment = "Primeiro nome" },
@@ -192,7 +189,6 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_addresses/"
       columns = [
         { name = "order_id",      type = "string", comment = "ID do pedido" },
-        { name = "order_date",    type = "date",   comment = "Data do pedido" },
         { name = "address_type",  type = "string", comment = "Tipo de endereço (shipping/billing)" },
         { name = "name",          type = "string", comment = "Nome completo" },
         { name = "first_name",    type = "string", comment = "Primeiro nome" },
@@ -220,7 +216,6 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_discount_codes/"
       columns = [
         { name = "order_id",   type = "string",        comment = "ID do pedido" },
-        { name = "order_date", type = "date",          comment = "Data do pedido" },
         { name = "code_pos",   type = "int",           comment = "Posição do código" },
         { name = "code",       type = "string",        comment = "Código de desconto" },
         { name = "type",       type = "string",        comment = "Tipo de desconto" },
@@ -236,7 +231,6 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_discount_applications/"
       columns = [
         { name = "order_id",   type = "string",        comment = "ID do pedido" },
-        { name = "order_date", type = "date",          comment = "Data do pedido" },
         { name = "app_pos",    type = "int",           comment = "Posição da aplicação" },
         { name = "type",       type = "string",        comment = "Tipo" },
         { name = "value",      type = "decimal(18,2)", comment = "Valor" },
@@ -257,7 +251,6 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_payments/"
       columns = [
         { name = "order_id",   type = "string", comment = "ID do pedido" },
-        { name = "order_date", type = "date",   comment = "Data do pedido" },
         { name = "currency",   type = "string", comment = "Moeda" },
         { name = "payment_pos",type = "int",    comment = "Posição do gateway" },
         { name = "gateway",    type = "string", comment = "Nome do gateway" }
@@ -272,7 +265,6 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_fulfillments/"
       columns = [
         { name = "order_id",         type = "string",    comment = "ID do pedido" },
-        { name = "order_date",       type = "date",      comment = "Data do pedido" },
         { name = "fulfillment_pos",  type = "int",       comment = "Posição do fulfillment" },
         { name = "fulfillment_id",   type = "string",    comment = "ID do fulfillment" },
         { name = "created_at",       type = "timestamp", comment = "Criação do fulfillment" },
@@ -298,7 +290,6 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_fulfillment_items/"
       columns = [
         { name = "order_id",        type = "string",        comment = "ID do pedido" },
-        { name = "order_date",      type = "date",          comment = "Data do pedido" },
         { name = "fulfillment_id",  type = "string",        comment = "ID do fulfillment" },
         { name = "fulfillment_pos", type = "int",           comment = "Posição do fulfillment" },
         { name = "line_pos",        type = "int",           comment = "Posição da linha" },
