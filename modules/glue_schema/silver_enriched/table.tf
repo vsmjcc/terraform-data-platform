@@ -26,8 +26,9 @@ locals {
         { name = "current_total_discounts", type = "decimal(18,2)", comment = "Descontos atuais" },
         { name = "current_total_price", type = "decimal(18,2)", comment = "Total atual" },
 
-        { name = "discount_codes",    type = "array<string>", comment = "Discount codes (estrutura original)" },
-        { name = "refunds",           type = "array<string>", comment = "Refunds (estrutura original)" }
+        # Esses campos são persistidos como JSON (string) pelo ETL B2S.
+        { name = "discount_codes",    type = "string", comment = "discount_codes em JSON (string)" },
+        { name = "refunds",           type = "string", comment = "refunds em JSON (string)" }
       ]
 
       partition_keys = [

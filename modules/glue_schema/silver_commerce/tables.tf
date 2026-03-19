@@ -119,12 +119,13 @@ locals {
         { name = "order_status_url",          type = "string", comment = "URL de status do pedido" },
 
         # arrays/structs
-        { name = "discount_codes",            type = "array<string>", comment = "Discount codes (estrutura original serializada)" },
-        { name = "discount_applications",     type = "array<string>", comment = "Discount applications (estrutura original serializada)" },
-        { name = "shipping_lines",            type = "array<string>", comment = "Shipping lines (estrutura original serializada)" },
-        { name = "fulfillments",              type = "array<string>", comment = "Fulfillments (estrutura original serializada)" },
-        { name = "refunds",                   type = "array<string>", comment = "Refunds (estrutura original serializada)" },
-        { name = "tax_lines",                 type = "array<string>", comment = "Tax lines (estrutura original serializada)" }
+        # Persistidos como JSON string no ETL (commerce-shopify-orders-b2s-refine.py).
+        { name = "discount_codes",            type = "string", comment = "discount_codes em JSON (string)" },
+        { name = "discount_applications",     type = "string", comment = "discount_applications em JSON (string)" },
+        { name = "shipping_lines",            type = "string", comment = "shipping_lines em JSON (string)" },
+        { name = "fulfillments",              type = "string", comment = "fulfillments em JSON (string)" },
+        { name = "refunds",                   type = "string", comment = "refunds em JSON (string)" },
+        { name = "tax_lines",                 type = "string", comment = "tax_lines em JSON (string)" }
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
