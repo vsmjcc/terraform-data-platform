@@ -434,6 +434,49 @@ module "zextract_watermarks" {
   }
 }
 
+module "quicksight" {
+  source = "./modules/quicksight"
+
+  environment        = var.environment
+  account_name       = "zerezes-bi-dev"
+  notification_email = "data-notifications@zerezes.com.br"
+
+  create_account_subscription = true
+  create_account_settings     = false
+
+  authentication_method = "IAM_IDENTITY_CENTER"
+  edition               = "ENTERPRISE"
+
+  admin_group_names  = ["aws-quicksight-dev-admins"]
+  author_group_names = ["aws-quicksight-dev-authors"]
+  reader_group_names = ["aws-quicksight-dev-readers"]
+
+  # se o módulo já descobre automaticamente, pode omitir;
+  # se não, passe explicitamente
+  # iam_identity_center_instance_arn = var.iam_identity_center_instance_arn
+
+  default_namespace              = "default"
+  termination_protection_enabled = true
+
+  athena_data_sources = {
+    gold = { 
+      name = "gold"
+      data_source_id = "athena-gold"
+      work_group = "primary"
+    }
+
+  }
+
+  create_vpc_connection = false
+
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Project     = "zerezes-data"
+  }
+}
+
+
 
 resource "aws_security_group_rule" "allow_amundsen_search_to_es" {
   # Isso é uma regra de ENTRADA (ingress)
