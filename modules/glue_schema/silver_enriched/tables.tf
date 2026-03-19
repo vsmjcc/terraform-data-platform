@@ -26,9 +26,9 @@ locals {
         { name = "current_total_discounts", type = "decimal(18,2)", comment = "Descontos atuais" },
         { name = "current_total_price", type = "decimal(18,2)", comment = "Total atual" },
 
-        # Esses campos são persistidos como JSON (string) pelo ETL B2S.
-        { name = "discount_codes",    type = "string", comment = "discount_codes em JSON (string)" },
-        { name = "refunds",           type = "string", comment = "refunds em JSON (string)" }
+        # arrays/structs (removidos do Glue Catalog como workaround)
+        # Campos que estavam causando erro ao abrir o split no Athena/Trino
+        # quando as partições antigas ainda estão com estrutura “nested”.
       ]
 
       partition_keys = [
