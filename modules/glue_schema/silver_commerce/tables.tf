@@ -118,14 +118,10 @@ locals {
         { name = "merchant_business_entity_id", type = "string", comment = "Entidade de negócio" },
         { name = "order_status_url",          type = "string", comment = "URL de status do pedido" },
 
-        # arrays/structs
-        # Persistidos como JSON string no ETL (commerce-shopify-orders-b2s-refine.py).
-        { name = "discount_codes",            type = "string", comment = "discount_codes em JSON (string)" },
-        { name = "discount_applications",     type = "string", comment = "discount_applications em JSON (string)" },
-        { name = "shipping_lines",            type = "string", comment = "shipping_lines em JSON (string)" },
-        { name = "fulfillments",              type = "string", comment = "fulfillments em JSON (string)" },
-        { name = "refunds",                   type = "string", comment = "refunds em JSON (string)" },
-        { name = "tax_lines",                 type = "string", comment = "tax_lines em JSON (string)" }
+        # arrays/structs (removidos do Glue Catalog como workaround)
+        # Esses campos aparecem como nested/complex no Parquet de partições já existentes,
+        # e o Athena/Trino está falhando ao abrir o split.
+        # Quando reprocessar as partições com o script atualizado, podemos reintroduzir.
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
