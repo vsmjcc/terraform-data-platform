@@ -477,6 +477,51 @@ module "quicksight" {
 }
 
 
+module "quicksight_folders" {
+  source = "./modules/quicksight-folders"
+
+  environment               = var.environment
+  namespace                 = "default"
+
+  admin_group_names = [
+    "aws-qs-${var.environment}-admins"
+  ]
+
+  areas = {
+    marketing = {
+      display_name = "Marketing"
+      group_name   = "aws-qs-dev-marketing"
+    }
+
+    digital_inovacao = {
+      display_name = "Digital e Inovação"
+      group_name   = "aws-qs-dev-digital_inovacao"
+    }
+
+    operacoes_financeiro = {
+      display_name = "Operações e Financeiro"
+      group_name   = "aws-qs-dev-operacoes_financeiro"
+    }
+
+    comercial_expansao = {
+      display_name = "Comercial e Expansão"
+      group_name   = "aws-qs-dev-comercial_expansao"
+    }
+
+    pessoas_cultura = {
+      display_name = "Pessoas e Cultura"
+      group_name   = "aws-qs-dev-pessoas_cultura"
+    }
+
+    produto = {
+      display_name = "Produto"
+      group_name   = "aws-qs-dev-produto"
+    }
+  }
+  
+}
+
+
 
 resource "aws_security_group_rule" "allow_amundsen_search_to_es" {
   # Isso é uma regra de ENTRADA (ingress)
