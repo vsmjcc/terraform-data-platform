@@ -27,13 +27,13 @@ variable "runtime" {
 }
 
 variable "memory_size" {
-  type        = number
-  default     = 128
+  type    = number
+  default = 128
 }
 
 variable "timeout" {
-  type        = number
-  default     = 10
+  type    = number
+  default = 10
 }
 
 variable "enable_http_api" {

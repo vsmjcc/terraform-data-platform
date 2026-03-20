@@ -4,8 +4,8 @@ data "aws_subnet" "private_subnets" {
     for idx, subnet_id in var.private_subnet_ids :
     idx => subnet_id
   }
-  
-  id       = each.value
+
+  id = each.value
 }
 
 locals {

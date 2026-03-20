@@ -40,12 +40,15 @@ locals {
   }
 }
 
+
+
 resource "aws_quicksight_folder" "area" {
   for_each = var.areas
 
   aws_account_id = local.account_id
   folder_id      = "fld-${var.environment}-${each.key}"
   name           = each.value.display_name
+  # folder_type    = "RESTRICTED" 
 
   dynamic "permissions" {
     for_each = toset(local.admin_group_arns)

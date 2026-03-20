@@ -7,13 +7,13 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/dataset=dim_product/"
 
       columns = [
-        { name = "id",              type = "bigint",    comment = "Chave da dimensão (product_id ou hash do product_code; -99 para NA)" },
-        { name = "product_id",      type = "bigint",    comment = "ID interno do produto no Omie" },
-        { name = "product_code",    type = "string",    comment = "Código do produto" },
-        { name = "description",     type = "string",    comment = "Descrição do produto" },
-        { name = "created_at",      type = "timestamp", comment = "Data/hora de inclusão no Omie" },
-        { name = "launch_end_date", type = "date",      comment = "Data de fim do período de lançamento" },
-        { name = "updated_by",      type = "string",    comment = "Usuário da última alteração" }
+        { name = "id", type = "bigint", comment = "Chave da dimensão (product_id ou hash do product_code; -99 para NA)" },
+        { name = "product_id", type = "bigint", comment = "ID interno do produto no Omie" },
+        { name = "product_code", type = "string", comment = "Código do produto" },
+        { name = "description", type = "string", comment = "Descrição do produto" },
+        { name = "created_at", type = "timestamp", comment = "Data/hora de inclusão no Omie" },
+        { name = "launch_end_date", type = "date", comment = "Data de fim do período de lançamento" },
+        { name = "updated_by", type = "string", comment = "Usuário da última alteração" }
       ]
       partition_keys = []
     }
@@ -24,14 +24,14 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_product_sales/"
 
       columns = [
-        { name = "product_id",           type = "bigint",  comment = "FK para dim_product (-99 se não encontrado)" },
-        { name = "document_id",          type = "string",  comment = "ID do documento de venda" },
-        { name = "quantity",             type = "double",  comment = "Quantidade vendida" },
-        { name = "gross_sale_amount",    type = "double",  comment = "Valor bruto de venda (total_price)" },
-        { name = "discount_amount",      type = "double",  comment = "Valor de desconto" },
-        { name = "realized_sale_amount", type = "double",  comment = "Valor líquido realizado (bruto - desconto)" },
-        { name = "is_launch_product",    type = "boolean", comment = "Flag indicando se é produto em período de lançamento" },
-        { name = "launch_type",          type = "string",  comment = "Tipo de lançamento: LANCAMENTO ou NAO_LANCAMENTO" }
+        { name = "product_id", type = "bigint", comment = "FK para dim_product (-99 se não encontrado)" },
+        { name = "document_id", type = "string", comment = "ID do documento de venda" },
+        { name = "quantity", type = "double", comment = "Quantidade vendida" },
+        { name = "gross_sale_amount", type = "double", comment = "Valor bruto de venda (total_price)" },
+        { name = "discount_amount", type = "double", comment = "Valor de desconto" },
+        { name = "realized_sale_amount", type = "double", comment = "Valor líquido realizado (bruto - desconto)" },
+        { name = "is_launch_product", type = "boolean", comment = "Flag indicando se é produto em período de lançamento" },
+        { name = "launch_type", type = "string", comment = "Tipo de lançamento: LANCAMENTO ou NAO_LANCAMENTO" }
       ]
       partition_keys = [
         { name = "date", type = "date", comment = "Data da venda (YYYY-MM-DD)" }

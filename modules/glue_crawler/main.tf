@@ -4,8 +4,8 @@ locals {
   normalized_prefixes = [
     for p in var.read_prefixes :
     length(split("arn:aws:s3:::", p)) > 1
-      ? join("/", slice(split("/", p), 1, length(split("/", p))))
-      : p
+    ? join("/", slice(split("/", p), 1, length(split("/", p))))
+    : p
   ]
 
   # Monta ARNs de objeto corretamente: arn:aws:s3:::<bucket>/<prefix>

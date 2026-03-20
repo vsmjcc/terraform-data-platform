@@ -19,7 +19,7 @@ output "neo4j_log_group_name" {
 }
 
 output "neo4j_host" {
- value       = "${aws_service_discovery_service.neo4j.name}.${var.service_discovery_namespace_name}"
+  value       = "${aws_service_discovery_service.neo4j.name}.${var.service_discovery_namespace_name}"
   description = "DNS do Neo4j via Service Discovery (Ex: neo4j.zerezes.local)"
 }
 
@@ -31,7 +31,7 @@ output "neo4j_efs_id" {
 output "neo4j_password_secret_arn" {
   description = "ARN do Secret Manager para a senha do Neo4j"
   # O valor vem do recurso que você criou no seu main.tf 
-  value       = aws_secretsmanager_secret.neo4j_password.arn
+  value = aws_secretsmanager_secret.neo4j_password.arn
 }
 
 output "neo4j_password_secret_id" {

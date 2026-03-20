@@ -22,8 +22,8 @@ module "glue_job_ga4_sessions_fact_to_gold" {
   default_arguments = {}
 
   tags = merge(var.common_tags, {
-    Layer = "gold"
-    Type  = "fact"
+    Layer  = "gold"
+    Type   = "fact"
     Domain = "analytics"
   })
 }

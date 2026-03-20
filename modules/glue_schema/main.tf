@@ -1,7 +1,7 @@
 resource "aws_glue_catalog_database" "silver_cx" {
   name = "silver_cx"
 }
-  
+
 resource "aws_glue_catalog_database" "silver_commerce" {
   name = "silver_commerce"
 }

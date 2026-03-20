@@ -6,11 +6,11 @@ resource "aws_s3_bucket_policy" "bronze_bucket_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid:      "AllowPutFromIngestToBronze",
-        Effect   = "Allow",
+        Sid : "AllowPutFromIngestToBronze",
+        Effect    = "Allow",
         Principal = "*",
-        Action   = "s3:PutObject",
-        Resource = "arn:aws:s3:::zrzs-${var.environment}-data-lake-bronze/*",
+        Action    = "s3:PutObject",
+        Resource  = "arn:aws:s3:::zrzs-${var.environment}-data-lake-bronze/*",
         Condition = {
           StringLike = {
             "aws:PrincipalArn" = "arn:aws:sts::${data.aws_caller_identity.current.account_id}:assumed-role/ingest-*-to-bronze-lambda-role/*"

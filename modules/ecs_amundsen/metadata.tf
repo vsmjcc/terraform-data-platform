@@ -3,7 +3,7 @@ resource "aws_security_group" "metadata" {
   name        = "amundsen-metadata-${var.environment}-sg"
   description = "SG for Amundsen Metadata service"
   vpc_id      = var.vpc_id
-  
+
   # --- MUDANÇA AQUI ---
   # Permite tráfego na porta 5002 de QUALQUER LUGAR dentro da VPC
   ingress {
@@ -24,10 +24,10 @@ resource "aws_security_group" "metadata" {
 
   # Egress Padrão
   egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = { Name = "amundsen-metadata-${var.environment}-sg" }
@@ -49,33 +49,33 @@ resource "aws_ecs_task_definition" "metadata" {
       name      = "amundsen-metadata"
       image     = var.image_metadata
       essential = true
-      
+
       portMappings = [
         { containerPort = 5002, hostPort = 5002, protocol = "tcp" }
       ],
 
-     environment = [
-        { name = "PROXY_CLIENT",                   value = "NEO4J" },
-        { name = "CREDENTIALS_PROXY_USER",         value = "neo4j" },
-        { name = "PROXY_HOST",                     value = "bolt://${var.neo4j_host}" },
-        { name = "PROXY_PORT",                     value = "7687" },
-        { name = "PROXY_ENCRYPTED",                value = "False" },
+      environment = [
+        { name = "PROXY_CLIENT", value = "NEO4J" },
+        { name = "CREDENTIALS_PROXY_USER", value = "neo4j" },
+        { name = "PROXY_HOST", value = "bolt://${var.neo4j_host}" },
+        { name = "PROXY_PORT", value = "7687" },
+        { name = "PROXY_ENCRYPTED", value = "False" },
 
         { name = "METADATA_SVC_CONFIG_MODULE_CLASS", value = "metadata_service.metadata_config.MetadataConfig" },
 
         # OIDC no metadata (validação do Authorization enviado pelo frontend)
-        { name = "FLASK_APP_MODULE_NAME",          value = "flaskoidc" },
-        { name = "FLASK_APP_CLASS_NAME",           value = "FlaskOIDC" },
-        { name = "FLASK_OIDC_CONFIG_URL",          value = "https://accounts.google.com/.well-known/openid-configuration" },
-        { name = "FLASK_OIDC_SCOPES",              value = "openid email profile" }
+        { name = "FLASK_APP_MODULE_NAME", value = "flaskoidc" },
+        { name = "FLASK_APP_CLASS_NAME", value = "FlaskOIDC" },
+        { name = "FLASK_OIDC_CONFIG_URL", value = "https://accounts.google.com/.well-known/openid-configuration" },
+        { name = "FLASK_OIDC_SCOPES", value = "openid email profile" }
       ]
 
       secrets = [
         { name = "CREDENTIALS_PROXY_PASSWORD", valueFrom = "${var.neo4j_password_secret_arn}:password::" },
-        { name = "FLASK_OIDC_CLIENT_ID",       valueFrom = "${aws_secretsmanager_secret.amundsen.arn}:oidc_client_id::" },
-        { name = "FLASK_OIDC_CLIENT_SECRET",   valueFrom = "${aws_secretsmanager_secret.amundsen.arn}:oidc_client_secret::" }
+        { name = "FLASK_OIDC_CLIENT_ID", valueFrom = "${aws_secretsmanager_secret.amundsen.arn}:oidc_client_id::" },
+        { name = "FLASK_OIDC_CLIENT_SECRET", valueFrom = "${aws_secretsmanager_secret.amundsen.arn}:oidc_client_secret::" }
       ]
-      
+
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -95,12 +95,12 @@ resource "aws_cloudwatch_log_group" "metadata" {
 
 # --- METADATA: Service e Service Discovery ---
 resource "aws_ecs_service" "metadata" {
-  name            = "amundsen-metadata-${var.environment}"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
-  task_definition = aws_ecs_task_definition.metadata.arn
-  enable_execute_command = true  
+  name                   = "amundsen-metadata-${var.environment}"
+  cluster                = var.cluster_name
+  launch_type            = "FARGATE"
+  desired_count          = 1
+  task_definition        = aws_ecs_task_definition.metadata.arn
+  enable_execute_command = true
 
   network_configuration {
     subnets          = var.private_subnet_ids
@@ -117,9 +117,9 @@ resource "aws_service_discovery_service" "metadata" {
 
   dns_config {
     namespace_id = var.service_discovery_namespace_id
-    dns_records { 
+    dns_records {
       type = "A"
-      ttl  = 10 
+      ttl  = 10
     }
     routing_policy = "MULTIVALUE"
   }

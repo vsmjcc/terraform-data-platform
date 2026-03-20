@@ -1,7 +1,7 @@
 module "glue_job_protheus_nf_out_b2s" {
   source = "../../glue_job"
 
-  name          = "finance-protheus-nf-out-b2s-glue"
+  name = "finance-protheus-nf-out-b2s-glue"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/glue-b2s/finance-protheus-nf-out-b2s-glue.py"

@@ -2,11 +2,11 @@
 module "glue_job_shopify_orders_to_silver" {
   source = "../glue_job"
 
-  name          = "commerce-shopify-orders-b2s-refine"
+  name = "commerce-shopify-orders-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/commerce-shopify-orders-b2s-refine.py"
-  temp_bucket        = var.etls_bucket
+  temp_bucket   = var.etls_bucket
 
   data_buckets = [
     var.bronze_bucket,

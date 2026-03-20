@@ -1,6 +1,6 @@
 resource "aws_apigatewayv2_api" "this" {
   count         = var.enable_http_api ? 1 : 0
-  name          = "${var.function_name}-http-api"  # ← padronizado
+  name          = "${var.function_name}-http-api" # ← padronizado
   protocol_type = "HTTP"
 }
 
@@ -14,11 +14,11 @@ resource "aws_lambda_permission" "api_gateway" {
 }
 
 resource "aws_apigatewayv2_integration" "this" {
-  count             = var.enable_http_api ? 1 : 0
-  api_id            = aws_apigatewayv2_api.this[0].id
-  integration_type  = "AWS_PROXY"
-  integration_uri   = aws_lambda_function.this.invoke_arn
-  integration_method = "POST"
+  count                  = var.enable_http_api ? 1 : 0
+  api_id                 = aws_apigatewayv2_api.this[0].id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.this.invoke_arn
+  integration_method     = "POST"
   payload_format_version = "2.0"
 }
 

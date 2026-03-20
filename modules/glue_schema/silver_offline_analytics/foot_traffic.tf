@@ -1,15 +1,15 @@
 locals {
   tables = {
-    
+
     store_foot_traffic_hourly = {
       description = "Contagem horária de pessoas por loja (foot traffic)."
       # ajuste 'source=' se preferir outro nome; usei 'vemco' por ser comum para footfall
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=foot_traffic/dataset=store_foot_traffic_hourly/"
+      location = "s3://${var.bucket}/domain=${var.domain}/source=foot_traffic/dataset=store_foot_traffic_hourly/"
       columns = [
-        { name = "location_id", type = "bigint",   comment = "ID da loja/local" },
-        { name = "cnpj",        type = "string",   comment = "CNPJ da loja" },
-        { name = "event_timestamp",        type = "timestamp",comment = "Timestamp (hora exata da janela)" },
-        { name = "count",       type = "int",      comment = "Pessoas contadas na hora" }
+        { name = "location_id", type = "bigint", comment = "ID da loja/local" },
+        { name = "cnpj", type = "string", comment = "CNPJ da loja" },
+        { name = "event_timestamp", type = "timestamp", comment = "Timestamp (hora exata da janela)" },
+        { name = "count", type = "int", comment = "Pessoas contadas na hora" }
       ]
       partition_keys = [
         {

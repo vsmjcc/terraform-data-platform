@@ -1,7 +1,7 @@
 
 # --- IAM Role de Execução (Usada por todos os 3 serviços) ---
 resource "aws_iam_role" "task_execution" {
-  name = "amundsen-services-${var.environment}-task-execution-role"
+  name               = "amundsen-services-${var.environment}-task-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role_policy.json
 }
 
@@ -65,19 +65,19 @@ resource "aws_secretsmanager_secret" "amundsen" {
 }
 
 resource "aws_secretsmanager_secret_version" "amundsen" {
-  secret_id     = aws_secretsmanager_secret.amundsen.id
+  secret_id = aws_secretsmanager_secret.amundsen.id
 
   secret_string = jsonencode({
-    oidc_client_id     = "" 
-    oidc_client_secret = ""
-    oidc_discovery_url = ""
-    google_sa_json     = ""
-    required_group     = ""
-    google_admin_subject= "amundsen-${var.environment}-sec@zerezes.com.br"
+    oidc_client_id       = ""
+    oidc_client_secret   = ""
+    oidc_discovery_url   = ""
+    google_sa_json       = ""
+    required_group       = ""
+    google_admin_subject = "amundsen-${var.environment}-sec@zerezes.com.br"
   })
 
   lifecycle {
-    ignore_changes = [ secret_string, secret_binary ]
+    ignore_changes = [secret_string, secret_binary]
   }
 }
 

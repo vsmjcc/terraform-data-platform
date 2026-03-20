@@ -7,16 +7,16 @@ locals {
 
       columns = [
         # Dimensões GA4
-        { name = "session_source_medium",  type = "string",  comment = "Fonte / Mídia da sessão (ex.: google / cpc)" },
-        { name = "session_campaign_name",  type = "string",  comment = "Nome da campanha (ex.: [ED] Zerezes Institucional)" },
+        { name = "session_source_medium", type = "string", comment = "Fonte / Mídia da sessão (ex.: google / cpc)" },
+        { name = "session_campaign_name", type = "string", comment = "Nome da campanha (ex.: [ED] Zerezes Institucional)" },
 
         # Métricas
-        { name = "sessions",               type = "bigint",  comment = "Quantidade de sessões" },
+        { name = "sessions", type = "bigint", comment = "Quantidade de sessões" },
 
         # Metadados do pipeline
-        { name = "source_system",          type = "string",  comment = "Sistema de origem (ga4)" },
-        { name = "ingestion_date",         type = "date",    comment = "Dia que o dado entrou na bronze" },
-        { name = "run_id",                 type = "string",  comment = "ID de execução/ingestão" }
+        { name = "source_system", type = "string", comment = "Sistema de origem (ga4)" },
+        { name = "ingestion_date", type = "date", comment = "Dia que o dado entrou na bronze" },
+        { name = "run_id", type = "string", comment = "ID de execução/ingestão" }
       ]
 
       partition_keys = [
@@ -41,18 +41,18 @@ locals {
 
       columns = [
         # Dimensões GA4
-        { name = "transaction_id",   type = "string",  comment = "ID da transação (pode vir vazio em linhas agregadas)" },
-        { name = "source_medium",    type = "string",  comment = "Fonte / Mídia atribuídas" },
-        { name = "campaign_name",    type = "string",  comment = "Nome da campanha atribuída" },
+        { name = "transaction_id", type = "string", comment = "ID da transação (pode vir vazio em linhas agregadas)" },
+        { name = "source_medium", type = "string", comment = "Fonte / Mídia atribuídas" },
+        { name = "campaign_name", type = "string", comment = "Nome da campanha atribuída" },
 
         # Métricas
-        { name = "conversions",      type = "bigint",  comment = "Número de conversões atribuídas" },
-        { name = "total_revenue",    type = "double",  comment = "Receita total atribuída (moeda da propriedade/relatório)" },
+        { name = "conversions", type = "bigint", comment = "Número de conversões atribuídas" },
+        { name = "total_revenue", type = "double", comment = "Receita total atribuída (moeda da propriedade/relatório)" },
 
         # Metadados do pipeline
-        { name = "source_system",    type = "string",  comment = "Sistema de origem (ga4)" },
-        { name = "ingestion_date",   type = "date",    comment = "Dia que o dado entrou na bronze" },
-        { name = "run_id",           type = "string",  comment = "ID de execução/ingestão" }
+        { name = "source_system", type = "string", comment = "Sistema de origem (ga4)" },
+        { name = "ingestion_date", type = "date", comment = "Dia que o dado entrou na bronze" },
+        { name = "run_id", type = "string", comment = "ID de execução/ingestão" }
       ]
 
       partition_keys = [
@@ -77,17 +77,17 @@ locals {
 
       columns = [
         # Dimensões
-        { name = "campaign_name",                 type = "string",  comment = "Nome da campanha" },
+        { name = "campaign_name", type = "string", comment = "Nome da campanha" },
 
         # Métricas de custo
-        { name = "advertiser_ad_cost",           type = "double",  comment = "Custo do anunciante" },
-        { name = "advertiser_ad_cost_per_click", type = "double",  comment = "CPC (custo por clique)" },
-        { name = "advertiser_ad_cost_per_conv",  type = "double",  comment = "Custo por conversão" },
+        { name = "advertiser_ad_cost", type = "double", comment = "Custo do anunciante" },
+        { name = "advertiser_ad_cost_per_click", type = "double", comment = "CPC (custo por clique)" },
+        { name = "advertiser_ad_cost_per_conv", type = "double", comment = "Custo por conversão" },
 
         # Metadados do pipeline
-        { name = "source_system",                type = "string",  comment = "Sistema de origem (ga4)" },
-        { name = "ingestion_date",               type = "date",    comment = "Dia que o dado entrou na bronze" },
-        { name = "run_id",                       type = "string",  comment = "ID de execução/ingestão" }
+        { name = "source_system", type = "string", comment = "Sistema de origem (ga4)" },
+        { name = "ingestion_date", type = "date", comment = "Dia que o dado entrou na bronze" },
+        { name = "run_id", type = "string", comment = "ID de execução/ingestão" }
       ]
 
       partition_keys = [
@@ -109,7 +109,7 @@ locals {
 }
 
 module "tables" {
-  source = "../../../modules/glue_table" 
+  source = "../../../modules/glue_table"
 
   for_each       = local.tables
   database_name  = var.database_name
