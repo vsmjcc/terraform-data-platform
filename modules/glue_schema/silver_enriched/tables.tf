@@ -35,8 +35,30 @@ locals {
         { name = "order_date", type = "date", comment = "Partição por data do pedido (YYYY-MM-DD)" }
       ]
     }
+
+
+    customers = {
+      description = "Customers consolidados de Shopify, Protheus e Omie (S2S Enriched) - Silver Enriched"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=customers/"
+      columns = [
+        { name = "customer_id",            type = "string",         comment = "Identificador único consolidado do cliente" },
+        { name = "shopify_customer_ids",   type = "array<string>",  comment = "Lista de IDs do cliente na fonte Shopify" },
+        { name = "protheus_customer_ids",  type = "array<string>",  comment = "Lista de IDs do cliente na fonte Protheus" },
+        { name = "omie_customer_ids",      type = "array<string>",  comment = "Lista de IDs do cliente na fonte Omie" },
+        { name = "latest_base_source",     type = "string",         comment = "Fonte da linha base mais atualizada usada na consolidação" },
+        { name = "reference_date",         type = "timestamp",      comment = "Data/hora de referência da linha base utilizada" },
+        { name = "customer_document",      type = "string",         comment = "CPF ou CNPJ normalizado do cliente" },
+        { name = "email",                  type = "string",         comment = "Email do cliente" },
+        { name = "legal_name",             type = "string",         comment = "Nome principal ou razão social do cliente" },
+        { name = "trade_name",             type = "string",         comment = "Nome fantasia ou nome reduzido do cliente" },
+        { name = "phone",                  type = "string",         comment = "Telefone normalizado do cliente" },
+      ]
+
+      partition_keys = []
+    }
   }
 }
+
 
 module "tables" {
   source = "../../../modules/glue_table" 
