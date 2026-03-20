@@ -39,6 +39,19 @@ module "glue_b2s" {
   glue_sg_id         = local.glue_sg_id
 }
 
+module "glue_s2s" {
+  source = "./glue_s2s"
+
+  etls_bucket        = var.etls_bucket
+  bronze_bucket      = var.bronze_bucket
+  silver_bucket      = var.silver_bucket
+  private_subnet_ids = var.private_subnet_ids
+  common_tags        = var.common_tags
+  environment        = var.environment
+  vpc_id             = var.vpc_id
+  glue_sg_id         = local.glue_sg_id
+}
+
 # # Catálogo (uma vez)
 # resource "aws_glue_catalog_database" "silver_commerce" {
 #   name = "silver_commerce"

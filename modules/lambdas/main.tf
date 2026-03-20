@@ -118,8 +118,7 @@ module "invoice_search_lambda" {
   timeout            = 10
   memory_size        = 128
 
-  # === CHAPADO DEV ===
-  s3_bucket          = "zrzs-dev-packages"
+  s3_bucket          = "zrzs-${var.environment}-packages"
   s3_key             = "empty-lambda.zip"
 
   enable_http_api      = true
@@ -131,14 +130,13 @@ module "invoice_search_lambda" {
   environment          = var.environment
   region               = var.region
 
-  # === ENV VARS CHAPADAS DEV ===
   environment_variables = {
-    STAGE     = "dev"
+    STAGE     = var.environment
     LOG_LEVEL = "debug"
 
     ATHENA_DATABASE   = "silver_erp"
     ATHENA_WORKGROUP  = "primary"
-    ATHENA_OUTPUT_S3  = "s3://zrzs-dev-athena-results/invoice-search/"
+    ATHENA_OUTPUT_S3  = "s3://zrzs-${var.environment}-athena-results/invoice-search/"
 
     DOCS_TABLE        = "omie_documents"
     ITEMS_TABLE       = "omie_document_items"
@@ -184,25 +182,25 @@ module "invoice_search_lambda" {
           Sid    = "S3AthenaResultsBucket"
           Effect = "Allow"
           Action = ["s3:ListBucket", "s3:GetBucketLocation"]
-          Resource = "arn:aws:s3:::zrzs-dev-athena-results"
+          Resource = "arn:aws:s3:::zrzs-${var.environment}-athena-results"
         },
         {
           Sid    = "S3AthenaResultsObjects"
           Effect = "Allow"
           Action = ["s3:GetObject", "s3:PutObject"]
-          Resource = "arn:aws:s3:::zrzs-dev-athena-results/*"
+          Resource = "arn:aws:s3:::zrzs-${var.environment}-athena-results/*"
         },
         {
           Sid    = "S3SilverBucket"
           Effect = "Allow"
           Action = ["s3:ListBucket", "s3:GetBucketLocation"]
-          Resource = "arn:aws:s3:::zrzs-dev-data-lake-silver"
+          Resource = "arn:aws:s3:::zrzs-${var.environment}-data-lake-silver"
         },
         {
           Sid    = "S3SilverReadAll"
           Effect = "Allow"
           Action = ["s3:GetObject"]
-          Resource = "arn:aws:s3:::zrzs-dev-data-lake-silver/*"
+          Resource = "arn:aws:s3:::zrzs-${var.environment}-data-lake-silver/*"
         }
       ]
     })

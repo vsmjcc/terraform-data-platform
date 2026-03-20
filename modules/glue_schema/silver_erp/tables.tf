@@ -315,190 +315,190 @@ locals {
       ]
     }
 
-    omie_fiscal_coupons_header = {
-      description = "Cabeçalho de cupons fiscais do Omie (uma linha por cupom, com totais e vínculos a cliente/vendedor)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_header/"
+    # omie_fiscal_coupons_header = {
+    #   description = "Cabeçalho de cupons fiscais do Omie (uma linha por cupom, com totais e vínculos a cliente/vendedor)."
+    #   location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_header/"
 
-      columns = [
-        # Identificação básica
-        { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
-        { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
-        { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
-        { name = "coupon_series",      type = "string",    comment = "Série do cupom (nSerieCupom)" },
-        { name = "coupon_model",       type = "string",    comment = "Modelo do cupom (cModeloCupom, ex.: 65)" },
+    #   columns = [
+    #     # Identificação básica
+    #     { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
+    #     { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
+    #     { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
+    #     { name = "coupon_series",      type = "string",    comment = "Série do cupom (nSerieCupom)" },
+    #     { name = "coupon_model",       type = "string",    comment = "Modelo do cupom (cModeloCupom, ex.: 65)" },
 
-        # Datas / horários de emissão
-        { name = "emission_date",      type = "date",      comment = "Data de emissão do cupom (dDtEmissaoCupom)" },
-        { name = "emission_time",      type = "string",    comment = "Hora de emissão do cupom (cHrEmissaoCupom, HH:MM:SS)" },
-        { name = "emission_datetime",  type = "timestamp", comment = "Data/hora de emissão do cupom (construído na silver)" },
+    #     # Datas / horários de emissão
+    #     { name = "emission_date",      type = "date",      comment = "Data de emissão do cupom (dDtEmissaoCupom)" },
+    #     { name = "emission_time",      type = "string",    comment = "Hora de emissão do cupom (cHrEmissaoCupom, HH:MM:SS)" },
+    #     { name = "emission_datetime",  type = "timestamp", comment = "Data/hora de emissão do cupom (construído na silver)" },
 
-        # Contingência e status
-        { name = "is_contingency",     type = "boolean",   comment = "Indicador de contingência (cContingencia = 'S'/'N')" },
-        { name = "is_cancelled",       type = "boolean",   comment = "Cupom cancelado? (info.cCupomCancelado)" },
-        { name = "is_returned",        type = "boolean",   comment = "Cupom devolvido? (info.cCupomDevolvido)" },
+    #     # Contingência e status
+    #     { name = "is_contingency",     type = "boolean",   comment = "Indicador de contingência (cContingencia = 'S'/'N')" },
+    #     { name = "is_cancelled",       type = "boolean",   comment = "Cupom cancelado? (info.cCupomCancelado)" },
+    #     { name = "is_returned",        type = "boolean",   comment = "Cupom devolvido? (info.cCupomDevolvido)" },
 
-        # Vínculos
-        { name = "client_id",          type = "bigint",    comment = "ID do cliente no Omie (idCliente)" },
-        { name = "seller_id",          type = "bigint",    comment = "ID do vendedor no Omie (idVendedor)" },
-        { name = "cash_register_seq",  type = "bigint",    comment = "Sequência do caixa (seqCaixa)" },
-        { name = "coupon_seq",         type = "bigint",    comment = "Sequência do cupom (seqCupom)" },
+    #     # Vínculos
+    #     { name = "client_id",          type = "bigint",    comment = "ID do cliente no Omie (idCliente)" },
+    #     { name = "seller_id",          type = "bigint",    comment = "ID do vendedor no Omie (idVendedor)" },
+    #     { name = "cash_register_seq",  type = "bigint",    comment = "Sequência do caixa (seqCaixa)" },
+    #     { name = "coupon_seq",         type = "bigint",    comment = "Sequência do cupom (seqCupom)" },
 
-        # Totais do cupom
-        { name = "amount_total",       type = "double",    comment = "Valor total do cupom (nValorCupom)" },
-        { name = "amount_tax_icms",    type = "double",    comment = "Valor de ICMS do cupom (nValorICMS)" },
-        { name = "amount_tax_pis",     type = "double",    comment = "Valor de PIS do cupom (nValorPIS)" },
-        { name = "amount_tax_cofins",  type = "double",    comment = "Valor de COFINS do cupom (nValorCOFINS)" },
-        { name = "amount_fee",         type = "double",    comment = "Valor de taxa adicional (nValorTaxa)" },
+    #     # Totais do cupom
+    #     { name = "amount_total",       type = "double",    comment = "Valor total do cupom (nValorCupom)" },
+    #     { name = "amount_tax_icms",    type = "double",    comment = "Valor de ICMS do cupom (nValorICMS)" },
+    #     { name = "amount_tax_pis",     type = "double",    comment = "Valor de PIS do cupom (nValorPIS)" },
+    #     { name = "amount_tax_cofins",  type = "double",    comment = "Valor de COFINS do cupom (nValorCOFINS)" },
+    #     { name = "amount_fee",         type = "double",    comment = "Valor de taxa adicional (nValorTaxa)" },
 
-        # Auditoria Omie (inclusão/alteração)
-        { name = "created_date",       type = "date",      comment = "Data de inclusão do cupom no Omie (info.dDtInclusao)" },
-        { name = "created_time",       type = "string",    comment = "Hora de inclusão do cupom no Omie (info.cHrInclusao)" },
-        { name = "created_at",         type = "timestamp", comment = "Data/hora de inclusão no Omie (derivado)" },
-        { name = "created_by",         type = "string",    comment = "Usuário que incluiu (info.uInc)" },
+    #     # Auditoria Omie (inclusão/alteração)
+    #     { name = "created_date",       type = "date",      comment = "Data de inclusão do cupom no Omie (info.dDtInclusao)" },
+    #     { name = "created_time",       type = "string",    comment = "Hora de inclusão do cupom no Omie (info.cHrInclusao)" },
+    #     { name = "created_at",         type = "timestamp", comment = "Data/hora de inclusão no Omie (derivado)" },
+    #     { name = "created_by",         type = "string",    comment = "Usuário que incluiu (info.uInc)" },
 
-        { name = "updated_date",       type = "date",      comment = "Data de alteração do cupom no Omie (info.dDtAlteracao)" },
-        { name = "updated_time",       type = "string",    comment = "Hora de alteração do cupom no Omie (info.cHrAlteracao)" },
-        { name = "updated_at",         type = "timestamp", comment = "Data/hora de alteração no Omie (derivado)" },
-        { name = "updated_by",         type = "string",    comment = "Usuário que alterou (info.uAlt)" },
+    #     { name = "updated_date",       type = "date",      comment = "Data de alteração do cupom no Omie (info.dDtAlteracao)" },
+    #     { name = "updated_time",       type = "string",    comment = "Hora de alteração do cupom no Omie (info.cHrAlteracao)" },
+    #     { name = "updated_at",         type = "timestamp", comment = "Data/hora de alteração no Omie (derivado)" },
+    #     { name = "updated_by",         type = "string",    comment = "Usuário que alterou (info.uAlt)" },
 
-        # Metadados de ingestão
-        { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
-        { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
-        { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
-        { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
-      ]
+    #     # Metadados de ingestão
+    #     { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
+    #     { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
+    #     { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
+    #     { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
+    #   ]
 
-      partition_keys = [
-        {
-          name    = "ingestion_date"
-          type    = "date"
-          comment = "Data de ingestão do batch (YYYY-MM-DD)"
-          projection = {
-            type          = "date"
-            format        = "yyyy-MM-dd"
-            range         = "2020-01-01,NOW"
-            interval      = "1"
-            interval_unit = "DAYS"
-          }
-        }
-      ]
-    }
+    #   partition_keys = [
+    #     {
+    #       name    = "ingestion_date"
+    #       type    = "date"
+    #       comment = "Data de ingestão do batch (YYYY-MM-DD)"
+    #       projection = {
+    #         type          = "date"
+    #         format        = "yyyy-MM-dd"
+    #         range         = "2020-01-01,NOW"
+    #         interval      = "1"
+    #         interval_unit = "DAYS"
+    #       }
+    #     }
+    #   ]
+    # }
 
-    omie_fiscal_coupons_items = {
-      description = "Itens de cupons fiscais do Omie (uma linha por cupom x item)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_items/"
+    # omie_fiscal_coupons_items = {
+    #   description = "Itens de cupons fiscais do Omie (uma linha por cupom x item)."
+    #   location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_items/"
 
-      columns = [
-        # Chave do cupom (FK)
-        { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
-        { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
-        { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
+    #   columns = [
+    #     # Chave do cupom (FK)
+    #     { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
+    #     { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
+    #     { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
 
-        # Identificação do item
-        { name = "item_id",            type = "bigint",    comment = "ID interno do item no Omie (idItem)" },
-        { name = "item_sequence",      type = "bigint",    comment = "Sequência do item no cupom (nSequencia)" },
+    #     # Identificação do item
+    #     { name = "item_id",            type = "bigint",    comment = "ID interno do item no Omie (idItem)" },
+    #     { name = "item_sequence",      type = "bigint",    comment = "Sequência do item no cupom (nSequencia)" },
 
-        # Produto
-        { name = "product_id",         type = "bigint",    comment = "ID do produto no Omie (idProduto)" },
-        { name = "product_code",       type = "string",    comment = "Código do produto (cCodigo / emiProduto)" },
-        { name = "product_name",       type = "string",    comment = "Descrição do produto (xProd)" },
-        { name = "unit",               type = "string",    comment = "Unidade de medida (cUn)" },
-        { name = "ncm",                type = "string",    comment = "Código NCM do item (cNCM)" },
-        { name = "cfop",               type = "string",    comment = "CFOP do item (cCFOP)" },
+    #     # Produto
+    #     { name = "product_id",         type = "bigint",    comment = "ID do produto no Omie (idProduto)" },
+    #     { name = "product_code",       type = "string",    comment = "Código do produto (cCodigo / emiProduto)" },
+    #     { name = "product_name",       type = "string",    comment = "Descrição do produto (xProd)" },
+    #     { name = "unit",               type = "string",    comment = "Unidade de medida (cUn)" },
+    #     { name = "ncm",                type = "string",    comment = "Código NCM do item (cNCM)" },
+    #     { name = "cfop",               type = "string",    comment = "CFOP do item (cCFOP)" },
 
-        # Quantidade e valores
-        { name = "quantity",           type = "double",    comment = "Quantidade (nQuant)" },
-        { name = "unit_price",         type = "double",    comment = "Preço unitário (vUnit)" },
-        { name = "item_amount",        type = "double",    comment = "Valor do item (vItem)" },
-        { name = "discount_amount",    type = "double",    comment = "Desconto no item (vDesc)" },
-        { name = "addition_amount",    type = "double",    comment = "Acréscimo no item (vAcresc)" },
-        { name = "other_amount",       type = "double",    comment = "Outros valores (nValorOutros)" },
+    #     # Quantidade e valores
+    #     { name = "quantity",           type = "double",    comment = "Quantidade (nQuant)" },
+    #     { name = "unit_price",         type = "double",    comment = "Preço unitário (vUnit)" },
+    #     { name = "item_amount",        type = "double",    comment = "Valor do item (vItem)" },
+    #     { name = "discount_amount",    type = "double",    comment = "Desconto no item (vDesc)" },
+    #     { name = "addition_amount",    type = "double",    comment = "Acréscimo no item (vAcresc)" },
+    #     { name = "other_amount",       type = "double",    comment = "Outros valores (nValorOutros)" },
 
-        # Tributação no item
-        { name = "icms_rate",          type = "double",    comment = "Alíquota ICMS do item (nAliqICMS)" },
-        { name = "pis_rate",           type = "double",    comment = "Alíquota PIS do item (nAliqPIS)" },
-        { name = "cofins_rate",        type = "double",    comment = "Alíquota COFINS do item (nAliqCOFINS)" },
+    #     # Tributação no item
+    #     { name = "icms_rate",          type = "double",    comment = "Alíquota ICMS do item (nAliqICMS)" },
+    #     { name = "pis_rate",           type = "double",    comment = "Alíquota PIS do item (nAliqPIS)" },
+    #     { name = "cofins_rate",        type = "double",    comment = "Alíquota COFINS do item (nAliqCOFINS)" },
 
-        { name = "icms_amount",        type = "double",    comment = "Valor ICMS do item (nValorICMS)" },
-        { name = "pis_amount",         type = "double",    comment = "Valor PIS do item (nValorPIS)" },
-        { name = "cofins_amount",      type = "double",    comment = "Valor COFINS do item (nValorCOFINS)" },
+    #     { name = "icms_amount",        type = "double",    comment = "Valor ICMS do item (nValorICMS)" },
+    #     { name = "pis_amount",         type = "double",    comment = "Valor PIS do item (nValorPIS)" },
+    #     { name = "cofins_amount",      type = "double",    comment = "Valor COFINS do item (nValorCOFINS)" },
 
-        # Status do item
-        { name = "is_cancelled",       type = "boolean",   comment = "Item cancelado? (cCupomCancelado)" },
-        { name = "is_returned",        type = "boolean",   comment = "Item devolvido? (cCupomDevolvido)" },
+    #     # Status do item
+    #     { name = "is_cancelled",       type = "boolean",   comment = "Item cancelado? (cCupomCancelado)" },
+    #     { name = "is_returned",        type = "boolean",   comment = "Item devolvido? (cCupomDevolvido)" },
 
-        # Metadados de ingestão
-        { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
-        { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
-        { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
-        { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
-      ]
+    #     # Metadados de ingestão
+    #     { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
+    #     { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
+    #     { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
+    #     { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
+    #   ]
 
-      partition_keys = [
-        {
-          name    = "ingestion_date"
-          type    = "date"
-          comment = "Data de ingestão do batch (YYYY-MM-DD)"
-          projection = {
-            type          = "date"
-            format        = "yyyy-MM-dd"
-            range         = "2020-01-01,NOW"
-            interval      = "1"
-            interval_unit = "DAYS"
-          }
-        }
-      ]
-    }
+    #   partition_keys = [
+    #     {
+    #       name    = "ingestion_date"
+    #       type    = "date"
+    #       comment = "Data de ingestão do batch (YYYY-MM-DD)"
+    #       projection = {
+    #         type          = "date"
+    #         format        = "yyyy-MM-dd"
+    #         range         = "2020-01-01,NOW"
+    #         interval      = "1"
+    #         interval_unit = "DAYS"
+    #       }
+    #     }
+    #   ]
+    # }
 
-    omie_fiscal_coupons_payments = {
-      description = "Pagamentos de cupons fiscais do Omie (uma linha por cupom x parcela/pagamento)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_payments/"
+    # omie_fiscal_coupons_payments = {
+    #   description = "Pagamentos de cupons fiscais do Omie (uma linha por cupom x parcela/pagamento)."
+    #   location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_fiscal_coupons_payments/"
 
-      columns = [
-        # Chave do cupom (FK)
-        { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
-        { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
-        { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
+    #   columns = [
+    #     # Chave do cupom (FK)
+    #     { name = "coupon_id",          type = "bigint",    comment = "ID interno do cupom no Omie (nIdCupom)" },
+    #     { name = "coupon_key",         type = "string",    comment = "Chave do cupom fiscal (cChaveCupom)" },
+    #     { name = "coupon_number",      type = "bigint",    comment = "Número do cupom (nNumCupom)" },
 
-        # Identificação da parcela
-        { name = "payment_sequence",   type = "bigint",    comment = "Sequência do pagamento (nSequencia)" },
-        { name = "installment_code",   type = "string",    comment = "Identificação da parcela (cNumParcela, ex.: 001/003)" },
+    #     # Identificação da parcela
+    #     { name = "payment_sequence",   type = "bigint",    comment = "Sequência do pagamento (nSequencia)" },
+    #     { name = "installment_code",   type = "string",    comment = "Identificação da parcela (cNumParcela, ex.: 001/003)" },
 
-        # Título / documento
-        { name = "title_id",           type = "bigint",    comment = "Código do título financeiro (nCodTitulo)" },
-        { name = "doc_type",           type = "string",    comment = "Tipo de documento/pagamento (cTipoDoc, ex.: CRD, CRC)" },
+    #     # Título / documento
+    #     { name = "title_id",           type = "bigint",    comment = "Código do título financeiro (nCodTitulo)" },
+    #     { name = "doc_type",           type = "string",    comment = "Tipo de documento/pagamento (cTipoDoc, ex.: CRD, CRC)" },
 
-        # Conta corrente
-        { name = "bank_account_id",    type = "bigint",    comment = "ID da conta corrente no Omie (idContaCorrente)" },
-        { name = "account_category",   type = "string",    comment = "Categoria da conta / centro de custo (cCategoria)" },
+    #     # Conta corrente
+    #     { name = "bank_account_id",    type = "bigint",    comment = "ID da conta corrente no Omie (idContaCorrente)" },
+    #     { name = "account_category",   type = "string",    comment = "Categoria da conta / centro de custo (cCategoria)" },
 
-        # Valores e vencimento
-        { name = "due_date",           type = "date",      comment = "Data de vencimento da parcela (dDtVencimento)" },
-        { name = "document_amount",    type = "double",    comment = "Valor do documento/parcela (nValorDocumento)" },
-        { name = "fee_amount",         type = "double",    comment = "Valor de taxa (nValorTaxa)" },
+    #     # Valores e vencimento
+    #     { name = "due_date",           type = "date",      comment = "Data de vencimento da parcela (dDtVencimento)" },
+    #     { name = "document_amount",    type = "double",    comment = "Valor do documento/parcela (nValorDocumento)" },
+    #     { name = "fee_amount",         type = "double",    comment = "Valor de taxa (nValorTaxa)" },
 
-        # Metadados de ingestão
-        { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
-        { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
-        { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
-        { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
-      ]
+    #     # Metadados de ingestão
+    #     { name = "run_id",             type = "string",    comment = "ID da execução de ingestão" },
+    #     { name = "generated_at",       type = "timestamp", comment = "Timestamp de geração do arquivo de origem" },
+    #     { name = "source_cnpj",        type = "string",    comment = "CNPJ da empresa no Omie (params.cnpj)" },
+    #     { name = "source_system",      type = "string",    comment = "Sistema de origem (ex.: Omie)" }
+    #   ]
 
-      partition_keys = [
-        {
-          name    = "ingestion_date"
-          type    = "date"
-          comment = "Data de ingestão do batch (YYYY-MM-DD)"
-          projection = {
-            type          = "date"
-            format        = "yyyy-MM-dd"
-            range         = "2020-01-01,NOW"
-            interval      = "1"
-            interval_unit = "DAYS"
-          }
-        }
-      ]
-    }
+    #   partition_keys = [
+    #     {
+    #       name    = "ingestion_date"
+    #       type    = "date"
+    #       comment = "Data de ingestão do batch (YYYY-MM-DD)"
+    #       projection = {
+    #         type          = "date"
+    #         format        = "yyyy-MM-dd"
+    #         range         = "2020-01-01,NOW"
+    #         interval      = "1"
+    #         interval_unit = "DAYS"
+    #       }
+    #     }
+    #   ]
+    # }
 
     omie_documents = {
       description = "Omie fiscal documents (todos os modelos retornados por /contador/xml/ListarDocumentos). Uma linha por documento."
@@ -610,6 +610,7 @@ locals {
         { name = "product_name",   type = "string",        comment = "Descrição do produto (xProd)" },
         { name = "ncm",            type = "string",        comment = "NCM do produto" },
         { name = "cfop",           type = "string",        comment = "CFOP do item" },
+        { name = "tax_benefit_code", type = "string",      comment = "Código de benefício fiscal (cBenef)" },
 
         # Quantidade / valores
         { name = "quantity",       type = "double",        comment = "Quantidade comercializada (qCom)" },
@@ -618,17 +619,49 @@ locals {
         { name = "total_price",    type = "decimal(18,2)", comment = "Valor total do item (vProd)" },
         { name = "discount_value", type = "decimal(18,2)", comment = "Desconto no item (vDesc)" },
 
-        # Impostos (Novos)
+        # ICMS
         { name = "origin",         type = "string",        comment = "Origem da mercadoria (orig)" },
-        { name = "origin_desc",    type = "string",        comment = "Descrição da origem: Nacional, Importada, etc." }, # NOVO
+        { name = "origin_desc",    type = "string",        comment = "Descrição da origem: nacional, importada etc. (derivado de orig)" },
         { name = "cst_icms",       type = "string",        comment = "CST do ICMS" },
+        { name = "csosn_icms",     type = "string",        comment = "CSOSN do ICMS, quando aplicável" },
         { name = "icms_rate",      type = "decimal(18,2)", comment = "Alíquota do ICMS (pICMS)" },
         { name = "icms_base",      type = "decimal(18,2)", comment = "Base de cálculo do ICMS (vBC)" },
         { name = "icms_value",     type = "decimal(18,2)", comment = "Valor do ICMS (vICMS)" },
+        { name = "icms_reduction_rate", type = "decimal(18,2)", comment = "Percentual de redução da base do ICMS (pRedBC)" },
+        { name = "icms_exempt_value", type = "decimal(18,2)", comment = "Valor do ICMS desonerado (vICMSDeson)" },
+        { name = "icms_exempt_reason", type = "string",    comment = "Motivo da desoneração do ICMS (motDesICMS)" },
+        { name = "icms_exempt_deduction_flag", type = "string", comment = "Indica se a desoneração foi deduzida do item (indDeduzDeson)" },
+
+        # FCP
+        { name = "fcp_base",       type = "decimal(18,2)", comment = "Base de cálculo do FCP (vBCFCP)" },
+        { name = "fcp_rate",       type = "decimal(18,2)", comment = "Alíquota do FCP (pFCP)" },
+        { name = "fcp_value",      type = "decimal(18,2)", comment = "Valor do FCP (vFCP)" },
+
+        # PIS
         { name = "pis_cst",        type = "string",        comment = "CST do PIS" },
+        { name = "pis_base",       type = "decimal(18,2)", comment = "Base de cálculo do PIS (vBC)" },
+        { name = "pis_rate",       type = "decimal(18,2)", comment = "Alíquota do PIS (pPIS)" },
         { name = "pis_value",      type = "decimal(18,2)", comment = "Valor do PIS (vPIS)" },
+
+        # COFINS
         { name = "cofins_cst",     type = "string",        comment = "CST do COFINS" },
+        { name = "cofins_base",    type = "decimal(18,2)", comment = "Base de cálculo do COFINS (vBC)" },
+        { name = "cofins_rate",    type = "decimal(18,2)", comment = "Alíquota do COFINS (pCOFINS)" },
         { name = "cofins_value",   type = "decimal(18,2)", comment = "Valor do COFINS (vCOFINS)" },
+
+        # IBS / CBS
+        { name = "ibscbs_cst",     type = "string",        comment = "CST do IBS/CBS" },
+        { name = "ibscbs_class_trib", type = "string",     comment = "Código de classificação tributária IBS/CBS (cClassTrib)" },
+        { name = "ibscbs_base",    type = "decimal(18,2)", comment = "Base de cálculo do IBS/CBS (gIBSCBS.vBC)" },
+
+        { name = "ibs_value",      type = "decimal(18,2)", comment = "Valor total do IBS (vIBS)" },
+        { name = "ibs_uf_rate",    type = "decimal(18,4)", comment = "Alíquota do IBS UF (pIBSUF)" },
+        { name = "ibs_uf_value",   type = "decimal(18,2)", comment = "Valor do IBS UF (vIBSUF)" },
+        { name = "ibs_municipality_rate", type = "decimal(18,4)", comment = "Alíquota do IBS municipal (pIBSMun)" },
+        { name = "ibs_municipality_value", type = "decimal(18,2)", comment = "Valor do IBS municipal (vIBSMun)" },
+
+        { name = "cbs_rate",       type = "decimal(18,4)", comment = "Alíquota da CBS (pCBS)" },
+        { name = "cbs_value",      type = "decimal(18,2)", comment = "Valor da CBS (vCBS)" },
 
         # Metadados extras que você queira derivar
         { name = "is_gift",        type = "boolean",       comment = "Flag para itens brinde/cortesia, se derivado" }
@@ -866,6 +899,91 @@ locals {
           name    = "ingestion_date"
           type    = "date"
           comment = "Data de ingestão do snapshot de estoque (YYYY-MM-DD)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+    
+    omie_customers = {
+      description = "Customers from Omie ERP refined in Silver (one row per customer, latest version by customer_key)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_customers/"
+
+      columns = [
+        # Source / lineage
+        { name = "domain",              type = "string",    comment = "Logical data domain from source envelope" },
+        { name = "source",              type = "string",    comment = "Source system name (omie)" },
+        { name = "dataset",             type = "string",    comment = "Dataset name from source envelope" },
+        { name = "run_id",              type = "string",    comment = "Ingestion run identifier" },
+        { name = "generated_at",        type = "string",    comment = "Source file generation timestamp from bronze envelope" },
+        { name = "source_cnpj",         type = "string",    comment = "Source company CNPJ used during extraction (matriz account)" },
+        { name = "source_date_from_br", type = "string",    comment = "Original extraction start date in Brazilian format (DD/MM/YYYY)" },
+        { name = "source_date_to_br",   type = "string",    comment = "Original extraction end date in Brazilian format (DD/MM/YYYY)" },
+        { name = "source_page_number",  type = "bigint",    comment = "Source page number from Omie pagination" },
+        { name = "source_total_pages",  type = "bigint",    comment = "Total number of pages informed by Omie for the extraction" },
+
+        # Customer identifiers
+        { name = "customer_key",            type = "string",    comment = "Business key used for deduplication (coalesce of Omie ID, integration ID, document or email)" },
+        { name = "customer_omie_id",        type = "string",    comment = "Internal customer identifier in Omie" },
+        { name = "customer_integration_id", type = "string",    comment = "Customer integration identifier from Omie" },
+        { name = "customer_document",       type = "string",    comment = "Customer CPF or CNPJ digits only" },
+
+        # Customer profile
+        { name = "customer_name",           type = "string",    comment = "Customer legal name / full name" },
+        { name = "customer_trade_name",     type = "string",    comment = "Customer trade name / short name" },
+        { name = "customer_person_type",    type = "string",    comment = "Customer person type (PF or PJ)" },
+        { name = "customer_email",          type = "string",    comment = "Customer e-mail in lowercase" },
+        { name = "customer_contact_name",   type = "string",    comment = "Customer contact name" },
+
+        # Contact
+        { name = "customer_phone_area_code", type = "string",   comment = "Phone area code (DDD)" },
+        { name = "customer_phone_number",    type = "string",   comment = "Phone number digits only" },
+
+        # Address
+        { name = "address_street",          type = "string",    comment = "Street / address line" },
+        { name = "address_number",          type = "string",    comment = "Address number" },
+        { name = "address_complement",      type = "string",    comment = "Address complement" },
+        { name = "address_neighborhood",    type = "string",    comment = "Address neighborhood" },
+        { name = "address_city",            type = "string",    comment = "Address city" },
+        { name = "address_state",           type = "string",    comment = "Address state (UF)" },
+        { name = "address_zipcode",         type = "string",    comment = "ZIP code digits only" },
+        { name = "address_country_code",    type = "string",    comment = "Country code from Omie" },
+        { name = "city_code",               type = "string",    comment = "IBGE city code" },
+
+        # Registrations
+        { name = "state_registration",      type = "string",    comment = "State registration" },
+        { name = "municipal_registration",  type = "string",    comment = "Municipal registration" },
+
+        # Status flags
+        { name = "is_inactive",             type = "boolean",   comment = "Whether customer is inactive in Omie" },
+        { name = "is_billing_blocked",      type = "boolean",   comment = "Whether customer billing is blocked" },
+        { name = "is_delete_blocked",       type = "boolean",   comment = "Whether customer deletion is blocked" },
+        { name = "is_foreign",              type = "boolean",   comment = "Whether customer is foreign" },
+        { name = "send_attachments",        type = "boolean",   comment = "Whether attachments should be sent" },
+        { name = "is_imported_via_api",     type = "boolean",   comment = "Whether customer was imported via API" },
+
+        # ERP timestamps / authorship
+        { name = "created_at_erp",          type = "timestamp", comment = "Customer creation timestamp in Omie ERP" },
+        { name = "updated_at_erp",          type = "timestamp", comment = "Customer last update timestamp in Omie ERP" },
+        { name = "created_by_erp",          type = "string",    comment = "User that created the customer in Omie" },
+        { name = "updated_by_erp",          type = "string",    comment = "User that last updated the customer in Omie" },
+        { name = "created_date",            type = "date",      comment = "Date portion of created_at_erp" },
+        { name = "updated_date",            type = "date",      comment = "Date portion of updated_at_erp" },
+
+        # Tags
+        { name = "customer_tags",           type = "string",    comment = "Customer tags concatenated by pipe" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "ingestion_date"
+          type    = "date"
+          comment = "Ingestion date of the refined Omie customers batch (YYYY-MM-DD)"
           projection = {
             type          = "date"
             format        = "yyyy-MM-dd"
