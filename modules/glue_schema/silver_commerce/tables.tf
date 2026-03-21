@@ -316,6 +316,7 @@ module "tables" {
   source = "../../../modules/glue_table"
 
   for_each       = local.tables
+  environment    = var.environment
   database_name  = var.database_name
   table_name     = each.key
   description    = each.value.description

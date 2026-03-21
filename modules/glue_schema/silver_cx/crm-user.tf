@@ -392,6 +392,7 @@ module "crm_tables" {
   source = "../../../modules/glue_table" # ajuste o caminho
 
   for_each       = local.crm_tables
+  environment    = var.environment
   database_name  = var.database_name
   table_name     = each.key
   description    = each.value.description

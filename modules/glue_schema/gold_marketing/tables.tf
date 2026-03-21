@@ -11,6 +11,12 @@ locals {
         { name = "device", type = "string", comment = "Dispositivo normalizado (ex.: DESKTOP, MOBILE)" }
       ]
       partition_keys = []
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
     }
 
     # Dimensão query (GSC): termos de busca. Populada pelo job dim-query-gsc-s2g.
@@ -23,6 +29,12 @@ locals {
         { name = "query", type = "string", comment = "Termo de busca normalizado" }
       ]
       partition_keys = []
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
     }
 
     # Fato GSC: clicks/impressions por (date, device_id, query_id). Populada pelo job fact-gsc-metrics-s2g.
@@ -39,6 +51,12 @@ locals {
       partition_keys = [
         { name = "date", type = "date", comment = "Data do relatório (YYYY-MM-DD)" }
       ]
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
     }
   }
 }
@@ -47,6 +65,7 @@ module "tables" {
   source = "../../../modules/glue_table"
 
   for_each       = local.tables
+  environment    = var.environment
   database_name  = var.database_name
   table_name     = each.key
   description    = each.value.description
@@ -58,4 +77,7 @@ module "tables" {
     classification  = "parquet"
     compressionType = "snappy"
   }
+
+  quicksight              = try(each.value.quicksight, null)
+  quicksight_data_sources = var.quicksight_data_sources
 }

@@ -326,14 +326,101 @@ module "mocks" {
 }
 
 
+
+module "quicksight" {
+  source = "./modules/quicksight"
+
+  environment        = var.environment
+  account_name       = "zerezes-bi-${var.environment}"
+  notification_email = "data-notifications@zerezes.com.br"
+
+  create_account_subscription = true
+  create_account_settings     = false
+
+  authentication_method = "IAM_IDENTITY_CENTER"
+  edition               = "ENTERPRISE"
+
+  admin_group_names  = ["aws-quicksight-${var.environment}-admins"]
+  author_group_names = ["aws-quicksight-${var.environment}-authors"]
+  reader_group_names = ["aws-quicksight-${var.environment}-readers"]
+
+  # se o módulo já descobre automaticamente, pode omitir;
+  # se não, passe explicitamente
+  # iam_identity_center_instance_arn = var.iam_identity_center_instance_arn
+
+  default_namespace              = "default"
+  termination_protection_enabled = true
+
+  athena_data_sources = {
+    gold = {
+      name           = "gold"
+      data_source_id = "athena-gold"
+      work_group     = "primary"
+    }
+
+  }
+
+  create_vpc_connection = false
+
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Project     = "zerezes-data"
+  }
+}
+
+module "quicksight_folders" {
+  source = "./modules/quicksight-folders"
+
+  environment               = var.environment
+  namespace                 = "default"
+
+  admin_group_names = [
+    "aws-qs-${var.environment}-admins"
+  ]
+
+  areas = {
+    marketing = {
+      display_name = "Marketing"
+      group_name   = "aws-qs-${var.environment}-marketing"
+    }
+
+    digital_inovacao = {
+      display_name = "Digital e Inovação"
+      group_name   = "aws-qs-${var.environment}-digital_inovacao"
+    }
+
+    operacoes_financeiro = {
+      display_name = "Operações e Financeiro"
+      group_name   = "aws-qs-${var.environment}-operacoes_financeiro"
+    }
+
+    comercial_expansao = {
+      display_name = "Comercial e Expansão"
+      group_name   = "aws-qs-${var.environment}-comercial_expansao"
+    }
+
+    pessoas_cultura = {
+      display_name = "Pessoas e Cultura"
+      group_name   = "aws-qs-${var.environment}-pessoas_cultura"
+    }
+
+    produto = {
+      display_name = "Produto"
+      group_name   = "aws-qs-${var.environment}-produto"
+    }
+  }
+}
+
 module "glue_schema" {
   source = "./modules/glue_schema"
 
-  environment   = var.environment
-  bronze_bucket = module.buckets.bronze_bucket_name
-  silver_bucket = module.buckets.silver_bucket_name
-  gold_bucket   = module.buckets.gold_bucket_name
-  etls_bucket   = module.buckets.etls_bucket_name
+  environment             = var.environment
+  bronze_bucket           = module.buckets.bronze_bucket_name
+  silver_bucket           = module.buckets.silver_bucket_name
+  gold_bucket             = module.buckets.gold_bucket_name
+  etls_bucket             = module.buckets.etls_bucket_name
+  quicksight_data_sources = module.quicksight.quicksight_data_sources
 }
 
 module "glue_etls" {
@@ -434,90 +521,6 @@ module "zextract_watermarks" {
   }
 }
 
-module "quicksight" {
-  source = "./modules/quicksight"
-
-  environment        = var.environment
-  account_name       = "zerezes-bi-${var.environment}"
-  notification_email = "data-notifications@zerezes.com.br"
-
-  create_account_subscription = true
-  create_account_settings     = false
-
-  authentication_method = "IAM_IDENTITY_CENTER"
-  edition               = "ENTERPRISE"
-
-  admin_group_names  = ["aws-quicksight-${var.environment}-admins"]
-  author_group_names = ["aws-quicksight-${var.environment}-authors"]
-  reader_group_names = ["aws-quicksight-${var.environment}-readers"]
-
-  # se o módulo já descobre automaticamente, pode omitir;
-  # se não, passe explicitamente
-  # iam_identity_center_instance_arn = var.iam_identity_center_instance_arn
-
-  default_namespace              = "default"
-  termination_protection_enabled = true
-
-  athena_data_sources = {
-    gold = {
-      name           = "gold"
-      data_source_id = "athena-gold"
-      work_group     = "primary"
-    }
-
-  }
-
-  create_vpc_connection = false
-
-  tags = {
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Project     = "zerezes-data"
-  }
-}
-
-module "quicksight_folders" {
-  source = "./modules/quicksight-folders"
-
-  environment               = var.environment
-  namespace                 = "default"
-
-  admin_group_names = [
-    "aws-qs-${var.environment}-admins"
-  ]
-
-  areas = {
-    marketing = {
-      display_name = "Marketing"
-      group_name   = "aws-qs-${var.environment}-marketing"
-    }
-
-    digital_inovacao = {
-      display_name = "Digital e Inovação"
-      group_name   = "aws-qs-${var.environment}-digital_inovacao"
-    }
-
-    operacoes_financeiro = {
-      display_name = "Operações e Financeiro"
-      group_name   = "aws-qs-${var.environment}-operacoes_financeiro"
-    }
-
-    comercial_expansao = {
-      display_name = "Comercial e Expansão"
-      group_name   = "aws-qs-${var.environment}-comercial_expansao"
-    }
-
-    pessoas_cultura = {
-      display_name = "Pessoas e Cultura"
-      group_name   = "aws-qs-${var.environment}-pessoas_cultura"
-    }
-
-    produto = {
-      display_name = "Produto"
-      group_name   = "aws-qs-${var.environment}-produto"
-    }
-  }
-}
 
 
 resource "aws_security_group_rule" "allow_amundsen_search_to_es" {

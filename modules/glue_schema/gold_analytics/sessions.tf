@@ -13,6 +13,12 @@ locals {
         { name = "year", type = "int", comment = "Ano" }
       ]
       partition_keys = []
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
     }
 
     ga4_dim_source_medium = {
@@ -24,6 +30,12 @@ locals {
         { name = "medium", type = "string", comment = "Meio do tráfego" }
       ]
       partition_keys = []
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
     }
 
     ga4_dim_campaign = {
@@ -34,6 +46,12 @@ locals {
         { name = "campaign", type = "string", comment = "Nome da campanha" }
       ]
       partition_keys = []
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
     }
 
     ga4_fact_sessions_daily = {
@@ -50,6 +68,12 @@ locals {
       partition_keys = [
         { name = "report_date", type = "date" }
       ]
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
     }
   }
 }
@@ -58,14 +82,19 @@ module "tables" {
   source = "../../../modules/glue_table"
 
   for_each       = local.tables
+  environment    = var.environment
   database_name  = var.database_name
   table_name     = each.key
   description    = each.value.description
   location       = each.value.location
   columns        = each.value.columns
   partition_keys = each.value.partition_keys
+  
   parameters = {
     classification  = "parquet"
     compressionType = "snappy"
   }
+
+  quicksight             = try(each.value.quicksight, null)
+  quicksight_data_sources = var.quicksight_data_sources
 }

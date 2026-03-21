@@ -16,6 +16,13 @@ locals {
         { name = "updated_by", type = "string", comment = "Usuário da última alteração" }
       ]
       partition_keys = []
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+      
     }
 
     # Fato de vendas por produto (Omie). Populada pelo job fact-product-sales-s2g.
@@ -36,6 +43,12 @@ locals {
       partition_keys = [
         { name = "date", type = "date", comment = "Data da venda (YYYY-MM-DD)" }
       ]
+
+      quicksight = {
+        enabled         = true
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
     }
   }
 }
@@ -44,6 +57,7 @@ module "tables" {
   source = "../../../modules/glue_table"
 
   for_each       = local.tables
+  environment    = var.environment
   database_name  = var.database_name
   table_name     = each.key
   description    = each.value.description
@@ -55,4 +69,9 @@ module "tables" {
     classification  = "parquet"
     compressionType = "snappy"
   }
+
+  quicksight             = try(each.value.quicksight, null)
+  quicksight_data_sources = var.quicksight_data_sources
+
 }
+

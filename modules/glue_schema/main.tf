@@ -129,6 +129,7 @@ module "gold_cx" {
   bucket        = var.gold_bucket
   database_name = aws_glue_catalog_database.gold_cx.name
   domain        = "customer_experience"
+  quicksight_data_sources = var.quicksight_data_sources
 }
 
 module "gold_analytics" {
@@ -138,6 +139,7 @@ module "gold_analytics" {
   bucket        = var.gold_bucket
   database_name = aws_glue_catalog_database.gold_analytics.name
   domain        = "analytics"
+  quicksight_data_sources = var.quicksight_data_sources
 }
 
 module "gold_marketing" {
@@ -147,14 +149,16 @@ module "gold_marketing" {
   bucket        = var.gold_bucket
   database_name = aws_glue_catalog_database.gold_marketing.name
   domain        = "marketing"
+  quicksight_data_sources = var.quicksight_data_sources
 }
 
 module "gold" {
   source = "./gold"
 
-  environment   = var.environment
-  bucket        = var.gold_bucket
-  database_name = aws_glue_catalog_database.gold.name
-  domain        = "gold"
+  environment             = var.environment
+  bucket                  = var.gold_bucket
+  database_name           = aws_glue_catalog_database.gold.name
+  domain                  = "gold"
+  quicksight_data_sources = var.quicksight_data_sources
 }
 
