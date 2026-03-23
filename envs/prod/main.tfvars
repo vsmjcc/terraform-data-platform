@@ -13,6 +13,6 @@ peer_zerezes_vpc_id     = "vpc-08a0e8e9a408c4f7d"
 peer_zerezes_vpc_cidr   = "10.25.48.0/22"
 peer_zerezes_account_id = "219219235757"
 
-ssh_key_name  = "aws-data-prod-key"
+ssh_key_name = "aws-data-prod-key"
 
-public_zone_name   = "zerezes.digital"
+public_zone_name = "zerezes.digital"

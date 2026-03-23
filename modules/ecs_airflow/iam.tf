@@ -173,9 +173,9 @@ data "aws_iam_policy_document" "airflow_glue_crawlers_all" {
   }
 
   statement {
-    sid    = "ListCrawlers"
-    effect = "Allow"
-    actions = ["glue:ListCrawlers", "glue:GetCrawlerMetrics"]
+    sid       = "ListCrawlers"
+    effect    = "Allow"
+    actions   = ["glue:ListCrawlers", "glue:GetCrawlerMetrics"]
     resources = ["*"]
   }
 }

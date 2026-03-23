@@ -2,7 +2,7 @@
 module "glue_job_foot_traffic_to_silver" {
   source = "../glue_job"
 
-  name          = "offline-analytics-foot_traffic-b2s-refine"
+  name = "offline-analytics-foot_traffic-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/offline-analytics-foot_traffic-b2s-refine.py"

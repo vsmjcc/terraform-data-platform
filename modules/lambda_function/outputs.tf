@@ -12,9 +12,9 @@ output "http_api_url" {
     length(aws_apigatewayv2_domain_name.custom) > 0
     ? "https://${aws_apigatewayv2_domain_name.custom[0].domain_name}"
     : (
-        length(aws_apigatewayv2_api.this) > 0
-        ? "${aws_apigatewayv2_api.this[0].api_endpoint}"
-        : null
-      )
+      length(aws_apigatewayv2_api.this) > 0
+      ? "${aws_apigatewayv2_api.this[0].api_endpoint}"
+      : null
+    )
   )
 }

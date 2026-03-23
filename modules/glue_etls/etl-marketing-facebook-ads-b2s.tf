@@ -2,7 +2,7 @@
 module "glue_job_facebook_ads_to_silver" {
   source = "../glue_job"
 
-  name          = "marketing-facebook-ads-b2s-refine"
+  name = "marketing-facebook-ads-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/marketing-facebook-ads-b2s-refine.py"

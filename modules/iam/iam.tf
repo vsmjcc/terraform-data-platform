@@ -117,20 +117,20 @@ resource "aws_iam_policy" "s3_dag_upload_policy" {
 }
 
 resource "aws_iam_policy" "s3_etls_glue_upload_policy" {
-  name        = "zerezes-etls-glue-s3-upload-policy" 
+  name        = "zerezes-etls-glue-s3-upload-policy"
   description = "Permite o upload e leitura dos scripts Glue no bucket zrzs-dev-etls"
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow",
-        Action = ["s3:PutObject", "s3:PutObjectAcl", "s3:GetObject"],
+        Effect   = "Allow",
+        Action   = ["s3:PutObject", "s3:PutObjectAcl", "s3:GetObject"],
         Resource = "arn:aws:s3:::zrzs-${var.environment}-etls/glue/*"
       },
       {
-        Effect = "Allow",
-        Action = "s3:ListBucket",
+        Effect   = "Allow",
+        Action   = "s3:ListBucket",
         Resource = "arn:aws:s3:::zrzs-${var.environment}-etls",
         Condition = {
           StringLike = { "s3:prefix" = ["glue/*"] }

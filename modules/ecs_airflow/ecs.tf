@@ -32,7 +32,7 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
         { name = "AIRFLOW__WEBSERVER__BASE_URL", value = "https://airflow.${var.dns_zone_name}" },
         { name = "AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX", value = "true" }
       ]
-      
+
       secrets = [{
         name      = "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN"
         valueFrom = aws_secretsmanager_secret.sqlalchemy_conn.arn
@@ -70,12 +70,12 @@ resource "aws_ecs_task_definition" "airflow_webserver" {
 }
 
 resource "aws_ecs_service" "airflow" {
-  name            = "airflow-${var.environment}-webserver"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
+  name                   = "airflow-${var.environment}-webserver"
+  cluster                = var.cluster_name
+  launch_type            = "FARGATE"
+  desired_count          = 1
   enable_execute_command = true
-  task_definition = aws_ecs_task_definition.airflow_webserver.arn
+  task_definition        = aws_ecs_task_definition.airflow_webserver.arn
 
   network_configuration {
     subnets          = var.private_subnet_ids
@@ -159,12 +159,12 @@ resource "aws_ecs_task_definition" "airflow_scheduler" {
 }
 
 resource "aws_ecs_service" "airflow_scheduler" {
-  name            = "airflow-${var.environment}-scheduler"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
+  name                   = "airflow-${var.environment}-scheduler"
+  cluster                = var.cluster_name
+  launch_type            = "FARGATE"
+  desired_count          = 1
   enable_execute_command = true
-  task_definition = aws_ecs_task_definition.airflow_scheduler.arn
+  task_definition        = aws_ecs_task_definition.airflow_scheduler.arn
 
   network_configuration {
     subnets          = var.private_subnet_ids
@@ -241,13 +241,13 @@ resource "aws_ecs_task_definition" "airflow_worker" {
 }
 
 resource "aws_ecs_service" "airflow_worker" {
-  count           = var.worker_count
-  name            = "airflow-${var.environment}-worker-${count.index}"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
+  count                  = var.worker_count
+  name                   = "airflow-${var.environment}-worker-${count.index}"
+  cluster                = var.cluster_name
+  launch_type            = "FARGATE"
+  desired_count          = 1
   enable_execute_command = true
-  task_definition = aws_ecs_task_definition.airflow_worker[count.index].arn
+  task_definition        = aws_ecs_task_definition.airflow_worker[count.index].arn
 
   network_configuration {
     subnets          = var.private_subnet_ids

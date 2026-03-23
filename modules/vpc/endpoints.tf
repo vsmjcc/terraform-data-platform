@@ -9,7 +9,7 @@ locals {
 
 # === Security Group (mantido EXATAMENTE como está no state) ===
 resource "aws_security_group" "vpc_endpoints" {
-  name        = "dev-vpc-endpoints"  # ← NOME ANTIGO (não muda!)
+  name        = "dev-vpc-endpoints" # ← NOME ANTIGO (não muda!)
   description = "Permite trafego interno para os endpoints"
   vpc_id      = aws_vpc.this.id
 
@@ -45,11 +45,11 @@ resource "aws_security_group" "vpc_endpoints" {
 resource "aws_vpc_endpoint" "interface" {
   for_each = local.interface_endpoints
 
-  vpc_id            = aws_vpc.this.id
-  service_name      = each.value
-  vpc_endpoint_type = "Interface"
-  subnet_ids        = aws_subnet.private[*].id
-  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  vpc_id              = aws_vpc.this.id
+  service_name        = each.value
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = aws_subnet.private[*].id
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
 
   tags = {

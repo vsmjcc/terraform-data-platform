@@ -13,3 +13,11 @@ variable "database_name" {
 variable "domain" {
   type = string
 }
+
+variable "quicksight_data_sources" {
+  description = "Mapa de data sources do QuickSight já criados, por chave lógica (ex.: gold)"
+  type = map(object({
+    arn = string
+  }))
+  default = {}
+}

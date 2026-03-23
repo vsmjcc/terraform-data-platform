@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "vpc_flow_logs" {
-  count  = var.enable_vpc_flow_logs ? 1 : 0
-  bucket = "zrzs-${var.environment}-vpc-flow-logs-${var.region}"
+  count         = var.enable_vpc_flow_logs ? 1 : 0
+  bucket        = "zrzs-${var.environment}-vpc-flow-logs-${var.region}"
   force_destroy = true
 
   tags = {
@@ -34,8 +34,8 @@ resource "aws_iam_role_policy" "vpc_flow_logs" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Effect = "Allow",
-      Action = ["s3:PutObject"],
+      Effect   = "Allow",
+      Action   = ["s3:PutObject"],
       Resource = "${aws_s3_bucket.vpc_flow_logs[0].arn}/*"
     }]
   })

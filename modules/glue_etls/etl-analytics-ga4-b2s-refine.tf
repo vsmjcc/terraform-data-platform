@@ -3,7 +3,7 @@
 module "glue_job_ga4_cost_to_silver" {
   source = "../glue_job"
 
-  name          = "analytics-ga4-cost-b2s-refine"
+  name = "analytics-ga4-cost-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/analytics-ga4-cost-b2s-refine.py"
@@ -33,7 +33,7 @@ module "glue_job_ga4_cost_to_silver" {
 module "glue_job_ga4_sessions_to_silver" {
   source = "../glue_job"
 
-  name          = "analytics-ga4-sessions-b2s-refine"
+  name = "analytics-ga4-sessions-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/analytics-ga4-sessions-b2s-refine.py"
@@ -63,7 +63,7 @@ module "glue_job_ga4_sessions_to_silver" {
 module "glue_job_ga4_transactions_to_silver" {
   source = "../glue_job"
 
-  name          = "analytics-ga4-transactions-b2s-refine"
+  name = "analytics-ga4-transactions-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/analytics-ga4-transactions-b2s-refine.py"

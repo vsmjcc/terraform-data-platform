@@ -107,16 +107,16 @@ variable "tags" {
   default     = {}
 }
 
-variable "create_dns_record"     { 
-	description = "Cria DNS no Route53" 
-	type = bool 
-	default = false 
+variable "create_dns_record" {
+  description = "Cria DNS no Route53"
+  type        = bool
+  default     = false
 }
 
-variable "dns_zone_id"           { 
-	description = "Zone ID do Route 53" 
-	type = string 
-	default = null 
+variable "dns_zone_id" {
+  description = "Zone ID do Route 53"
+  type        = string
+  default     = null
 }
 
 variable "dns_zone_name" {
@@ -125,10 +125,10 @@ variable "dns_zone_name" {
   default     = null
 }
 
-variable "dns_evaluate_target_health" { 
-	description = "evaluate_target_health no alias" 
-	type = bool 
-	default = false 
+variable "dns_evaluate_target_health" {
+  description = "evaluate_target_health no alias"
+  type        = bool
+  default     = false
 }
 
 variable "enable_vpn_ssh" {

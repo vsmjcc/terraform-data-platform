@@ -10,7 +10,7 @@ resource "aws_secretsmanager_secret" "neo4j_password" {
 }
 
 resource "aws_secretsmanager_secret_version" "neo4j_password_version" {
-  secret_id     = aws_secretsmanager_secret.neo4j_password.id
+  secret_id = aws_secretsmanager_secret.neo4j_password.id
   secret_string = jsonencode({
     username = "neo4j"
     password = random_password.neo4j_password.result

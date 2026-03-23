@@ -110,12 +110,12 @@ variable "gsi" {
 
 variable "autoscaling" {
   type = object({
-    enabled         = bool
-    min_read        = number
-    max_read        = number
-    min_write       = number
-    max_write       = number
-    target_read_pct = number
+    enabled          = bool
+    min_read         = number
+    max_read         = number
+    min_write        = number
+    max_write        = number
+    target_read_pct  = number
     target_write_pct = number
   })
   description = "Autoscaling só vale para PROVISIONED."

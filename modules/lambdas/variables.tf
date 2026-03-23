@@ -49,8 +49,8 @@ variable "dns_zone_id" {
 variable "dns_zones" {
   description = "DNS Map"
   type = map(object({
-    zone_id            = string
-    zone_name           = string
+    zone_id         = string
+    zone_name       = string
     certificate_arn = string
   }))
 }

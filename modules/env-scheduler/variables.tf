@@ -29,28 +29,28 @@ variable "start_cron_utc" {
   default     = "cron(0 11 * * ? *)"
 }
 
-variable "manage_ecs" { 
+variable "manage_ecs" {
   description = "Manage ECS services"
-  type = bool
-  default = true 
+  type        = bool
+  default     = true
 }
 
-variable "manage_asg" { 
+variable "manage_asg" {
   description = "Manage Auto Scaling Groups"
-  type = bool
-  default = true 
+  type        = bool
+  default     = true
 }
 
-variable "manage_ec2" { 
+variable "manage_ec2" {
   description = "Manage EC2 instances"
-  type = bool
-  default = true 
+  type        = bool
+  default     = true
 }
 
-variable "manage_rds" { 
+variable "manage_rds" {
   description = "Manage RDS instances"
-  type = bool
-  default = true 
+  type        = bool
+  default     = true
 }
 
 variable "ecs_desired_default_on_start" {
@@ -61,20 +61,20 @@ variable "ecs_desired_default_on_start" {
 
 variable "asg_default_on_start" {
   description = "Fallback ASG sizes on start"
-  type = object({ min = number, max = number, desired = number })
-  default = { min = 1, max = 1, desired = 1 }
+  type        = object({ min = number, max = number, desired = number })
+  default     = { min = 1, max = 1, desired = 1 }
 }
 
-variable "lambda_memory_mb"    { 
+variable "lambda_memory_mb" {
   description = "Lambda memory (MB)"
-  type = number
-  default = 256 
+  type        = number
+  default     = 256
 }
 
-variable "lambda_timeout_seconds" { 
+variable "lambda_timeout_seconds" {
   description = "Lambda timeout (seconds)"
-  type = number
-  default = 900 
+  type        = number
+  default     = 900
 }
 
 variable "tags" {

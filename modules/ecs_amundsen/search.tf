@@ -3,7 +3,7 @@ resource "aws_security_group" "search" {
   name        = "amundsen-search-${var.environment}-sg"
   description = "SG for Amundsen Search service"
   vpc_id      = var.vpc_id
-  
+
   # --- MUDANÇA AQUI ---
   # Permite tráfego na porta 5001 de QUALQUER LUGAR dentro da VPC
   ingress {
@@ -21,7 +21,7 @@ resource "aws_security_group" "search" {
     to_port         = 9200
     security_groups = [var.es_sg_id]
   }
-  
+
   # --- ADICIONE ESTE BLOCO ---
   # Adiciona a regra de Egress para o Metadata inline
   egress {
@@ -34,10 +34,10 @@ resource "aws_security_group" "search" {
 
   # Egress Padrão
   egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = { Name = "amundsen-search-${var.environment}-sg" }
@@ -59,7 +59,7 @@ resource "aws_ecs_task_definition" "search" {
       name      = "amundsen-search"
       image     = var.image_search
       essential = true
-      
+
       portMappings = [
         { containerPort = 5001, hostPort = 5001, protocol = "tcp" }
       ],
@@ -68,9 +68,9 @@ resource "aws_ecs_task_definition" "search" {
         # Conexão com Metadata Service
         { name = "METADATA_HOST", value = "${aws_service_discovery_service.metadata.name}.${var.service_discovery_namespace_name}" }, # amundsen-metadata
         { name = "METADATA_PORT", value = "5002" },
-        
+
         # Conexão com Elasticsearch
-        { name = "PROXY_ENDPOINT", value = "http://${var.es_host}:9200"},
+        { name = "PROXY_ENDPOINT", value = "http://${var.es_host}:9200" },
         { name = "CREDENTIALS_PROXY_USER", value = "elastic" },
         { name = "PROXY_USER", value = "elastic" }
       ],
@@ -101,11 +101,11 @@ resource "aws_cloudwatch_log_group" "search" {
 
 # --- SEARCH: Service e Service Discovery ---
 resource "aws_ecs_service" "search" {
-  name            = "amundsen-search-${var.environment}"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
-  task_definition = aws_ecs_task_definition.search.arn
+  name                   = "amundsen-search-${var.environment}"
+  cluster                = var.cluster_name
+  launch_type            = "FARGATE"
+  desired_count          = 1
+  task_definition        = aws_ecs_task_definition.search.arn
   enable_execute_command = true
 
   network_configuration {
@@ -123,9 +123,9 @@ resource "aws_service_discovery_service" "search" {
 
   dns_config {
     namespace_id = var.service_discovery_namespace_id
-    dns_records { 
+    dns_records {
       type = "A"
-      ttl  = 10 
+      ttl  = 10
     }
     routing_policy = "MULTIVALUE"
   }

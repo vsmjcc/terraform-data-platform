@@ -186,11 +186,11 @@ resource "aws_ecs_task_definition" "this" {
 
 resource "aws_ecs_service" "this" {
   # ⚠️ Nome do serviço pra bater com o workflow (SERVICE_NAME = mocks-${env})
-  name                  = "${var.app_name}-${var.environment}"
-  cluster               = var.cluster_name
-  launch_type           = "FARGATE"
-  desired_count         = 1
-  task_definition       = aws_ecs_task_definition.this.arn
+  name                   = "${var.app_name}-${var.environment}"
+  cluster                = var.cluster_name
+  launch_type            = "FARGATE"
+  desired_count          = 1
+  task_definition        = aws_ecs_task_definition.this.arn
   enable_execute_command = true
 
   network_configuration {
