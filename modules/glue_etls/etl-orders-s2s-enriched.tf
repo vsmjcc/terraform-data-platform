@@ -20,7 +20,7 @@ module "glue_job_orders_s2s_enriched" {
     "--SOURCE_GLUE_DATABASE" = "silver_commerce"
     "--SOURCE_GLUE_TABLE"    = "orders"
     "--GLUE_DATABASE"        = "silver_enriched"
-    "--GLUE_TABLE"           = "orders"
+    "--GLUE_TABLE"          = "orders_enriched"
     "--MODE"                 = "overwrite"
   }
 
