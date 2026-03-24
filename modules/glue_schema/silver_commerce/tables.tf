@@ -67,6 +67,11 @@ locals {
         { name = "order_number", type = "bigint", comment = "Número do pedido" },
         { name = "number_internal", type = "bigint", comment = "Número interno" },
 
+        # clientes
+        { name = "customer_id", type = "string", comment = "identificador do cliente shopify" },
+        { name = "email", type = "string", comment = "email do cliente shopify" },
+        { name = "customer_document", type = "string", comment = "cpf do cliente shopify" },
+        
         # status
         { name = "financial_status", type = "string", comment = "Status financeiro" },
         { name = "fulfillment_status", type = "string", comment = "Status de fulfillment" },
