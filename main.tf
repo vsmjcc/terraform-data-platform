@@ -50,27 +50,6 @@ module "vpn_pritunl" {
   environment   = var.environment
 }
 
-# module "ec2_superset" {
-#   source        = "./modules/ec2-superset"
-#   environment   = var.environment
-#   vpc_id        = module.vpc.vpc_id
-#   subnet_id     = module.vpc.private_subnet_ids[0]
-#   ami_id        = "ami-080e1f13689e07408"
-#   instance_type = "t3.medium"
-#   key_name      = var.ssh_key_name
-#   enable_vpn_ssh        = true
-#   vpn_security_group_id = module.vpn_pritunl.security_group_id
-#   enable_alb             = true
-#   alb_certificate_arn    = module.dns.dns_zones["data_zerezes"].certificate_arn
-#   alb_public_subnet_ids  = module.vpc.public_subnet_ids
-#   allowed_cidrs_https    = ["0.0.0.0/0"]
-
-#   create_dns_record = true
-#   dns_zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
-#   dns_zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
-# }
-
-
 resource "aws_service_discovery_private_dns_namespace" "internal" {
   name        = "zerezes.local"
   description = "Internal namespace for service discovery"
@@ -326,6 +305,30 @@ module "mocks" {
 }
 
 
+module "data_lake_settings" {
+  source = "./modules/data_lake_settings"
+
+  environment = var.environment
+  aws_region  = var.region
+
+  zone_id         = module.dns.dns_zones["data_zerezes"].zone_id
+  zone_name       = module.dns.dns_zones["data_zerezes"].zone_name
+  certificate_arn = module.dns.dns_zones["data_zerezes"].certificate_arn
+
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnet_ids
+  public_subnet_ids  = module.vpc.public_subnet_ids
+
+  ecs_cluster_name   = module.ecs_cluster.name
+
+  subdomain = "settings"
+
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Project     = "data-lake-settings"
+  }
+}
 
 module "quicksight" {
   source = "./modules/quicksight"

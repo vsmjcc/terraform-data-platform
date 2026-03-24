@@ -140,6 +140,62 @@ resource "aws_iam_policy" "s3_etls_glue_upload_policy" {
   })
 }
 
+resource "aws_iam_policy" "s3_frontend_deploy_policy" {
+  name        = "zerezes-app-s3-frontend-deploy-policy"
+  description = "Permite deploy do frontend no bucket data-lake-settings"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "ListFrontendBucket",
+        Effect = "Allow",
+        Action = [
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ],
+        Resource = [
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-settings"
+        ]
+      },
+      {
+        Sid    = "ManageFrontendObjects",
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ],
+        Resource = [
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-settings/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "cloudfront_invalidation_policy" {
+  name        = "zerezes-app-cloudfront-invalidation-policy"
+  description = "Permite invalidar distribuições CloudFront usadas no deploy do frontend"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "InvalidateCloudFront",
+        Effect = "Allow",
+        Action = [
+          "cloudfront:CreateInvalidation",
+          "cloudfront:GetDistribution",
+          "cloudfront:GetInvalidation",
+          "cloudfront:ListInvalidations"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_policy" "bronze_write_policy" {
   name = "zrzs-${var.environment}-data-lake-bronze-write-policy"
 

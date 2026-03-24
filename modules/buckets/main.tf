@@ -42,6 +42,14 @@ module "packages_bucket" {
   tags        = {}
 }
 
+module "data_lake_settings_bucket" {
+  source      = "../s3_bucket"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "zrzs-${var.environment}-data-lake-settings"
+  tags        = {}
+}
+
 resource "aws_s3_object" "lambda_zip" {
   bucket       = module.packages_bucket.bucket_name
   key          = "empty-lambda.zip"

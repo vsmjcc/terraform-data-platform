@@ -76,20 +76,29 @@ output "zextract_table_arn" {
 }
 
 
+output "data_lake_settings" {
+  description = "Resumo dos recursos da aplicação data lake settings."
 
-# output "superset_https_url" {
-#   value       = module.ec2_superset.https_url
-# }
+  value = {
+    frontend = {
+      url                        = module.data_lake_settings.frontend_url
+      bucket_name                = module.data_lake_settings.frontend_bucket_name
+      cloudfront_distribution_id = module.data_lake_settings.frontend_cloudfront_distribution_id
+    }
 
-# output "superset_generated_admin_password" {
-#   value       = module.ec2_superset.generated_admin_password
-#   sensitive   = true
-# }
+    backend = {
+      url                 = module.data_lake_settings.backend_url
+      service_name        = module.data_lake_settings.backend_service_name
+      task_definition_arn = module.data_lake_settings.backend_task_definition_arn
+      container_image     = module.data_lake_settings.backend_container_image
+    }
 
-# output "superset_generated_secret_key" {
-#   value       = module.ec2_superset.generated_secret_key
-#   sensitive   = true
-# }
+    ecr = {
+      repository_name = module.data_lake_settings.backend_ecr_repository_name
+      repository_url  = module.data_lake_settings.backend_ecr_repository_url
+    }
+  }
+}
 
 
 
