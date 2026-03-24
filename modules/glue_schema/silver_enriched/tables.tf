@@ -59,6 +59,12 @@ locals {
         { name = "fulfillment_status", type = "string",        comment = "Status de fulfillment" },
         { name = "confirmed",          type = "boolean",       comment = "Pedido confirmado" },
 
+        { name = "shopify_customer_id",  type = "string",        comment = "Identificador do customer no shopify" },
+        { name = "customer_id",  type = "string",        comment = "Identificador do customer" },
+        { name = "customer_document",  type = "string",        comment = "CPF" },
+        { name = "customer_document_raw",  type = "string",        comment = "CPF original" },
+        { name = "email",  type = "string",        comment = "email" },
+        
         { name = "currency",             type = "string",        comment = "Moeda" },
         { name = "subtotal_price",       type = "decimal(18,2)", comment = "Subtotal" },
         { name = "total_price",          type = "decimal(18,2)", comment = "Total" },
