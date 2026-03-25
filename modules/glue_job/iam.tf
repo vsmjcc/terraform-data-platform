@@ -23,25 +23,25 @@ resource "aws_iam_role" "glue" {
 # S3 access (listar buckets específicos + R/W nos objetos)
 data "aws_iam_policy_document" "glue_s3" {
   statement {
-    sid     = "ListAll"
-    effect  = "Allow"
-    actions = ["s3:ListAllMyBuckets"]
+    sid       = "ListAll"
+    effect    = "Allow"
+    actions   = ["s3:ListAllMyBuckets"]
     resources = ["*"]
   }
 
   statement {
-    sid     = "ListSpecificBuckets"
-    effect  = "Allow"
-    actions = ["s3:ListBucket"]
+    sid       = "ListSpecificBuckets"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
     resources = [for b in local.all_buckets : "arn:aws:s3:::${b}"]
   }
 
   statement {
-    sid     = "ObjectsRW"
-    effect  = "Allow"
+    sid    = "ObjectsRW"
+    effect = "Allow"
     actions = [
-      "s3:GetObject","s3:PutObject","s3:DeleteObject",
-      "s3:AbortMultipartUpload","s3:ListBucketMultipartUploads"
+      "s3:GetObject", "s3:PutObject", "s3:DeleteObject",
+      "s3:AbortMultipartUpload", "s3:ListBucketMultipartUploads"
     ]
     resources = [for b in local.all_buckets : "arn:aws:s3:::${b}/*"]
   }
@@ -55,19 +55,19 @@ resource "aws_iam_policy" "glue_s3" {
 # CloudWatch Logs + Glue Catalog + (opcional EC2 p/ VPC)
 data "aws_iam_policy_document" "glue_logs_catalog" {
   statement {
-    sid     = "CWLogs"
-    effect  = "Allow"
-    actions = ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents","logs:DescribeLogStreams"]
+    sid       = "CWLogs"
+    effect    = "Allow"
+    actions   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams"]
     resources = ["*"]
   }
 
   statement {
-    sid     = "GlueCatalog"
-    effect  = "Allow"
+    sid    = "GlueCatalog"
+    effect = "Allow"
     actions = [
-      "glue:Get*","glue:BatchGet*","glue:List*",
-      "glue:CreateDatabase","glue:UpdateDatabase","glue:DeleteDatabase",
-      "glue:CreateTable","glue:UpdateTable","glue:DeleteTable"
+      "glue:Get*", "glue:BatchGet*", "glue:List*",
+      "glue:CreateDatabase", "glue:UpdateDatabase", "glue:DeleteDatabase",
+      "glue:CreateTable", "glue:UpdateTable", "glue:DeleteTable"
     ]
     resources = ["*"]
   }
@@ -75,11 +75,11 @@ data "aws_iam_policy_document" "glue_logs_catalog" {
   dynamic "statement" {
     for_each = var.use_vpc ? [1] : []
     content {
-      sid     = "EC2ForGlueVPC"
-      effect  = "Allow"
+      sid    = "EC2ForGlueVPC"
+      effect = "Allow"
       actions = [
-        "ec2:CreateNetworkInterface","ec2:DeleteNetworkInterface","ec2:DescribeNetworkInterfaces",
-        "ec2:DescribeSubnets","ec2:DescribeSecurityGroups","ec2:DescribeVpcs"
+        "ec2:CreateNetworkInterface", "ec2:DeleteNetworkInterface", "ec2:DescribeNetworkInterfaces",
+        "ec2:DescribeSubnets", "ec2:DescribeSecurityGroups", "ec2:DescribeVpcs"
       ]
       resources = ["*"]
     }
@@ -95,8 +95,8 @@ resource "aws_iam_policy" "glue_logs_catalog" {
 data "aws_iam_policy_document" "kms" {
   count = length(var.kms_keys) > 0 ? 1 : 0
   statement {
-    effect = "Allow"
-    actions = ["kms:Decrypt","kms:Encrypt","kms:ReEncrypt*","kms:GenerateDataKey*","kms:DescribeKey"]
+    effect    = "Allow"
+    actions   = ["kms:Decrypt", "kms:Encrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:DescribeKey"]
     resources = var.kms_keys
   }
 }

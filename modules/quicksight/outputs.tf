@@ -25,3 +25,15 @@ output "athena_data_source_arns" {
 output "vpc_connection_arn" {
   value = try(aws_quicksight_vpc_connection.this[0].arn, null)
 }
+
+output "quicksight_data_sources" {
+  description = "Mapa de data sources do QuickSight para reutilização em outros módulos."
+  value = {
+    for k, v in aws_quicksight_data_source.athena : k => {
+      arn            = v.arn
+      data_source_id = v.data_source_id
+      name           = v.name
+      type           = v.type
+    }
+  }
+}

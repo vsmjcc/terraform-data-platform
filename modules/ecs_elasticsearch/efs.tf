@@ -30,9 +30,9 @@ resource "aws_efs_mount_target" "es_data" {
     for idx, subnet_id in var.private_subnet_ids :
     idx => subnet_id
   }
-  
-  file_system_id = aws_efs_file_system.es_data.id
-  subnet_id      = each.value
+
+  file_system_id  = aws_efs_file_system.es_data.id
+  subnet_id       = each.value
   security_groups = [aws_security_group.efs.id]
 }
 

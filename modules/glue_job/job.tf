@@ -5,7 +5,7 @@ data "aws_subnet" "selected" {
 }
 
 resource "aws_glue_job" "this" {
-  name     = "${var.name}"
+  name     = var.name
   role_arn = aws_iam_role.glue.arn
 
   glue_version      = var.glue_version

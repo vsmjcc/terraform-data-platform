@@ -5,7 +5,7 @@ output "peering_id" {
 
 output "acceptance_instructions" {
   description = "Passos/CLI para aceitar no peer quando manage_peer_side=false"
-  value = var.manage_peer_side ? null : <<EOT
+  value       = var.manage_peer_side ? null : <<EOT
 [PARCIAL] Aceitar peering na conta peer (zerezes):
 
 1) Console: VPC -> Peering connections -> Selecione ${local.peering_id} -> Accept.

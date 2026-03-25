@@ -16,7 +16,7 @@ resource "aws_apigatewayv2_domain_name" "custom" {
 }
 
 resource "aws_route53_record" "custom_dns" {
-  count   = var.enable_http_api && var.enable_custom_domain ? 1 : 0
+  count = var.enable_http_api && var.enable_custom_domain ? 1 : 0
 
   zone_id = var.dns_zone_id
   name    = "${var.function_name}.${data.aws_route53_zone.selected[0].name}"

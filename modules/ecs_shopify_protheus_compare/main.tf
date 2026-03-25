@@ -43,7 +43,7 @@ resource "aws_iam_role" "task_role" {
 # (Opcional) Permite usar o ECS Exec para entrar no container via terminal
 resource "aws_iam_role_policy_attachment" "task_role_ssm_policy" {
   role       = aws_iam_role.task_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy" 
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 
@@ -51,8 +51,8 @@ resource "aws_iam_role_policy_attachment" "task_role_ssm_policy" {
 # Permite que a task leia o segredo criado acima
 data "aws_iam_policy_document" "read_shopify_secret" {
   statement {
-    effect = "Allow"
-    actions = ["secretsmanager:GetSecretValue"]
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
     resources = [aws_secretsmanager_secret.shopify_compare.arn]
   }
 }
@@ -169,34 +169,34 @@ resource "aws_ecs_task_definition" "shopify" {
   network_mode             = "awsvpc"
   cpu                      = var.cpu
   memory                   = var.memory
-  
+
   # Usa as roles locais criadas neste arquivo
-  execution_role_arn       = aws_iam_role.execution_role.arn
-  task_role_arn            = aws_iam_role.task_role.arn
+  execution_role_arn = aws_iam_role.execution_role.arn
+  task_role_arn      = aws_iam_role.task_role.arn
 
   container_definitions = jsonencode([
     {
       name      = "shopify-compare-app" # Nome consistente com o workflow do Github
       image     = var.app_image
       essential = true
-      
+
       portMappings = [
         { containerPort = 8501, hostPort = 8501, protocol = "tcp" }
       ],
 
       # Injeta as variáveis de ambiente lendo do Secrets Manager
       secrets = [
-        { name = "DB_USER",            valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:DB_USER::" },
-        { name = "DB_PASS",            valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:DB_PASS::" },
-        { name = "DB_DSN",             valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:DB_DSN::" },
-        { name = "SHOPIFY_API_KEY",    valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:SHOPIFY_API_KEY::" },
-        { name = "SHOPIFY_PASSWORD",   valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:SHOPIFY_PASSWORD::" },
-        { name = "SHOPIFY_SHOP_URL",   valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:SHOPIFY_SHOP_URL::" },
-        { name = "INVOICE_API_URL",    valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_URL::" },
-        { name = "APP_USER_ADMIN",     valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:APP_USER_ADMIN::" },
-        { name = "APP_USER_ISA",       valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:APP_USER_ISA::" },
-        { name = "INVOICE_API_USER",   valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_USER::" },
-        { name = "INVOICE_API_PASS",   valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_PASS::" }
+        { name = "DB_USER", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:DB_USER::" },
+        { name = "DB_PASS", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:DB_PASS::" },
+        { name = "DB_DSN", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:DB_DSN::" },
+        { name = "SHOPIFY_API_KEY", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:SHOPIFY_API_KEY::" },
+        { name = "SHOPIFY_PASSWORD", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:SHOPIFY_PASSWORD::" },
+        { name = "SHOPIFY_SHOP_URL", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:SHOPIFY_SHOP_URL::" },
+        { name = "INVOICE_API_URL", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_URL::" },
+        { name = "APP_USER_ADMIN", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:APP_USER_ADMIN::" },
+        { name = "APP_USER_ISA", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:APP_USER_ISA::" },
+        { name = "INVOICE_API_USER", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_USER::" },
+        { name = "INVOICE_API_PASS", valueFrom = "${aws_secretsmanager_secret.shopify_compare.arn}:INVOICE_API_PASS::" }
       ],
 
       logConfiguration = {
@@ -218,11 +218,11 @@ resource "aws_cloudwatch_log_group" "shopify" {
 
 # --- ECS SERVICE ---
 resource "aws_ecs_service" "shopify" {
-  name            = "shopify-protheus-compare-${var.environment}"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
-  task_definition = aws_ecs_task_definition.shopify.arn
+  name                   = "shopify-protheus-compare-${var.environment}"
+  cluster                = var.cluster_name
+  launch_type            = "FARGATE"
+  desired_count          = 1
+  task_definition        = aws_ecs_task_definition.shopify.arn
   enable_execute_command = true
 
   network_configuration {

@@ -3,14 +3,14 @@ resource "aws_security_group" "frontend" {
   name        = "amundsen-frontend-${var.environment}-sg"
   description = "SG for Amundsen Frontend service"
   vpc_id      = var.vpc_id
-  
+
   # --- CORREÇÃO DA PORTA 5002 ---
   ingress {
-    description       = "Allow traffic from ALB"
-    from_port         = 5000 # <-- DEVE SER 5000 [cite: 37]
-    to_port           = 5000 # <-- DEVE SER 5000 [cite: 37]
-    protocol          = "tcp"
-    security_groups   = [aws_security_group.frontend_alb.id]
+    description     = "Allow traffic from ALB"
+    from_port       = 5000 # <-- DEVE SER 5000 [cite: 37]
+    to_port         = 5000 # <-- DEVE SER 5000 [cite: 37]
+    protocol        = "tcp"
+    security_groups = [aws_security_group.frontend_alb.id]
   }
 
   # Egress para o Metadata Service (Porta 5002) - OK 
@@ -32,10 +32,10 @@ resource "aws_security_group" "frontend" {
 
   # Egress Padrão [cite: 39]
   egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   tags = { Name = "amundsen-frontend-${var.environment}-sg" }
 }
@@ -53,14 +53,14 @@ resource "aws_ecs_task_definition" "frontend" {
   lifecycle {
     create_before_destroy = true
   }
-  
+
 
   container_definitions = jsonencode([
     {
       name      = "amundsen-frontend"
       image     = var.image_frontend
       essential = true
-      
+
       portMappings = [
         { containerPort = 5000, hostPort = 5000, protocol = "tcp" }
       ],
@@ -70,14 +70,14 @@ resource "aws_ecs_task_definition" "frontend" {
         # Conexão com Metadata
         { name = "METADATASERVICE_BASE", value = "http://${aws_service_discovery_service.metadata.name}.${var.service_discovery_namespace_name}:5002" },
         #{ name = "METADATASERVICE_REQUEST_PORT", value = "5002" },
-        
+
         # Conexão com Search
         { name = "SEARCHSERVICE_BASE", value = "http://${aws_service_discovery_service.search.name}.${var.service_discovery_namespace_name}:5001" },
         #{ name = "SEARCHSERVICE_REQUEST_PORT", value = "5001" },
 
         { name = "OIDC_ENABLED", value = "true" },
-        { name = "FRONTEND_SVC_CONFIG_MODULE_CLASS", value = "amundsen_application.oidc_config.OidcConfig" },# "amundsen_application.config.LocalConfig"
-        
+        { name = "FRONTEND_SVC_CONFIG_MODULE_CLASS", value = "amundsen_application.oidc_config.OidcConfig" }, # "amundsen_application.config.LocalConfig"
+
         { name = "FLASK_APP_MODULE_NAME", value = "flaskoidc" },
         { name = "FLASK_APP_CLASS_NAME", value = "FlaskOIDC" },
         { name = "FLASK_OIDC_CONFIG_URL", value = "https://accounts.google.com/.well-known/openid-configuration" },
@@ -133,19 +133,19 @@ resource "aws_cloudwatch_log_group" "frontend" {
 
 # --- FRONTEND: Service e Service Discovery ---
 resource "aws_ecs_service" "frontend" {
-  name            = "amundsen-frontend-${var.environment}"
-  cluster         = var.cluster_name
-  launch_type     = "FARGATE"
-  desired_count   = 1
-  task_definition = aws_ecs_task_definition.frontend.arn
+  name                   = "amundsen-frontend-${var.environment}"
+  cluster                = var.cluster_name
+  launch_type            = "FARGATE"
+  desired_count          = 1
+  task_definition        = aws_ecs_task_definition.frontend.arn
   enable_execute_command = true
 
   network_configuration {
     subnets          = var.private_subnet_ids # Roda o serviço nas subnets privadas
     security_groups  = [aws_security_group.frontend.id]
-    assign_public_ip = false 
+    assign_public_ip = false
   }
-  
+
   # --- ADIÇÃO AQUI ---
   # [cite_start]Linka o serviço ao Load Balancer [cite: 41]
   load_balancer {
@@ -155,7 +155,7 @@ resource "aws_ecs_service" "frontend" {
   }
 
   depends_on = [aws_lb_listener.frontend_https] # Garante que o listener esteja pronto
-  
+
 
 }
 

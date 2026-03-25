@@ -1,7 +1,7 @@
 module "glue_job_omie_products_to_silver" {
   source = "../glue_job"
 
-  name          = "erp-omie-products-b2s-refine"
+  name = "erp-omie-products-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/erp-omie-products-b2s-refine.py"
@@ -29,7 +29,7 @@ module "glue_job_omie_products_to_silver" {
 module "glue_job_omie_sellers_to_silver" {
   source = "../glue_job"
 
-  name          = "erp-omie-sellers-b2s-refine"
+  name = "erp-omie-sellers-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/erp-omie-sellers-b2s-refine.py"
@@ -57,7 +57,7 @@ module "glue_job_omie_sellers_to_silver" {
 module "glue_job_omie_bank_accounts_to_silver" {
   source = "../glue_job"
 
-  name          = "erp-omie-bank-accounts-b2s-refine"
+  name = "erp-omie-bank-accounts-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/erp-omie-bank-accounts-b2s-refine.py"
@@ -84,7 +84,7 @@ module "glue_job_omie_bank_accounts_to_silver" {
 module "glue_job_omie_fiscal_coupons_to_silver" {
   source = "../glue_job"
 
-  name          = "erp-omie-fiscal-coupons-b2s-refine"
+  name = "erp-omie-fiscal-coupons-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/erp-omie-fiscal-coupons-b2s-refine.py"
@@ -111,7 +111,7 @@ module "glue_job_omie_fiscal_coupons_to_silver" {
 module "glue_job_omie_documents_to_silver" {
   source = "../glue_job"
 
-  name          = "erp-omie-documents-b2s-refine"
+  name = "erp-omie-documents-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/erp-omie-documents-b2s-refine.py"
@@ -138,7 +138,7 @@ module "glue_job_omie_documents_to_silver" {
 module "glue_job_omie_stocks_to_silver" {
   source = "../glue_job"
 
-  name          = "erp-omie-stocks-b2s-refine"
+  name = "erp-omie-stocks-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/erp-omie-stocks-b2s-refine.py"

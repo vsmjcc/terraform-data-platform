@@ -2,7 +2,7 @@
 module "glue_job_typeform_nps_to_gold" {
   source = "../glue_job"
 
-  name          = "customer-experience-typeform-nps-s2g-refine"
+  name = "customer-experience-typeform-nps-s2g-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/customer-experience-typeform-nps-s2g-refine.py"

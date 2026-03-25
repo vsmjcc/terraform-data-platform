@@ -12,7 +12,7 @@ locals {
       for pk in local.proj_pks : {
         "projection.${pk.name}.type"          = pk.projection.type
         "projection.${pk.name}.format"        = try(pk.projection.format, null)
-        "projection.${pk.name}.range"         = try(pk.projection.range,  null)
+        "projection.${pk.name}.range"         = try(pk.projection.range, null)
         "projection.${pk.name}.interval"      = try(pk.projection.interval, null)
         "projection.${pk.name}.interval.unit" = try(pk.projection.interval_unit, null)
         "projection.${pk.name}.values"        = try(pk.projection.values, null)
@@ -70,7 +70,7 @@ resource "aws_glue_catalog_table" "this" {
     ser_de_info {
       name                  = "parquet"
       serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
-      parameters = { "serialization.format" = "1" }
+      parameters            = { "serialization.format" = "1" }
     }
 
     dynamic "columns" {

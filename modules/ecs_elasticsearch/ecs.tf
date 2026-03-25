@@ -10,7 +10,7 @@ resource "aws_secretsmanager_secret" "es_password" {
 }
 
 resource "aws_secretsmanager_secret_version" "es_password_version" {
-  secret_id     = aws_secretsmanager_secret.es_password.id
+  secret_id = aws_secretsmanager_secret.es_password.id
   secret_string = jsonencode({
     username = "elastic"
     password = random_password.es_password.result

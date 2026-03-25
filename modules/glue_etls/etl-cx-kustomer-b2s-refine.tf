@@ -3,7 +3,7 @@
 module "glue_job_cx_kustomer_users_to_silver" {
   source = "../glue_job"
 
-  name          = "cx-kustomer-users-b2s-refine"
+  name = "cx-kustomer-users-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/cx-kustomer-users-b2s-refine.py"
@@ -33,7 +33,7 @@ module "glue_job_cx_kustomer_users_to_silver" {
 module "glue_job_cx_kustomer_tags_to_silver" {
   source = "../glue_job"
 
-  name          = "cx-kustomer-tags-b2s-refine"
+  name = "cx-kustomer-tags-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/cx-kustomer-tags-b2s-refine.py"
@@ -63,7 +63,7 @@ module "glue_job_cx_kustomer_tags_to_silver" {
 module "glue_job_cx_kustomer_queues_to_silver" {
   source = "../glue_job"
 
-  name          = "cx-kustomer-queues-b2s-refine"
+  name = "cx-kustomer-queues-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/cx-kustomer-queues-b2s-refine.py"
@@ -93,7 +93,7 @@ module "glue_job_cx_kustomer_queues_to_silver" {
 module "glue_job_cx_kustomer_customers_to_silver" {
   source = "../glue_job"
 
-  name          = "cx-kustomer-customers-b2s-refine"
+  name = "cx-kustomer-customers-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/cx-kustomer-customers-b2s-refine.py"
@@ -122,7 +122,7 @@ module "glue_job_cx_kustomer_customers_to_silver" {
 module "glue_job_cx_kustomer_conversations_to_silver" {
   source = "../glue_job"
 
-  name          = "cx-kustomer-conversations-b2s-refine"
+  name = "cx-kustomer-conversations-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/cx-kustomer-conversations-b2s-refine.py"
@@ -151,7 +151,7 @@ module "glue_job_cx_kustomer_conversations_to_silver" {
 module "glue_job_cx_kustomer_messages_to_silver" {
   source = "../glue_job"
 
-  name          = "cx-kustomer-messages-b2s-refine"
+  name = "cx-kustomer-messages-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/cx-kustomer-messages-b2s-refine.py"

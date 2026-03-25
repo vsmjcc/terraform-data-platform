@@ -2,7 +2,7 @@
 module "glue_job_klaviyo_profiles_to_silver" {
   source = "../glue_job"
 
-  name          = "marketing-klaviyo-profiles-b2s-refine"
+  name = "marketing-klaviyo-profiles-b2s-refine"
 
   script_bucket = var.etls_bucket
   script_key    = "glue/marketing-klaviyo-profiles-b2s-refine.py"

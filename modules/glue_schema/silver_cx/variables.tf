@@ -4,14 +4,14 @@ variable "environment" {
 
 # Buckets (sem ARN)
 variable "bucket" {
-  type = string 
+  type = string
 }
 
 variable "database_name" {
-  type = string 
+  type = string
 }
 
 variable "domain" {
-  type = string 
+  type = string
 }
 

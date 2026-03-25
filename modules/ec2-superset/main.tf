@@ -9,22 +9,22 @@ locals {
 }
 
 resource "random_password" "admin" {
-  count               = var.superset_admin_password == null ? 1 : 0
-  length              = 20
-  special             = true
+  count            = var.superset_admin_password == null ? 1 : 0
+  length           = 20
+  special          = true
   override_special = "_!#$%^&*()-"
 }
 
 resource "random_password" "secret_key" {
-  count               = var.superset_secret_key == null ? 1 : 0
-  length              = 64
-  special             = true
+  count            = var.superset_secret_key == null ? 1 : 0
+  length           = 64
+  special          = true
   override_special = "_!#$%^&*()-"
 }
 
 locals {
   admin_password = coalesce(var.superset_admin_password, try(random_password.admin[0].result, null))
-  secret_key     = coalesce(var.superset_secret_key,   try(random_password.secret_key[0].result, null))
+  secret_key     = coalesce(var.superset_secret_key, try(random_password.secret_key[0].result, null))
 }
 
 resource "aws_security_group" "ec2" {
@@ -82,15 +82,15 @@ resource "aws_instance" "this" {
     delete_on_termination = true
   }
 
-	user_data = templatefile("${path.module}/user_data.sh.tmpl", {
-	  ADMIN_USERNAME       = var.superset_admin_username
-	  ADMIN_PASSWORD       = local.admin_password
-	  ADMIN_EMAIL          = var.superset_admin_email
-	  SUPERSET_SECRET_KEY  = local.secret_key
-	  REDIS_HOST           = "redis"
-	  REDIS_PORT           = 6379
-	  SUPERSET_DB          = "postgresql+psycopg2://superset:superset@db:5432/superset"
-	})
+  user_data = templatefile("${path.module}/user_data.sh.tmpl", {
+    ADMIN_USERNAME      = var.superset_admin_username
+    ADMIN_PASSWORD      = local.admin_password
+    ADMIN_EMAIL         = var.superset_admin_email
+    SUPERSET_SECRET_KEY = local.secret_key
+    REDIS_HOST          = "redis"
+    REDIS_PORT          = 6379
+    SUPERSET_DB         = "postgresql+psycopg2://superset:superset@db:5432/superset"
+  })
 
   tags = merge(local.tags, { Name = local.name })
 }
@@ -134,14 +134,14 @@ resource "aws_security_group_rule" "ec2_from_alb_8088" {
 }
 
 resource "aws_lb" "this" {
-  count              = var.enable_alb ? 1 : 0
-  name               = "${local.name}-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb[0].id]
-  subnets            = var.alb_public_subnet_ids
+  count                      = var.enable_alb ? 1 : 0
+  name                       = "${local.name}-alb"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.alb[0].id]
+  subnets                    = var.alb_public_subnet_ids
   enable_deletion_protection = false
-  tags = local.tags
+  tags                       = local.tags
 }
 
 resource "aws_lb_target_group" "superset" {

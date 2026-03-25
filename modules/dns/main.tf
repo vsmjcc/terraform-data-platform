@@ -1,9 +1,9 @@
 module "dns_data_zerezes" {
-  source       = "../route53_dns"
-  zone_name    = "data.${var.public_zone_name}"
-  create_zone  = true
-  create_cert  = true
-  records      = []
+  source      = "../route53_dns"
+  zone_name   = "data.${var.public_zone_name}"
+  create_zone = true
+  create_cert = true
+  records     = []
 }
 
 # module "dns_zerezes" {

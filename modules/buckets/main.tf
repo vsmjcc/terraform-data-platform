@@ -1,8 +1,8 @@
 module "bronze_bucket" {
-  source          = "../s3_bucket"
-  environment     = var.environment
-  region          = var.region
-  bucket_name     = "zrzs-${var.environment}-data-lake-bronze"
+  source             = "../s3_bucket"
+  environment        = var.environment
+  region             = var.region
+  bucket_name        = "zrzs-${var.environment}-data-lake-bronze"
   versioning_enabled = true
   force_destroy      = true
   tags = {
@@ -11,10 +11,10 @@ module "bronze_bucket" {
 }
 
 module "silver_bucket" {
-  source          = "../s3_bucket"
-  environment     = var.environment
-  region          = var.region
-  bucket_name     = "zrzs-${var.environment}-data-lake-silver"
+  source             = "../s3_bucket"
+  environment        = var.environment
+  region             = var.region
+  bucket_name        = "zrzs-${var.environment}-data-lake-silver"
   versioning_enabled = true
   force_destroy      = true
   tags = {
@@ -23,10 +23,10 @@ module "silver_bucket" {
 }
 
 module "gold_bucket" {
-  source          = "../s3_bucket"
-  environment     = var.environment
-  region          = var.region
-  bucket_name     = "zrzs-${var.environment}-data-lake-gold"
+  source             = "../s3_bucket"
+  environment        = var.environment
+  region             = var.region
+  bucket_name        = "zrzs-${var.environment}-data-lake-gold"
   versioning_enabled = true
   force_destroy      = true
   tags = {
@@ -35,57 +35,65 @@ module "gold_bucket" {
 }
 
 module "packages_bucket" {
-  source          = "../s3_bucket"
-  environment     = var.environment
-  region          = var.region
-  bucket_name     = "zrzs-${var.environment}-packages"
-  tags = {}
+  source      = "../s3_bucket"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "zrzs-${var.environment}-packages"
+  tags        = {}
+}
+
+module "data_lake_settings_bucket" {
+  source      = "../s3_bucket"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "zrzs-${var.environment}-data-lake-settings"
+  tags        = {}
 }
 
 resource "aws_s3_object" "lambda_zip" {
-  bucket = module.packages_bucket.bucket_name
-  key    = "empty-lambda.zip"
-  source = "${path.module}/files/empty-lambda.zip"
-  etag   = filemd5("${path.module}/files/empty-lambda.zip")
+  bucket       = module.packages_bucket.bucket_name
+  key          = "empty-lambda.zip"
+  source       = "${path.module}/files/empty-lambda.zip"
+  etag         = filemd5("${path.module}/files/empty-lambda.zip")
   content_type = "application/zip"
 }
 
 module "athena_results_bucket" {
-  source          = "../s3_bucket"
-  environment     = var.environment
-  region          = var.region
-  bucket_name     = "zrzs-${var.environment}-athena-results"
-  tags = {}
+  source      = "../s3_bucket"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "zrzs-${var.environment}-athena-results"
+  tags        = {}
 }
 
 module "etls_bucket" {
-  source          = "../s3_bucket"
-  environment     = var.environment
-  region          = var.region
-  bucket_name     = "zrzs-${var.environment}-etls"
-  tags = {}
+  source      = "../s3_bucket"
+  environment = var.environment
+  region      = var.region
+  bucket_name = "zrzs-${var.environment}-etls"
+  tags        = {}
 }
 
 
 module "files_bucket" {
-  source          = "../s3_bucket"
-  environment     = var.environment
-  region          = var.region
-  bucket_name     = "zrzs-${var.environment}-data-lake-files"
+  source             = "../s3_bucket"
+  environment        = var.environment
+  region             = var.region
+  bucket_name        = "zrzs-${var.environment}-data-lake-files"
   versioning_enabled = true
   force_destroy      = true
-  tags = {}
+  tags               = {}
 }
 
 
 locals {
   bucket_modules = {
-    bronze          = module.bronze_bucket
-    silver          = module.silver_bucket
-    gold            = module.gold_bucket
-    packages        = module.packages_bucket
-    athena_results  = module.athena_results_bucket
-    etls            = module.etls_bucket
-    files           = module.files_bucket
+    bronze         = module.bronze_bucket
+    silver         = module.silver_bucket
+    gold           = module.gold_bucket
+    packages       = module.packages_bucket
+    athena_results = module.athena_results_bucket
+    etls           = module.etls_bucket
+    files          = module.files_bucket
   }
 }
