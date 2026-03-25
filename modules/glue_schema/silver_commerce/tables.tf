@@ -112,7 +112,6 @@ locals {
         { name = "tags", type = "string", comment = "Tags do pedido" },
         { name = "note", type = "string", comment = "Nota do pedido" },
         { name = "po_number", type = "string", comment = "Número de pedido de compra" },
-        { name = "payment_terms", type = "string", comment = "Termos de pagamento" },
         { name = "confirmation_number", type = "string", comment = "Número de confirmação" },
         { name = "admin_graphql_api_id", type = "string", comment = "Admin GraphQL API ID" },
         { name = "app_id", type = "string", comment = "ID do app" },
