@@ -42,3 +42,18 @@ output "backend_container_image" {
   description = "Imagem efetivamente utilizada pelo serviço ECS (incluindo tag)."
   value       = module.backend_app.container_image
 }
+
+output "backend_secret_name" {
+  description = "Nome do secret do backend no Secrets Manager."
+  value       = aws_secretsmanager_secret.backend_env.name
+}
+
+output "backend_secret_arn" {
+  description = "ARN do secret do backend no Secrets Manager."
+  value       = aws_secretsmanager_secret.backend_env.arn
+}
+
+output "backend_data_lake_files_policy_arn" {
+  description = "ARN da policy de acesso ao bucket data-lake-files anexada ao backend."
+  value       = aws_iam_policy.data_lake_files_rw.arn
+}

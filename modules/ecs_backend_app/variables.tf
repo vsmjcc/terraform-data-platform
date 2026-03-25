@@ -136,3 +136,15 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "secret_arns_for_execution_role" {
+  description = "Lista de ARNs de secrets que a execution role da task pode ler."
+  type        = list(string)
+  default     = []
+}
+
+variable "task_role_policy_arns" {
+  description = "Lista de policy ARNs para anexar na task role."
+  type        = list(string)
+  default     = []
+}

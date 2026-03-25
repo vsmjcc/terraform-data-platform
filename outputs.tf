@@ -91,6 +91,8 @@ output "data_lake_settings" {
       service_name        = module.data_lake_settings.backend_service_name
       task_definition_arn = module.data_lake_settings.backend_task_definition_arn
       container_image     = module.data_lake_settings.backend_container_image
+      secret_name         = module.data_lake_settings.backend_secret_name
+      secret_arn          = module.data_lake_settings.backend_secret_arn
     }
 
     ecr = {

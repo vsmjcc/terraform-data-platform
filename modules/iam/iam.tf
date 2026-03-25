@@ -64,7 +64,9 @@ resource "aws_iam_policy" "ecs_deploy_policy" {
           "arn:aws:iam::${local.account_id}:role/airflow-${var.environment}-task-execution-role",
           "arn:aws:iam::${local.account_id}:role/*-task-execution-role",
           "arn:aws:iam::${local.account_id}:role/*-execution-role",
-          "arn:aws:iam::${local.account_id}:role/*-task-role"
+          "arn:aws:iam::${local.account_id}:role/*-task-role",
+          "arn:aws:iam::${local.account_id}:role/*-task",
+          "arn:aws:iam::${local.account_id}:role/*-exec"
         ],
         Condition = {
           StringEquals = {
@@ -142,7 +144,7 @@ resource "aws_iam_policy" "s3_etls_glue_upload_policy" {
 
 resource "aws_iam_policy" "s3_frontend_deploy_policy" {
   name        = "zerezes-app-s3-frontend-deploy-policy"
-  description = "Permite deploy do frontend no bucket data-lake-settings"
+  description = "Permite deploy do frontend no bucket data-lake-settings-front"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -155,7 +157,7 @@ resource "aws_iam_policy" "s3_frontend_deploy_policy" {
           "s3:GetBucketLocation"
         ],
         Resource = [
-          "arn:aws:s3:::zrzs-${var.environment}-data-lake-settings"
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-settings-front"
         ]
       },
       {
@@ -167,7 +169,7 @@ resource "aws_iam_policy" "s3_frontend_deploy_policy" {
           "s3:DeleteObject"
         ],
         Resource = [
-          "arn:aws:s3:::zrzs-${var.environment}-data-lake-settings/*"
+          "arn:aws:s3:::zrzs-${var.environment}-data-lake-settings-front/*"
         ]
       }
     ]

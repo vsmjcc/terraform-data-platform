@@ -55,48 +55,6 @@ variable "backend_container_image" {
   default     = null
 }
 
-variable "backend_container_port" {
-  description = "Porta exposta pelo container backend."
-  type        = number
-  default     = 8000
-}
-
-variable "backend_cpu" {
-  description = "Quantidade de CPU alocada para a task ECS."
-  type        = number
-  default     = 512
-}
-
-variable "backend_memory" {
-  description = "Quantidade de memória (MB) alocada para a task ECS."
-  type        = number
-  default     = 1024
-}
-
-variable "backend_desired_count" {
-  description = "Quantidade desejada de instâncias do serviço ECS."
-  type        = number
-  default     = 1
-}
-
-variable "backend_health_check_path" {
-  description = "Endpoint utilizado para health check do backend."
-  type        = string
-  default     = "/health"
-}
-
-variable "backend_environment_variables" {
-  description = "Variáveis de ambiente do backend (mapa chave => valor)."
-  type        = map(string)
-  default     = {}
-}
-
-variable "backend_secrets" {
-  description = "Secrets do backend no formato nome => ARN (Secrets Manager ou SSM)."
-  type        = map(string)
-  default     = {}
-}
-
 variable "tags" {
   description = "Tags aplicadas aos recursos AWS."
   type        = map(string)
