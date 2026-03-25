@@ -52,6 +52,17 @@ locals {
         { name = "legal_name",             type = "string",         comment = "Nome principal ou razão social do cliente" },
         { name = "trade_name",             type = "string",         comment = "Nome fantasia ou nome reduzido do cliente" },
         { name = "phone",                  type = "string",         comment = "Telefone normalizado do cliente" },
+        { name = "address_street",         type = "string",         comment = "Logradouro consolidado do cliente" },
+        { name = "address_number",         type = "string",         comment = "Número do endereço consolidado do cliente" },
+        { name = "address_complement",     type = "string",         comment = "Complemento do endereço consolidado do cliente" },
+        { name = "address_neighborhood",   type = "string",         comment = "Bairro consolidado do cliente" },
+        { name = "address_city",           type = "string",         comment = "Cidade consolidada do cliente" },
+        { name = "address_state",          type = "string",         comment = "Estado/UF consolidado do cliente" },
+        { name = "address_zipcode",        type = "string",         comment = "CEP normalizado consolidado do cliente" },
+        { name = "address_country",        type = "string",         comment = "País consolidado do cliente" },
+        { name = "address_country_code",   type = "string",         comment = "Código do país consolidado do cliente" },
+        { name = "address_latitude",       type = "double",         comment = "Latitude do endereço consolidado do cliente" },
+        { name = "address_longitude",      type = "double",         comment = "Longitude do endereço consolidado do cliente" },
       ]
 
       partition_keys = []
