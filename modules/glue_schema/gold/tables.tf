@@ -50,6 +50,52 @@ locals {
         import_mode     = "SPICE"
       }
     }
+
+    # Dimensão de clientes. Populada pelo job dim-customers-s2g.
+    dim_customers = {
+      description = "Dimensão de clientes consolidada na Gold com dados cadastrais e datas da primeira e última compra."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=dim_customers/"
+
+      columns = [
+        { name = "customer_id",           type = "string",        comment = "Chave do cliente consolidado" },
+        { name = "shopify_customer_ids",  type = "array<string>", comment = "IDs de cliente associados na Shopify" },
+        { name = "protheus_customer_ids", type = "array<string>", comment = "IDs de cliente associados no Protheus" },
+        { name = "omie_customer_ids",     type = "array<string>", comment = "IDs de cliente associados no Omie" },
+        { name = "latest_base_source",    type = "string",        comment = "Fonte mais recente usada na consolidação cadastral" },
+        { name = "reference_date",        type = "timestamp",     comment = "Data/hora de referência do cadastro consolidado" },
+        { name = "customer_document",     type = "string",        comment = "Documento anonimizado / hash do cliente" },
+        { name = "email",                 type = "string",        comment = "E-mail consolidado do cliente" },
+        { name = "legal_name",            type = "string",        comment = "Nome legal / razão social consolidada" },
+        { name = "trade_name",            type = "string",        comment = "Nome fantasia / nome social consolidado" },
+        { name = "phone",                 type = "string",        comment = "Telefone consolidado do cliente" },
+        { name = "address_street",        type = "string",        comment = "Logradouro do cliente" },
+        { name = "address_number",        type = "string",        comment = "Número do endereço" },
+        { name = "address_complement",    type = "string",        comment = "Complemento do endereço" },
+        { name = "address_neighborhood",  type = "string",        comment = "Bairro do endereço" },
+        { name = "address_city",          type = "string",        comment = "Cidade do endereço" },
+        { name = "address_state",         type = "string",        comment = "Estado / UF do endereço" },
+        { name = "address_zipcode",       type = "string",        comment = "CEP do endereço" },
+        { name = "address_country",       type = "string",        comment = "País do endereço" },
+        { name = "address_country_code",  type = "string",        comment = "Código do país do endereço" },
+        { name = "address_latitude",      type = "double",        comment = "Latitude do endereço" },
+        { name = "address_longitude",     type = "double",        comment = "Longitude do endereço" },
+        { name = "first_purchase_date",   type = "date",          comment = "Data da primeira compra válida do cliente" },
+        { name = "last_purchase_date",    type = "date",          comment = "Data da última compra válida do cliente" }
+      ]
+      partition_keys = []
+    }
+
+    # Fato diária de novos clientes. Populada pelo job fact-new-customers-daily-s2g.
+    fact_new_customers_daily = {
+      description = "Fato diária de novos clientes com base na data da primeira compra registrada na dim_customers."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_new_customers_daily/"
+
+      columns = [
+        { name = "date",                type = "date",   comment = "Data de referência do indicador" },
+        { name = "new_customers_count", type = "bigint", comment = "Quantidade de novos clientes no dia" }
+      ]
+      partition_keys = []
+    }
   }
 }
 
