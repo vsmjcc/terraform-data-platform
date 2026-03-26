@@ -61,3 +61,36 @@ module "glue_job_fact_product_sales_s2g" {
     Type  = "fact"
   })
 }
+
+
+
+# ============================================================
+# GOLD - FACT NEW CUSTOMERS DAILY
+# ============================================================
+# Lê dim_customers e dim_date e gera a quantidade diária de novos clientes
+# com base em first_purchase_date.
+# ============================================================
+
+module "glue_job_fact_new_customers_daily_s2g" {
+  source = "../glue_job"
+
+  name          = "fact-new-customers-daily-s2g"
+  script_bucket = var.etls_bucket
+  script_key    = "glue/facts/fact-new-customers-daily.py"
+  temp_bucket   = var.etls_bucket
+
+  data_buckets = [
+    var.gold_bucket,
+  ]
+
+  use_vpc            = true
+  subnet_ids         = var.private_subnet_ids
+  security_group_ids = [local.glue_sg_id]
+
+  default_arguments = {}
+
+  tags = merge(var.common_tags, {
+    Layer = "gold"
+    Type  = "fact"
+  })
+}

@@ -170,3 +170,32 @@ module "glue_job_dim_product_s2g" {
     Type  = "dimension"
   })
 }
+
+# ============================================================
+# GOLD - DIM CUSTOMERS
+# ============================================================
+
+module "glue_job_dim_customers_s2g" {
+  source = "../glue_job"
+
+  name          = "dim-customers-s2g"
+  script_bucket = var.etls_bucket
+  script_key    = "glue/dimensions/dim-customers.py"
+  temp_bucket   = var.etls_bucket
+
+  data_buckets = [
+    var.silver_bucket,
+    var.gold_bucket,
+  ]
+
+  use_vpc            = true
+  subnet_ids         = var.private_subnet_ids
+  security_group_ids = [local.glue_sg_id]
+
+  default_arguments = {}
+
+  tags = merge(var.common_tags, {
+    Layer = "gold"
+    Type  = "dimension"
+  })
+}
