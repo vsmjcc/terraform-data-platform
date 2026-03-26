@@ -61,6 +61,7 @@ locals {
 
         { name = "shopify_customer_id",  type = "string",        comment = "Identificador do customer no shopify" },
         { name = "customer_id",  type = "string",        comment = "Identificador do customer" },
+        { name = "document_id",  type = "string",        comment = "Identificador da nota fiscal" },
         { name = "customer_document",  type = "string",        comment = "CPF" },
         { name = "customer_document_raw",  type = "string",        comment = "CPF original" },
         { name = "email",  type = "string",        comment = "email" },
