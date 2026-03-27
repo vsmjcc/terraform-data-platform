@@ -44,7 +44,9 @@ locals {
       description = "Orders Shopify refinadas (S2S Enriched) - Silver Enriched (orders_enriched)"
       location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=orders_enriched/"
       columns = [
-        { name = "order_id",            type = "string",        comment = "ID do pedido" },
+        { name = "source_order_id",     type = "string",        comment = "ID do pedido concatenado" },
+        { name = "shopify_order_id",    type = "string",        comment = "ID do pedido shopify" },
+        { name = "omie_order_id",       type = "string",        comment = "ID do pedido omie" },
         { name = "created_at",          type = "timestamp",     comment = "Data/hora de criação" },
         { name = "updated_at",          type = "timestamp",     comment = "Data/hora da última atualização" },
         { name = "processed_at",        type = "timestamp",     comment = "Data/hora de processamento" },
