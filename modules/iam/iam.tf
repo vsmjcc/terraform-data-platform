@@ -233,3 +233,38 @@ resource "aws_iam_role_policy" "airflow_zextract_watermarks_inline" {
     ]
   })
 }
+
+
+resource "aws_iam_role_policy" "airflow_read_channel_classification" {
+  name = "airflow-read-channel-classification"
+  role = "airflow-${var.environment}-task-execution-role"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ReadChannelClassificationPrefix"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject"
+        ]
+        Resource = "arn:aws:s3:::zrzs-${var.environment}-data-lake-settings/channel-classification/*"
+      },
+      {
+        Sid    = "ListSettingsBucketPrefix"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket"
+        ]
+        Resource = "arn:aws:s3:::zrzs-${var.environment}-data-lake-settings"
+        Condition = {
+          StringLike = {
+            "s3:prefix" = [
+              "channel-classification/*"
+            ]
+          }
+        }
+      }
+    ]
+  })
+}
