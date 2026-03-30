@@ -353,9 +353,9 @@ locals {
       partition_keys = []
     }
 
-    nps_form_responses = {
+    nps_form = {
       description = "Respostas NPS normalizadas por submissão (Silver CX)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=nps_form_responses/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=nps_form/"
       columns = [
         { name = "source", type = "string", comment = "Fonte (ex.: typeform)" },
         { name = "dataset", type = "string", comment = "Nome do dataset (ex.: nps)" },
@@ -377,8 +377,7 @@ locals {
         { name = "nps_score", type = "int", comment = "Score NPS (answers[0].number)" },
         { name = "assessment_score", type = "int", comment = "Score de avaliação (answers[1].number)" },
         { name = "request_id", type = "string", comment = "Request ID (_request_id)" },
-        { name = "ingestion_ts", type = "timestamp", comment = "Timestamp de ingestão (_ingestion_ts)" },
-        { name = "created_date", type = "date", comment = "Data derivada de ingestion_date" }
+        { name = "ingestion_ts", type = "timestamp", comment = "Timestamp de ingestão (_ingestion_ts)" }
       ]
       partition_keys = [
         { name = "created_date", type = "date", comment = "Partição por data (YYYY-MM-DD)" }
