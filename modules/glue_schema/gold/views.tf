@@ -47,7 +47,7 @@ locals {
           d.year,
           f.new_customers_count
         FROM ${var.database_name}.fact_new_customers_daily f
-        LEFT JOIN gold_analytics.ga4_dim_date d
+        LEFT JOIN ${var.database_name}.ga4_dim_date d
           ON f.date = d.date
       SQL
 
@@ -64,6 +64,79 @@ locals {
         refresh_type            = "FULL_REFRESH"
       }
     }
+
+    dm_ga4_sessions_daily = {
+      sql = <<-SQL
+        SELECT
+          f.date,
+          d.day,
+          d.month,
+          d.quarter,
+          d.semester,
+          d.year,
+
+          f.source_medium_id,
+          COALESCE(sm.source, 'NA') AS source,
+          COALESCE(sm.medium, 'NA') AS medium,
+
+          f.campaign_id,
+          COALESCE(c.campaign, 'NA') AS campaign,
+
+          f.report_date
+        FROM ${var.database_name}.ga4_fact_sessions_daily f
+        LEFT JOIN ${var.database_name}.ga4_dim_date d
+          ON f.date = d.date
+        LEFT JOIN ${var.database_name}.ga4_dim_source_medium sm
+          ON f.source_medium_id = sm.id
+        LEFT JOIN ${var.database_name}.ga4_dim_campaign c
+          ON f.campaign_id = c.id
+      SQL
+
+      quicksight = {
+        enabled                 = true
+        data_source_key         = "gold"
+        import_mode             = "SPICE"
+        create_refresh_schedule = true
+        start_after_date_time   = "2026-04-01T03:00:00"
+        schedule_id             = "daily"
+        refresh_interval        = "DAILY"
+        refresh_type            = "FULL_REFRESH"
+      }
+    }
+
+    dm_gsc_metrics = {
+      sql = <<-SQL
+        SELECT
+          f.date,
+          f.device_id,
+          COALESCE(d.device, 'NA') AS device,
+          f.query_id,
+          COALESCE(q.query, 'NA') AS query,
+          f.clicks,
+          f.impressions,
+          CASE
+            WHEN f.impressions > 0 THEN CAST(f.clicks AS DOUBLE) / CAST(f.impressions AS DOUBLE)
+            ELSE NULL
+          END AS ctr
+        FROM ${var.database_name}.fact_gsc_metrics f
+        LEFT JOIN ${var.database_name}.dim_device_gsc d
+          ON f.device_id = d.id
+        LEFT JOIN ${var.database_name}.dim_query_gsc q
+          ON f.query_id = q.id
+      SQL
+
+      quicksight = {
+        enabled                 = true
+        data_source_key         = "gold"
+        import_mode             = "SPICE"
+        create_refresh_schedule = true
+        start_after_date_time   = "2026-04-01T03:00:00"
+        schedule_id             = "daily"
+        refresh_interval        = "DAILY"
+        refresh_type            = "FULL_REFRESH"
+      }
+    }
+    
   }
 }
 

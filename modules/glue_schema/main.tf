@@ -33,18 +33,6 @@ resource "aws_glue_catalog_database" "silver_people" {
   name = "silver_people"
 }
 
-resource "aws_glue_catalog_database" "gold_cx" {
-  name = "gold_cx"
-}
-
-resource "aws_glue_catalog_database" "gold_analytics" {
-  name = "gold_analytics"
-}
-
-resource "aws_glue_catalog_database" "gold_marketing" {
-  name = "gold_marketing"
-}
-
 resource "aws_glue_catalog_database" "gold" {
   name = "gold"
 }
@@ -123,42 +111,6 @@ module "silver_people" {
   bucket        = var.silver_bucket
   database_name = aws_glue_catalog_database.silver_people.name
   domain        = "people"
-}
-
-module "gold_cx" {
-  source = "./gold_cx"
-
-  environment   = var.environment
-  region         = var.region
-  bucket        = var.gold_bucket
-  database_name = aws_glue_catalog_database.gold_cx.name
-  domain        = "customer_experience"
-  athena_output_location = "s3://zrzs-${var.environment}-athena-results/primary/"
-  quicksight_data_sources = var.quicksight_data_sources
-}
-
-module "gold_analytics" {
-  source = "./gold_analytics"
-
-  environment   = var.environment
-  region         = var.region
-  bucket        = var.gold_bucket
-  database_name = aws_glue_catalog_database.gold_analytics.name
-  domain        = "analytics"
-  athena_output_location = "s3://zrzs-${var.environment}-athena-results/primary/"
-  quicksight_data_sources = var.quicksight_data_sources
-}
-
-module "gold_marketing" {
-  source = "./gold_marketing"
-
-  environment    = var.environment
-  region         = var.region
-  bucket         = var.gold_bucket
-  database_name  = aws_glue_catalog_database.gold_marketing.name
-  domain         = "marketing"
-  athena_output_location = "s3://zrzs-${var.environment}-athena-results/primary/"
-  quicksight_data_sources = var.quicksight_data_sources
 }
 
 module "gold" {

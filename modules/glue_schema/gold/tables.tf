@@ -18,7 +18,7 @@ locals {
       partition_keys = []
 
       quicksight = {
-        enabled         = true
+        enabled         = false
         data_source_key = "gold"
         import_mode     = "SPICE"
       }
@@ -45,7 +45,7 @@ locals {
       ]
 
       quicksight = {
-        enabled         = true
+        enabled         = false
         data_source_key = "gold"
         import_mode     = "SPICE"
       }
@@ -96,6 +96,140 @@ locals {
       ]
       partition_keys = []
     }
+
+    ga4_dim_date = {
+      description = "Dimensão de datas para análises de GA4."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=ga4_dim_date/"
+      columns = [
+        { name = "date", type = "date", comment = "Data do evento" },
+        { name = "day", type = "int", comment = "Dia do mês" },
+        { name = "month", type = "int", comment = "Mês" },
+        { name = "quarter", type = "int", comment = "Trimestre" },
+        { name = "semester", type = "int", comment = "Semestre" },
+        { name = "year", type = "int", comment = "Ano" }
+      ]
+      partition_keys = []
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
+    ga4_dim_source_medium = {
+      description = "Dimensão de canal (source e medium)."
+      location    = "s3://${var.bucket}/domain=analytics/dataset=ga4_dim_source_medium/"
+      columns = [
+        { name = "id", type = "bigint", comment = "Chave da dimensão source/medium" },
+        { name = "source", type = "string", comment = "Fonte do tráfego" },
+        { name = "medium", type = "string", comment = "Meio do tráfego" }
+      ]
+      partition_keys = []
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
+    ga4_dim_campaign = {
+      description = "Dimensão de campanhas GA4."
+      location    = "s3://${var.bucket}/domain=analytics/dataset=ga4_dim_campaign/"
+      columns = [
+        { name = "id", type = "bigint", comment = "Chave da dimensão campanha" },
+        { name = "campaign", type = "string", comment = "Nome da campanha" }
+      ]
+      partition_keys = []
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
+    ga4_fact_sessions_daily = {
+      description = "Fato de sessões GA4 no grão diário por canal e campanha."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=ga4_fact_sessions_daily/"
+
+      columns = [
+        { name = "date", type = "date", comment = "Data da sessão" },
+        { name = "source_medium_id", type = "bigint", comment = "FK para dim_source_medium" },
+        { name = "campaign_id", type = "bigint", comment = "FK para dim_campaign" },
+        { name = "sessions", type = "bigint", comment = "Quantidade de sessões" }
+      ]
+
+      partition_keys = [
+        { name = "report_date", type = "date" }
+      ]
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
+    # Dimensão device (GSC): DESKTOP, MOBILE, etc. Populada pelo job dim-device-gsc-s2g.
+    dim_device_gsc = {
+      description = "Dimensão de dispositivo para Google Search Console (GSC)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=dim_device_gsc/"
+
+      columns = [
+        { name = "id", type = "bigint", comment = "Chave da dimensão (hash do device; -99 para NA)" },
+        { name = "device", type = "string", comment = "Dispositivo normalizado (ex.: DESKTOP, MOBILE)" }
+      ]
+      partition_keys = []
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
+    # Dimensão query (GSC): termos de busca. Populada pelo job dim-query-gsc-s2g.
+    dim_query_gsc = {
+      description = "Dimensão de query de busca para Google Search Console (GSC)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=dim_query_gsc/"
+
+      columns = [
+        { name = "id", type = "bigint", comment = "Chave da dimensão (hash da query; -99 para NA)" },
+        { name = "query", type = "string", comment = "Termo de busca normalizado" }
+      ]
+      partition_keys = []
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
+    # Fato GSC: clicks/impressions por (date, device_id, query_id). Populada pelo job fact-gsc-metrics-s2g.
+    fact_gsc_metrics = {
+      description = "Fato de métricas GSC (clicks, impressions) por data, dispositivo e query."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_gsc_metrics/"
+
+      columns = [
+        { name = "device_id", type = "bigint", comment = "FK para dim_device_gsc" },
+        { name = "query_id", type = "bigint", comment = "FK para dim_query_gsc" },
+        { name = "clicks", type = "bigint", comment = "Total de cliques" },
+        { name = "impressions", type = "bigint", comment = "Total de impressões" }
+      ]
+      partition_keys = [
+        { name = "date", type = "date", comment = "Data do relatório (YYYY-MM-DD)" }
+      ]
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
   }
 }
 
