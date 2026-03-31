@@ -4,9 +4,9 @@ module "glue_job_cx-typeform-nps-b2s" {
 
   name = "cx-typeform-nps-b2s"
 
-  script_bucket = var.etls_bucket
+  script_bucket = var.silver_bucket
   script_key    = "glue/cx-typeform-nps-b2s.py"
-  temp_bucket   = var.etls_bucket
+  temp_bucket   = var.silver_bucket
 
   data_buckets = [
     var.bronze_bucket,
