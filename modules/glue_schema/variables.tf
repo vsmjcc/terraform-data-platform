@@ -1,3 +1,7 @@
+variable "region" {
+  type = string
+}
+
 variable "environment" {
   type = string
 }
@@ -26,4 +30,5 @@ variable "quicksight_data_sources" {
   }))
   default = {}
 }
+
 

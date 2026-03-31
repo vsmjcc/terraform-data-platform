@@ -418,6 +418,7 @@ module "quicksight_folders" {
 module "glue_schema" {
   source = "./modules/glue_schema"
 
+  region                  = var.region
   environment             = var.environment
   bronze_bucket           = module.buckets.bronze_bucket_name
   silver_bucket           = module.buckets.silver_bucket_name
