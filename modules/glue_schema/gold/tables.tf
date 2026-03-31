@@ -119,7 +119,7 @@ locals {
 
     ga4_dim_source_medium = {
       description = "Dimensão de canal (source e medium)."
-      location    = "s3://${var.bucket}/domain=analytics/dataset=ga4_dim_source_medium/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=ga4_dim_source_medium/"
       columns = [
         { name = "id", type = "bigint", comment = "Chave da dimensão source/medium" },
         { name = "source", type = "string", comment = "Fonte do tráfego" },
@@ -136,7 +136,7 @@ locals {
 
     ga4_dim_campaign = {
       description = "Dimensão de campanhas GA4."
-      location    = "s3://${var.bucket}/domain=analytics/dataset=ga4_dim_campaign/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=ga4_dim_campaign/"
       columns = [
         { name = "id", type = "bigint", comment = "Chave da dimensão campanha" },
         { name = "campaign", type = "string", comment = "Nome da campanha" }
