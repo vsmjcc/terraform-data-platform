@@ -782,6 +782,50 @@ locals {
       ]
     }
 
+    protheus_products = {
+      description = "Cadastro de produtos do Protheus (SB1010) normalizado pelo job erp-protheus-products-b2s."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=protheus/dataset=protheus_products/"
+
+      columns = [
+        { name = "source", type = "string", comment = "Sistema de origem (protheus)" },
+        { name = "dataset", type = "string", comment = "Dataset lógico (products)" },
+
+        { name = "product_code", type = "string", comment = "Código do produto (B1_COD)" },
+        { name = "omie_product_code", type = "string", comment = "SKU Omie (B1_XSKUOMI)" },
+        { name = "description", type = "string", comment = "Descrição (B1_DESC)" },
+        { name = "product_type", type = "string", comment = "Tipo (B1_TIPO)" },
+        { name = "unit", type = "string", comment = "Unidade de medida (B1_UM)" },
+        { name = "group_code", type = "string", comment = "Grupo (B1_GRUPO)" },
+        { name = "ncm", type = "string", comment = "NCM / posição IPI (B1_POSIPI)" },
+
+        { name = "icms_rate", type = "double", comment = "Alíquota ICMS (B1_PICM)" },
+        { name = "ipi_rate", type = "double", comment = "Alíquota IPI (B1_IPI)" },
+        { name = "iss_rate", type = "double", comment = "Alíquota ISS (B1_ALIQISS)" },
+
+        { name = "branch", type = "string", comment = "Filial (B1_FILIAL)" },
+
+        { name = "is_deleted", type = "boolean", comment = "Registro marcado como deletado (D_E_L_E_T_='*')" },
+        { name = "recno", type = "bigint", comment = "R_E_C_N_O_" },
+        { name = "recdel", type = "bigint", comment = "R_E_C_D_E_L_" },
+        { name = "updated_at_erp", type = "timestamp", comment = "Timestamp técnico do Protheus (S_T_A_M_P_)" },
+      ]
+
+      partition_keys = [
+        {
+          name    = "created_date"
+          type    = "date"
+          comment = "Data da partição (derivada da ingestion_date da bronze)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
     protheus_nf_out = {
       description = "Notas fiscais de saída (cabeçalho) do Protheus (SF2010) normalizadas."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=protheus/dataset=protheus_nf_out/"
