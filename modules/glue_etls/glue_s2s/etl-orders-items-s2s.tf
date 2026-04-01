@@ -16,17 +16,7 @@ module "glue_job_orders_items_s2s_enriched" {
   subnet_ids         = var.private_subnet_ids
   security_group_ids = [var.glue_sg_id]
 
-  default_arguments = {
-    "--SHOPIFY_GLUE_DATABASE"  = "silver_commerce"
-    "--SHOPIFY_GLUE_TABLE"     = "order_items"
-    "--OMIE_GLUE_DATABASE"     = "silver_erp"
-    "--OMIE_GLUE_TABLE"        = "omie_document_items_refined"
-    "--PROTHEUS_GLUE_DATABASE" = "silver_erp"
-    "--PROTHEUS_GLUE_TABLE"    = "nf_out_items"
-    "--GLUE_DATABASE"          = "silver_enriched"
-    "--GLUE_TABLE"             = "orders_items_enriched"
-    "--MODE"                   = "overwrite"
-  }
+  default_arguments = {}
 
   tags = merge(var.common_tags, {
     Env   = var.environment
