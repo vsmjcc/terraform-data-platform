@@ -353,7 +353,7 @@ locals {
       partition_keys = []
     }
 
-    nps_form = {
+     nps_form = {
       description = "Respostas NPS normalizadas por submissão (Silver CX)."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=nps_form/"
       columns = [
@@ -368,14 +368,15 @@ locals {
         { name = "email", type = "string", comment = "E-mail normalizado (lowercase)" },
         { name = "customer_name", type = "string", comment = "Nome do cliente" },
         { name = "order_number", type = "string", comment = "Número do pedido" },
-        { name = "store", type = "string", comment = "Loja" },
+        { name = "store_name", type = "string", comment = "Loja (hidden.store)" },
         { name = "store_id", type = "string", comment = "ID da loja" },
-        { name = "seller", type = "string", comment = "Vendedor" },
+        { name = "seller_name", type = "string", comment = "Vendedor (hidden.seller)" },
         { name = "seller_id", type = "string", comment = "ID do vendedor" },
         { name = "phonenumber", type = "string", comment = "Telefone" },
         { name = "shopify_customer_id", type = "string", comment = "ID do cliente no Shopify" },
-        { name = "nps_score", type = "int", comment = "Score NPS (answers[0].number)" },
-        { name = "assessment_score", type = "int", comment = "Score de avaliação (answers[1].number)" },
+        { name = "question_ref", type = "string", comment = "Ref da pergunta (Typeform)" },
+        { name = "question_label", type = "string", comment = "Título da pergunta (Typeform)" },
+        { name = "answer_value", type = "string", comment = "Resposta normalizada (texto/número/choice/boolean)" },
         { name = "request_id", type = "string", comment = "Request ID (_request_id)" },
         { name = "ingestion_ts", type = "timestamp", comment = "Timestamp de ingestão (_ingestion_ts)" }
       ]

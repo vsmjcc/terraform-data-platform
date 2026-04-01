@@ -111,6 +111,41 @@ locals {
 
       partition_keys = []
     }
+
+        orders_items_enriched = {
+      description = "Order items unificados de Shopify, Omie e Protheus (S2S Enriched) - Silver Enriched"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=orders_items_enriched/"
+      columns = [
+        { name = "source_system",      type = "string",        comment = "Sistema de origem do item" },
+        { name = "source_type",        type = "string",        comment = "Tipo de origem do item" },
+        { name = "source_order_id",    type = "string",        comment = "Identificador do pedido/documento na origem" },
+        { name = "source_document_id", type = "string",        comment = "Identificador do documento fiscal na origem" },
+        { name = "source_item_id",     type = "string",        comment = "Identificador único do item na origem" },
+
+        { name = "sale_date",          type = "date",          comment = "Data de venda do item" },
+        { name = "document_date",      type = "date",          comment = "Data do documento fiscal do item" },
+        { name = "created_date",       type = "date",          comment = "Data de criação/ingestão de referência" },
+
+        { name = "product_id",         type = "string",        comment = "Identificador do produto" },
+        { name = "product_code",       type = "string",        comment = "Código/SKU do produto" },
+        { name = "variant_id",         type = "string",        comment = "Identificador da variante do produto" },
+        { name = "sku",                type = "string",        comment = "SKU do item" },
+        { name = "product_name",       type = "string",        comment = "Nome do produto" },
+
+        { name = "quantity",           type = "double",        comment = "Quantidade vendida/faturada" },
+        { name = "unit_price",         type = "decimal(18,2)", comment = "Preço unitário" },
+        { name = "gross_amount",       type = "decimal(18,2)", comment = "Valor bruto do item" },
+        { name = "discount_amount",    type = "decimal(18,2)", comment = "Valor de desconto do item" },
+        { name = "net_amount",         type = "decimal(18,2)", comment = "Valor líquido do item" },
+
+        { name = "currency",           type = "string",        comment = "Moeda do item" }
+      ]
+
+      partition_keys = [
+        { name = "order_date", type = "date", comment = "Partição por data do pedido/documento (YYYY-MM-DD)" }
+      ]
+    }
+
   }
 }
 

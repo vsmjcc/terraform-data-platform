@@ -5,7 +5,7 @@ module "glue_job_cx-typeform-nps-b2s" {
   name = "cx-typeform-nps-b2s"
 
   script_bucket = var.etls_bucket
-  script_key    = "glue/cx-typeform-nps-b2s.py"
+  script_key    = "glue/glue-b2s/cx-typeform-nps-b2s.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [
