@@ -31,10 +31,11 @@ module "glue_job_fact_gsc_metrics_s2g" {
 }
 
 # ============================================================
-# GOLD - FACT PRODUCT SALES (Omie)
+# GOLD - FACT PRODUCT SALES
 # ============================================================
-# Lê Silver S2S (omie_document_items_refined), junta com dim_product e dim_date,
-# gera fato de vendas por produto/documento/dia para análise de lançamentos.
+# Lê Silver Enriched (orders_items_enriched), junta com dim_product
+# e gera a fato detalhada de vendas por produto em granularidade de item vendido.
+# Suporta conferência manual e validação do indicador de faturamento de lançamentos.
 # ============================================================
 
 module "glue_job_fact_product_sales_s2g" {
