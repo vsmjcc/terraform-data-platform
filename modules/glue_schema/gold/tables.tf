@@ -25,20 +25,21 @@ locals {
       
     }
 
-    # Fato de vendas por produto (Omie). Populada pelo job fact-product-sales-s2g.
+    # Fato detalhada de vendas por produto. Populada pelo job fact-product-sales-s2g.
     fact_product_sales = {
-      description = "Fato de vendas por produto, documento e dia (Omie). Suporta análise de share entre lançamentos e não-lançamentos."
+      description = "Fato detalhada de vendas por produto em granularidade de item vendido. Suporta conferência manual e validação do indicador de faturamento de lançamentos."
       location    = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_product_sales/"
 
       columns = [
         { name = "product_id", type = "bigint", comment = "FK para dim_product (-99 se não encontrado)" },
-        { name = "document_id", type = "string", comment = "ID do documento de venda" },
+        { name = "source_system", type = "string", comment = "Sistema de origem da venda (shopify, omie, protheus)" },
+        { name = "source_item_id", type = "string", comment = "Identificador único do item vendido na origem" },
+        { name = "source_document_id", type = "string", comment = "Identificador do documento fiscal/pedido associado à venda" },
+        { name = "is_launch_sale", type = "boolean", comment = "Flag indicando se a venda ocorreu dentro do período de lançamento do produto" },
         { name = "quantity", type = "double", comment = "Quantidade vendida" },
-        { name = "gross_sale_amount", type = "double", comment = "Valor bruto de venda (total_price)" },
+        { name = "gross_sale_amount", type = "double", comment = "Valor bruto de venda" },
         { name = "discount_amount", type = "double", comment = "Valor de desconto" },
-        { name = "realized_sale_amount", type = "double", comment = "Valor líquido realizado (bruto - desconto)" },
-        { name = "is_launch_product", type = "boolean", comment = "Flag indicando se é produto em período de lançamento" },
-        { name = "launch_type", type = "string", comment = "Tipo de lançamento: LANCAMENTO ou NAO_LANCAMENTO" }
+        { name = "realized_sale_amount", type = "double", comment = "Valor líquido realizado (bruto - desconto)" }
       ]
       partition_keys = [
         { name = "date", type = "date", comment = "Data da venda (YYYY-MM-DD)" }
