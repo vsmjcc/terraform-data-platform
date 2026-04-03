@@ -63,7 +63,36 @@ module "glue_job_fact_product_sales_s2g" {
   })
 }
 
+# ============================================================
+# GOLD - FACT LAUNCH REVENUE DAILY
+# ============================================================
+# Lê gold.fact_product_sales e consolida, por dia,
+# os números de faturamento das vendas feitas em período de lançamento.
+# ============================================================
 
+module "glue_job_fact_launch_revenue_daily_s2g" {
+  source = "../glue_job"
+
+  name          = "fact-launch-revenue-daily-s2g"
+  script_bucket = var.etls_bucket
+  script_key    = "glue/facts/fact_launch_revenue_daily.py"
+  temp_bucket   = var.etls_bucket
+
+  data_buckets = [
+    var.gold_bucket,
+  ]
+
+  use_vpc            = true
+  subnet_ids         = var.private_subnet_ids
+  security_group_ids = [local.glue_sg_id]
+
+  default_arguments = {}
+
+  tags = merge(var.common_tags, {
+    Layer = "gold"
+    Type  = "fact"
+  })
+}
 
 # ============================================================
 # GOLD - FACT NEW CUSTOMERS DAILY

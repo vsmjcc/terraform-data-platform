@@ -52,6 +52,29 @@ locals {
       }
     }
 
+    # Fato derivada diária de faturamento de lançamentos.
+    fact_launch_revenue_daily = {
+      description = "Fato diária consolidada do faturamento de produtos vendidos em período de lançamento."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_launch_revenue_daily/"
+
+      columns = [
+        { name = "launch_sales_quantity", type = "double", comment = "Quantidade vendida de produtos em lançamento no dia" },
+        { name = "launch_gross_sale_amount", type = "double", comment = "Valor bruto vendido de produtos em lançamento no dia" },
+        { name = "launch_discount_amount", type = "double", comment = "Valor total de desconto aplicado em produtos em lançamento no dia" },
+        { name = "launch_realized_sale_amount", type = "double", comment = "Valor líquido realizado de produtos em lançamento no dia" }
+      ]
+
+      partition_keys = [
+        { name = "date", type = "date", comment = "Data de referência do indicador (YYYY-MM-DD)" }
+      ]
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
     # Dimensão de clientes. Populada pelo job dim-customers-s2g.
     dim_customers = {
       description = "Dimensão de clientes consolidada na Gold com dados cadastrais e datas da primeira e última compra."
