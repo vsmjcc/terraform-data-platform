@@ -64,18 +64,20 @@ module "glue_job_fact_product_sales_s2g" {
 }
 
 # ============================================================
-# GOLD - FACT LAUNCH REVENUE DAILY
+# GOLD - FACT REVENUE DAILY
 # ============================================================
 # Lê gold.fact_product_sales e consolida, por dia,
-# os números de faturamento das vendas feitas em período de lançamento.
+# os números gerais de faturamento e os números de faturamento
+# de vendas realizadas em período de lançamento.
+# Serve como base analítica do indicador.
 # ============================================================
 
-module "glue_job_fact_launch_revenue_daily_s2g" {
+module "glue_job_fact_revenue_daily_s2g" {
   source = "../glue_job"
 
-  name          = "fact-launch-revenue-daily-s2g"
+  name          = "fact-revenue-daily-s2g"
   script_bucket = var.etls_bucket
-  script_key    = "glue/facts/fact-launch-revenue-daily.py"
+  script_key    = "glue/facts/fact-revenue-daily.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [

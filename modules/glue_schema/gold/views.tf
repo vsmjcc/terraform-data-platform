@@ -25,7 +25,7 @@ locals {
       }
     }
 
-    dm_launch_revenue_daily = {
+    dm_revenue_daily = {
       sql = <<-SQL
         SELECT
           f.date,
@@ -34,11 +34,18 @@ locals {
           d.quarter,
           d.semester,
           d.year,
+
+          f.total_sales_quantity,
+          f.total_gross_sale_amount,
+          f.total_discount_amount,
+          f.total_realized_sale_amount,
+
           f.launch_sales_quantity,
           f.launch_gross_sale_amount,
           f.launch_discount_amount,
           f.launch_realized_sale_amount
-        FROM ${var.database_name}.fact_launch_revenue_daily f
+
+        FROM ${var.database_name}.fact_revenue_daily f
         LEFT JOIN ${var.database_name}.ga4_dim_date d
           ON f.date = d.date
       SQL
