@@ -153,6 +153,7 @@ locals {
 
       columns = [
         { name = "product_id", type = "bigint", comment = "ID interno do produto no Omie" },
+        { name = "source_system", type = "string", comment = "Sistema de origem" },
         { name = "product_code", type = "string", comment = "Código do produto" },
         { name = "description", type = "string", comment = "Descrição do produto" },
         { name = "stock_quantity", type = "double", comment = "Quantidade em estoque" },
