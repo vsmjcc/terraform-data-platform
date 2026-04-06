@@ -107,6 +107,34 @@ locals {
       }
     }
 
+    dm_launch_share_monthly = {
+      sql = <<-SQL
+        SELECT
+          f.month,
+          d.month AS month_number,
+          d.quarter,
+          d.semester,
+          d.year,
+          f.total_realized_sale_amount,
+          f.launch_realized_sale_amount,
+          f.launch_revenue_share
+        FROM ${var.database_name}.fact_launch_revenue_share_monthly f
+        LEFT JOIN ${var.database_name}.ga4_dim_date d
+          ON f.month = d.date
+      SQL
+
+      quicksight = {
+        enabled                 = true
+        data_source_key         = "gold"
+        import_mode             = "SPICE"
+        create_refresh_schedule = true
+        start_after_date_time   = "2026-04-07T03:00:00"
+        schedule_id             = "daily"
+        refresh_interval        = "DAILY"
+        refresh_type            = "FULL_REFRESH"
+      }
+    }
+
     dm_new_customers_daily = {
       sql = <<-SQL
         SELECT
