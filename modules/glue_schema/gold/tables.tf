@@ -80,6 +80,28 @@ locals {
       }
     }
 
+    fact_launch_revenue_share_monthly = {
+      description = "Fato mensal de participação do faturamento de lançamentos sobre o faturamento total realizado."
+
+      location = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_launch_revenue_share_monthly/"
+
+      columns = [
+        { name = "total_realized_sale_amount",  type = "double", comment = "Valor líquido total realizado no mês" },
+        { name = "launch_realized_sale_amount", type = "double", comment = "Valor líquido realizado de lançamentos no mês" },
+        { name = "launch_revenue_share",        type = "double", comment = "Participação do faturamento de lançamentos sobre o faturamento total no mês" }
+      ]
+
+      partition_keys = [
+        { name = "month", type = "date", comment = "Primeiro dia do mês de referência (YYYY-MM-01)" }
+      ]
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
     # Dimensão de clientes. Populada pelo job dim-customers-s2g.
     dim_customers = {
       description = "Dimensão de clientes consolidada na Gold com dados cadastrais e datas da primeira e última compra."
