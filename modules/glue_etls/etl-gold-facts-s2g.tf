@@ -43,7 +43,7 @@ module "glue_job_fact_product_sales_s2g" {
 
   name          = "fact-product-sales-s2g"
   script_bucket = var.etls_bucket
-  script_key    = "glue/facts/fact_product_sales.py"
+  script_key    = "glue/facts/fact-product-sales.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [
@@ -75,7 +75,7 @@ module "glue_job_fact_launch_revenue_daily_s2g" {
 
   name          = "fact-launch-revenue-daily-s2g"
   script_bucket = var.etls_bucket
-  script_key    = "glue/facts/fact_launch_revenue_daily.py"
+  script_key    = "glue/facts/fact-launch-revenue-daily.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [
