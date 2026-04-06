@@ -52,20 +52,25 @@ locals {
       }
     }
 
-    # Fato derivada diária de faturamento de lançamentos.
-    fact_launch_revenue_daily = {
-      description = "Fato diária consolidada do faturamento de produtos vendidos em período de lançamento."
-      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_launch_revenue_daily/"
+    fact_revenue_daily = {
+      description = "Fato diária consolidada de faturamento total e de lançamentos. Serve como base analítica do indicador de participação do faturamento de lançamentos."
+
+      location = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_revenue_daily/"
 
       columns = [
-        { name = "launch_sales_quantity", type = "double", comment = "Quantidade vendida de produtos em lançamento no dia" },
-        { name = "launch_gross_sale_amount", type = "double", comment = "Valor bruto vendido de produtos em lançamento no dia" },
-        { name = "launch_discount_amount", type = "double", comment = "Valor total de desconto aplicado em produtos em lançamento no dia" },
-        { name = "launch_realized_sale_amount", type = "double", comment = "Valor líquido realizado de produtos em lançamento no dia" }
+        { name = "total_sales_quantity",         type = "double", comment = "Quantidade total vendida no dia" },
+        { name = "total_gross_sale_amount",      type = "double", comment = "Valor bruto total vendido no dia" },
+        { name = "total_discount_amount",        type = "double", comment = "Valor total de desconto aplicado no dia" },
+        { name = "total_realized_sale_amount",   type = "double", comment = "Valor líquido total realizado no dia" },
+
+        { name = "launch_sales_quantity",        type = "double", comment = "Quantidade vendida de produtos em lançamento no dia" },
+        { name = "launch_gross_sale_amount",     type = "double", comment = "Valor bruto vendido de produtos em lançamento no dia" },
+        { name = "launch_discount_amount",       type = "double", comment = "Valor total de desconto aplicado em produtos em lançamento no dia" },
+        { name = "launch_realized_sale_amount",  type = "double", comment = "Valor líquido realizado de produtos em lançamento no dia" }
       ]
 
       partition_keys = [
-        { name = "date", type = "date", comment = "Data de referência do indicador (YYYY-MM-DD)" }
+        { name = "date", type = "date", comment = "Data de referência do faturamento (YYYY-MM-DD)" }
       ]
 
       quicksight = {
