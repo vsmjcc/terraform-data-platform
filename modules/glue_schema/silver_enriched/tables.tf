@@ -162,6 +162,27 @@ locals {
       ]
     }
 
+    # S2S: produtos refinados (subset de colunas para análise)
+    products = {
+      description = "Produtos refinados (S2S): subset de colunas (identificação, estoque, datas); particionado por ingestion_date."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_products_refined/"
+
+      columns = [
+        { name = "product_id", type = "bigint", comment = "ID interno do produto no Omie" },
+        { name = "source_system", type = "string", comment = "Sistema de origem" },
+        { name = "product_code", type = "string", comment = "Código do produto" },
+        { name = "description", type = "string", comment = "Descrição do produto" },
+        { name = "stock_quantity", type = "double", comment = "Quantidade em estoque" },
+        { name = "stock_minimum", type = "double", comment = "Estoque mínimo" },
+        { name = "created_at", type = "timestamp", comment = "Data/hora de inclusão no Omie" },
+        { name = "launch_end_date", type = "date", comment = "Data de fim do período no Omie" },
+        { name = "updated_by", type = "string", comment = "Usuário da última alteração" }
+      ]
+
+      partition_keys = [
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão (YYYY-MM-DD)" }
+      ]
+    }
 
   }
 }
