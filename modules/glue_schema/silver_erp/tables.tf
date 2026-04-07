@@ -803,14 +803,14 @@ locals {
         { name = "is_deleted", type = "boolean", comment = "Registro marcado como deletado (D_E_L_E_T_='*')" },
         { name = "recno", type = "bigint", comment = "R_E_C_N_O_" },
         { name = "updated_at_erp", type = "timestamp", comment = "Timestamp técnico do Protheus (S_T_A_M_P_)" },
-        { name = "created_date", type = "date", comment = "Data de criação do produto (YYYY-MM-DD)" },
+        { name = "ingestion_date", type = "date", comment = "Data de criação do (YYYY-MM-DD)" },
       ]
 
       partition_keys = [
         {
-          name    = "ingestion_date"
+          name    = "created_date"
           type    = "date"
-          comment = "Partição por data de ingestão (YYYY-MM-DD)"
+          comment = "Data da partição (derivada da ingestion_date da bronze)"
           projection = {
             type          = "date"
             format        = "yyyy-MM-dd"
