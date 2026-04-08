@@ -152,7 +152,7 @@ locals {
       location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=products/"
 
       columns = [
-        { name = "product_id", type = "bigint", comment = "ID interno do produto no Omie" },
+        { name = "product_id", type = "string", comment = "ID interno do produto no Omie" },
         { name = "source", type = "string", comment = "Sistema de origem" },
         { name = "product_code", type = "string", comment = "Código do produto" },
         { name = "description", type = "string", comment = "Descrição do produto" },
