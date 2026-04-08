@@ -164,7 +164,7 @@ locals {
       ]
 
       partition_keys = [
-        { name = "created_date", type = "date", comment = "Data/hora de inclusão no Omie" }
+        { name = "created_date", type = "date", comment = "Data de criação do produto" }
       ]
     }
 
