@@ -353,35 +353,37 @@ locals {
       partition_keys = []
     }
 
-     nps_form = {
+    nps_form = {
       description = "Respostas NPS normalizadas por submissão (Silver CX)."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=nps_form/"
+
       columns = [
-        { name = "source", type = "string", comment = "Fonte (ex.: typeform)" },
-        { name = "dataset", type = "string", comment = "Nome do dataset (ex.: nps)" },
-        { name = "event_id", type = "string", comment = "Event ID" },
-        { name = "form_id", type = "string", comment = "ID do formulário" },
-        { name = "form_title", type = "string", comment = "Título do formulário" },
-        { name = "submitted_at", type = "timestamp", comment = "Data/hora de envio" },
-        { name = "landed_at", type = "timestamp", comment = "Data/hora de entrada na página" },
-        { name = "customer_id", type = "string", comment = "ID do cliente (hidden.customerid)" },
-        { name = "email", type = "string", comment = "E-mail normalizado (lowercase)" },
-        { name = "customer_name", type = "string", comment = "Nome do cliente" },
-        { name = "order_number", type = "string", comment = "Número do pedido" },
-        { name = "store_name", type = "string", comment = "Loja (hidden.store)" },
-        { name = "store_id", type = "string", comment = "ID da loja" },
-        { name = "seller_name", type = "string", comment = "Vendedor (hidden.seller)" },
-        { name = "seller_id", type = "string", comment = "ID do vendedor" },
-        { name = "phonenumber", type = "string", comment = "Telefone" },
-        { name = "shopify_customer_id", type = "string", comment = "ID do cliente no Shopify" },
-        { name = "question_ref", type = "string", comment = "Ref da pergunta (Typeform)" },
-        { name = "question_label", type = "string", comment = "Título da pergunta (Typeform)" },
-        { name = "answer_value", type = "string", comment = "Resposta normalizada (texto/número/choice/boolean)" },
-        { name = "request_id", type = "string", comment = "Request ID (_request_id)" },
-        { name = "ingestion_ts", type = "timestamp", comment = "Timestamp de ingestão (_ingestion_ts)" }
+        { name = "source",              type = "string",    comment = "Fonte (ex.: typeform)" },
+        { name = "dataset",             type = "string",    comment = "Nome do dataset (ex.: nps)" },
+        { name = "event_id",            type = "string",    comment = "Event ID" },
+        { name = "form_id",             type = "string",    comment = "ID do formulário" },
+        { name = "form_title",          type = "string",    comment = "Título do formulário" },
+        { name = "submitted_at",        type = "timestamp", comment = "Data/hora de envio" },
+        { name = "landed_at",           type = "timestamp", comment = "Data/hora de entrada na página" },
+        { name = "customer_id",         type = "string",    comment = "ID do cliente (hidden.customerid)" },
+        { name = "email",               type = "string",    comment = "E-mail normalizado (lowercase)" },
+        { name = "customer_name",       type = "string",    comment = "Nome do cliente" },
+        { name = "order_number",        type = "string",    comment = "Número do pedido" },
+        { name = "store_name",          type = "string",    comment = "Loja (hidden.store)" },
+        { name = "store_id",            type = "string",    comment = "ID da loja" },
+        { name = "seller_name",         type = "string",    comment = "Vendedor (hidden.seller)" },
+        { name = "seller_id",           type = "string",    comment = "ID do vendedor" },
+        { name = "phonenumber",         type = "string",    comment = "Telefone" },
+        { name = "shopify_customer_id", type = "string",    comment = "ID do cliente no Shopify" },
+        { name = "question_ref",        type = "string",    comment = "Ref da pergunta (Typeform)" },
+        { name = "question_label",      type = "string",    comment = "Título da pergunta (Typeform)" },
+        { name = "answer_value",        type = "string",    comment = "Resposta normalizada (texto/número/choice/boolean)" },
+        { name = "request_id",          type = "string",    comment = "Request ID (_request_id)" },
+        { name = "ingestion_ts",        type = "timestamp", comment = "Timestamp de ingestão (_ingestion_ts)" }
       ]
+
       partition_keys = [
-        { name = "created_date", type = "date", comment = "Partição por data (YYYY-MM-DD)" }
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão usada para particionamento incremental" }
       ]
     }
 
