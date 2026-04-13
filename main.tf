@@ -434,10 +434,10 @@ module "glue_etls" {
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
 
-  bronze_bucket = module.buckets.bronze_bucket_name
-  silver_bucket = module.buckets.silver_bucket_name
-  gold_bucket   = module.buckets.gold_bucket_name
-  etls_bucket   = module.buckets.etls_bucket_name
+  bronze_bucket             = module.buckets.bronze_bucket_name
+  silver_bucket             = module.buckets.silver_bucket_name
+  gold_bucket               = module.buckets.gold_bucket_name
+  etls_bucket               = module.buckets.etls_bucket_name
 }
 
 

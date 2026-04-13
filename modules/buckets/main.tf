@@ -88,12 +88,13 @@ module "files_bucket" {
 
 locals {
   bucket_modules = {
-    bronze         = module.bronze_bucket
-    silver         = module.silver_bucket
-    gold           = module.gold_bucket
-    packages       = module.packages_bucket
-    athena_results = module.athena_results_bucket
-    etls           = module.etls_bucket
-    files          = module.files_bucket
+    bronze              = module.bronze_bucket
+    silver              = module.silver_bucket
+    gold                = module.gold_bucket
+    packages            = module.packages_bucket
+    athena_results      = module.athena_results_bucket
+    etls                = module.etls_bucket
+    files               = module.files_bucket
+    data_lake_settings  = module.data_lake_settings_bucket
   }
 }
