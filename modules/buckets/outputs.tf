@@ -39,6 +39,14 @@ output "gold_bucket_arn" {
   value = module.gold_bucket.bucket_arn
 }
 
+# data lake settings
+output "data_lake_settings_bucket_arn" {
+  value = module.data_lake_settings_bucket.bucket_arn
+}
+
+output "data_lake_settings_bucket_name" {
+  value = module.data_lake_settings_bucket.bucket_name
+}
 
 # etls
 output "etls_bucket_name" {

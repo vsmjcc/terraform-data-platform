@@ -2,6 +2,7 @@ locals {
   all_buckets = distinct(concat(var.data_buckets, [var.script_bucket, var.temp_bucket]))
 }
 
+
 data "aws_iam_policy_document" "glue_trust" {
   statement {
     effect  = "Allow"
@@ -44,6 +45,26 @@ data "aws_iam_policy_document" "glue_s3" {
       "s3:AbortMultipartUpload", "s3:ListBucketMultipartUploads"
     ]
     resources = [for b in local.all_buckets : "arn:aws:s3:::${b}/*"]
+  }
+
+  statement {
+    sid    = "SettingsBucketReadOnly"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject"
+    ]
+    resources = [
+      "arn:aws:s3:::zrzs-dev-data-lake-settings/*"
+    ]
+  }
+
+  statement {
+    sid       = "SettingsBucketList"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = [
+      "arn:aws:s3:::zrzs-dev-data-lake-settings"
+    ]
   }
 }
 
