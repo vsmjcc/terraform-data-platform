@@ -18,7 +18,7 @@ locals {
         data_source_key         = "gold"
         import_mode             = "SPICE"
         create_refresh_schedule = true
-        start_after_date_time   = "2026-04-07T03:00:00"
+        start_after_date_time   = "2026-04-14T03:00:00"
         schedule_id             = "daily"
         refresh_interval        = "DAILY"
         refresh_type            = "FULL_REFRESH"
@@ -55,7 +55,7 @@ locals {
         data_source_key         = "gold"
         import_mode             = "SPICE"
         create_refresh_schedule = true
-        start_after_date_time   = "2026-04-07T03:00:00"
+        start_after_date_time   = "2026-04-14T03:00:00"
         schedule_id             = "daily"
         refresh_interval        = "DAILY"
         refresh_type            = "FULL_REFRESH"
@@ -100,7 +100,7 @@ locals {
         data_source_key         = "gold"
         import_mode             = "SPICE"
         create_refresh_schedule = true
-        start_after_date_time   = "2026-04-07T03:00:00"
+        start_after_date_time   = "2026-04-14T03:00:00"
         schedule_id             = "daily"
         refresh_interval        = "DAILY"
         refresh_type            = "FULL_REFRESH"
@@ -128,7 +128,7 @@ locals {
         data_source_key         = "gold"
         import_mode             = "SPICE"
         create_refresh_schedule = true
-        start_after_date_time   = "2026-04-07T03:00:00"
+        start_after_date_time   = "2026-04-14T03:00:00"
         schedule_id             = "daily"
         refresh_interval        = "DAILY"
         refresh_type            = "FULL_REFRESH"
