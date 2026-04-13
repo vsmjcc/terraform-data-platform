@@ -112,37 +112,125 @@ locals {
       partition_keys = []
     }
 
-        orders_items_enriched = {
-      description = "Order items unificados de Shopify, Omie e Protheus (S2S Enriched) - Silver Enriched"
+    orders_items_enriched = {
+      description = "Order items consolidados e reconciliados de Shopify, Omie e Protheus (S2S Enriched) - Silver Enriched"
       location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=orders_items_enriched/"
+
       columns = [
-        { name = "source_system",      type = "string",        comment = "Sistema de origem do item" },
-        { name = "source_type",        type = "string",        comment = "Tipo de origem do item" },
-        { name = "source_order_id",    type = "string",        comment = "Identificador do pedido/documento na origem" },
-        { name = "source_document_id", type = "string",        comment = "Identificador do documento fiscal na origem" },
-        { name = "source_item_id",     type = "string",        comment = "Identificador único do item na origem" },
+        { name = "order_id", type = "string", comment = "Identificador canônico do pedido na S2S" },
+        { name = "source_system", type = "string", comment = "Sistema da linha que prevaleceu após a reconciliação" },
+        { name = "source_type", type = "string", comment = "Tipo de origem da linha vencedora" },
+        { name = "matched_sources", type = "array<string>", comment = "Lista das fontes onde o item/pedido foi encontrado" },
+        { name = "source_priority", type = "int", comment = "Prioridade usada na retenção: Protheus=1, Omie=2, Shopify=3" },
+        { name = "reconciliation_status", type = "string", comment = "Status final da conciliação: reconciled ou unmatched" },
+        { name = "matched_by", type = "string", comment = "Regra usada no match: document_id, order_bridge ou none" },
+        { name = "reconciliation_scope", type = "string", comment = "Escopo base usado na conciliação do item" },
+        { name = "item_reconciliation_key", type = "string", comment = "Chave final da linha reconciliada" },
 
-        { name = "sale_date",          type = "date",          comment = "Data de venda do item" },
-        { name = "document_date",      type = "date",          comment = "Data do documento fiscal do item" },
-        { name = "created_date",       type = "date",          comment = "Data de criação/ingestão de referência" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify quando houver" },
+        { name = "omie_order_id", type = "string", comment = "ID do pedido/documento no Omie quando houver" },
+        { name = "protheus_order_id", type = "string", comment = "ID do pedido/documento no Protheus quando houver" },
 
-        { name = "product_id",         type = "string",        comment = "Identificador do produto" },
-        { name = "product_code",       type = "string",        comment = "Código/SKU do produto" },
-        { name = "variant_id",         type = "string",        comment = "Identificador da variante do produto" },
-        { name = "sku",                type = "string",        comment = "SKU do item" },
-        { name = "product_name",       type = "string",        comment = "Nome do produto" },
+        { name = "source_item_id", type = "string", comment = "ID do item da linha vencedora, mantido apenas para rastreabilidade" },
+        { name = "document_id", type = "string", comment = "Documento fiscal canônico. Se existir e for diferente entre plataformas, não há match" },
+        { name = "source_document_id", type = "string", comment = "Alias do document_id para compatibilidade com consumidores downstream" },
+        { name = "document_key", type = "string", comment = "Chave do documento fiscal quando existir" },
+        { name = "document_number", type = "string", comment = "Número do documento fiscal quando existir" },
+        { name = "document_series", type = "string", comment = "Série do documento fiscal quando existir" },
+        { name = "purchase_order", type = "string", comment = "Código comercial do pedido usado na ponte Shopify x Omie" },
 
-        { name = "quantity",           type = "double",        comment = "Quantidade vendida/faturada" },
-        { name = "unit_price",         type = "decimal(18,2)", comment = "Preço unitário" },
-        { name = "gross_amount",       type = "decimal(18,2)", comment = "Valor bruto do item" },
-        { name = "discount_amount",    type = "decimal(18,2)", comment = "Valor de desconto do item" },
-        { name = "net_amount",         type = "decimal(18,2)", comment = "Valor líquido do item" },
+        { name = "sale_date", type = "date", comment = "Data de venda do item" },
+        { name = "document_date", type = "date", comment = "Data do documento fiscal" },
+        { name = "created_date", type = "date", comment = "Data de criação/ingestão de referência" },
 
-        { name = "currency",           type = "string",        comment = "Moeda do item" }
+        { name = "product_id", type = "string", comment = "Identificador do produto quando existir" },
+        { name = "product_code", type = "string", comment = "Código principal do produto" },
+        { name = "variant_id", type = "string", comment = "Identificador da variante quando existir" },
+        { name = "sku", type = "string", comment = "SKU informado na origem" },
+        { name = "product_name", type = "string", comment = "Nome do produto" },
+
+        { name = "quantity", type = "double", comment = "Quantidade vendida/faturada" },
+        { name = "unit_price", type = "decimal(18,2)", comment = "Preço unitário" },
+        { name = "gross_amount", type = "decimal(18,2)", comment = "Valor bruto do item" },
+        { name = "discount_amount", type = "decimal(18,2)", comment = "Valor de desconto do item" },
+        { name = "net_amount", type = "decimal(18,2)", comment = "Valor líquido do item" },
+        { name = "currency", type = "string", comment = "Moeda" }
       ]
 
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido/documento (YYYY-MM-DD)" }
+      ]
+    }
+
+    # S2S: produtos refinados (subset de colunas para análise)
+    products = {
+      description = "Produtos refinados (S2S): subset de colunas (identificação, estoque, datas); particionado por ingestion_date."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=products/"
+
+      columns = [
+        { name = "product_id", type = "string", comment = "ID interno do produto" },
+        { name = "source", type = "string", comment = "Sistema de origem" },
+        { name = "product_code", type = "string", comment = "Código do produto" },
+        { name = "description", type = "string", comment = "Descrição do produto" },
+        { name = "stock_quantity", type = "double", comment = "Quantidade em estoque" },
+        { name = "stock_minimum", type = "double", comment = "Estoque mínimo" },
+        { name = "launch_end_date", type = "date", comment = "Data de fim do período no Omie" },
+        { name = "updated_at", type = "date", comment = "Usuário da última alteração" },
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão (YYYY-MM-DD)" }
+      ]
+
+      partition_keys = [
+        { name = "created_date", type = "date", comment = "Data de criação do produto" }
+      ]
+    }
+
+    form_nps_response = {
+      description = "Resposta principal de NPS do formulário Typeform (S2S) - Customer Experience"
+      location    = "s3://${var.bucket}/domain=customer_experience/source=typeform/dataset=form_nps_response/"
+
+      columns = [
+        { name = "response_id",          type = "string", comment = "Identificador único da submissão/resposta do formulário" },
+        { name = "date",                 type = "date",   comment = "Data da resposta/submissão" },
+        { name = "typeform_customer_id", type = "string", comment = "Identificador do customer enviado no hidden.customerid do Typeform" },
+        { name = "shopify_customer_id",  type = "string", comment = "Identificador do customer no Shopify enviado no formulário" },
+        { name = "id_form",              type = "string", comment = "Identificador do formulário Typeform" },
+        { name = "order_number",         type = "string", comment = "Número do pedido relacionado à resposta" },
+        { name = "store_id",             type = "string", comment = "Identificador da loja associado à resposta" },
+        { name = "store_name",           type = "string", comment = "Nome da loja associado à resposta" },
+        { name = "seller_id",            type = "string", comment = "Identificador do vendedor associado à resposta" },
+        { name = "seller_name",          type = "string", comment = "Nome do vendedor associado à resposta" },
+        { name = "nps",                  type = "int",    comment = "Valor da resposta de NPS de 0 a 10" },
+        { name = "nps_type",             type = "string", comment = "Classificação do NPS: Detrator, Neutro ou Promotor" }
+      ]
+
+      partition_keys = [
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão usada para particionamento incremental" }
+      ]
+    }
+
+    form_nps_additional_responses = {
+      description = "Respostas adicionais do formulário Typeform, excluindo a pergunta de NPS (S2S) - Customer Experience"
+      location    = "s3://${var.bucket}/domain=customer_experience/source=typeform/dataset=form_nps_additional_responses/"
+
+      columns = [
+        { name = "response_id",          type = "string", comment = "Identificador único da submissão/resposta do formulário" },
+        { name = "question_id",          type = "string", comment = "Identificador da pergunta no formulário" },
+        { name = "question_desc",        type = "string", comment = "Descrição ou texto da pergunta" },
+        { name = "answer_desc",          type = "string", comment = "Resposta fornecida pelo usuário" },
+        { name = "type",                 type = "string", comment = "Tipo da pergunta ou resposta quando disponível" },
+        { name = "date",                 type = "date",   comment = "Data da resposta/submissão" },
+        { name = "typeform_customer_id", type = "string", comment = "Identificador do customer enviado no hidden.customerid do Typeform" },
+        { name = "shopify_customer_id",  type = "string", comment = "Identificador do customer no Shopify enviado no formulário" },
+        { name = "id_form",              type = "string", comment = "Identificador do formulário Typeform" },
+        { name = "order_number",         type = "string", comment = "Número do pedido relacionado à resposta" },
+        { name = "store_id",             type = "string", comment = "Identificador da loja associado à resposta" },
+        { name = "store_name",           type = "string", comment = "Nome da loja associado à resposta" },
+        { name = "seller_id",            type = "string", comment = "Identificador do vendedor associado à resposta" },
+        { name = "seller_name",          type = "string", comment = "Nome do vendedor associado à resposta" }
+      ]
+
+      partition_keys = [
+        { name = "ingestion_date", type = "date", comment = "Data de ingestão usada para particionamento incremental" }
       ]
     }
 

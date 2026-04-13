@@ -798,16 +798,12 @@ locals {
         { name = "group_code", type = "string", comment = "Grupo (B1_GRUPO)" },
         { name = "ncm", type = "string", comment = "NCM / posição IPI (B1_POSIPI)" },
 
-        { name = "icms_rate", type = "double", comment = "Alíquota ICMS (B1_PICM)" },
-        { name = "ipi_rate", type = "double", comment = "Alíquota IPI (B1_IPI)" },
-        { name = "iss_rate", type = "double", comment = "Alíquota ISS (B1_ALIQISS)" },
-
         { name = "branch", type = "string", comment = "Filial (B1_FILIAL)" },
 
         { name = "is_deleted", type = "boolean", comment = "Registro marcado como deletado (D_E_L_E_T_='*')" },
         { name = "recno", type = "bigint", comment = "R_E_C_N_O_" },
-        { name = "recdel", type = "bigint", comment = "R_E_C_D_E_L_" },
         { name = "updated_at_erp", type = "timestamp", comment = "Timestamp técnico do Protheus (S_T_A_M_P_)" },
+        { name = "ingestion_date", type = "date", comment = "Data de criação do (YYYY-MM-DD)" },
       ]
 
       partition_keys = [
@@ -883,6 +879,92 @@ locals {
         { name = "total_value", type = "double", comment = "Total do item (D2_TOTAL)" },
 
         { name = "issue_date", type = "date", comment = "Data de emissão (D2_EMISSAO)" },
+      ]
+
+      partition_keys = [
+        {
+          name    = "created_date"
+          type    = "date"
+          comment = "Data da partição (derivada da ingestion_date da bronze)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    protheus_orders = {
+      description = "Pedidos do Protheus (SC5010) normalizados."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=protheus/dataset=protheus_orders/"
+
+      columns = [
+        { name = "source", type = "string", comment = "Sistema de origem (protheus)" },
+        { name = "dataset", type = "string", comment = "Dataset lógico (orders)" },
+
+        { name = "branch_code", type = "string", comment = "Filial do pedido (C5_FILIAL)" },
+        { name = "order_id", type = "string", comment = "Número do pedido no Protheus (C5_NUM)" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido na Shopify armazenado no Protheus (C5_PEDECOM)" },
+        { name = "customer_order_xid", type = "string", comment = "Identificador adicional do pedido/cliente (C5_XID)" },
+
+        { name = "customer_code", type = "string", comment = "Código do cliente (C5_CLIENTE)" },
+        { name = "customer_store", type = "string", comment = "Loja do cliente (C5_LOJACLI)" },
+
+        { name = "issue_date", type = "date", comment = "Data de emissão do pedido (C5_EMISSAO)" },
+        { name = "freight_value", type = "double", comment = "Valor do frete (C5_FRETE)" },
+        { name = "freight_type", type = "string", comment = "Tipo do frete (C5_TPFRETE)" },
+        { name = "expenses_value", type = "double", comment = "Outras despesas (C5_DESPESA)" },
+        { name = "payment_condition_code", type = "string", comment = "Código da condição de pagamento (C5_CONDPAG)" },
+
+        { name = "updated_at", type = "timestamp", comment = "Timestamp técnico do Protheus (S_T_A_M_P_)" },
+      ]
+
+      partition_keys = [
+        {
+          name    = "created_date"
+          type    = "date"
+          comment = "Data da partição (derivada da ingestion_date da bronze)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    protheus_order_items = {
+      description = "Itens de pedidos do Protheus (SC6010) normalizados."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=protheus/dataset=protheus_order_items/"
+
+      columns = [
+        { name = "source", type = "string", comment = "Sistema de origem (protheus)" },
+        { name = "dataset", type = "string", comment = "Dataset lógico (order_items)" },
+
+        { name = "branch_code", type = "string", comment = "Filial do pedido (C6_FILIAL)" },
+        { name = "order_id", type = "string", comment = "Número do pedido no Protheus (C6_NUM)" },
+        { name = "item_number", type = "int", comment = "Número do item do pedido (C6_ITEM)" },
+
+        { name = "product_code", type = "string", comment = "Código do produto (C6_PRODUTO)" },
+        { name = "quantity", type = "double", comment = "Quantidade vendida (C6_QTDVEN)" },
+        { name = "unit_price", type = "double", comment = "Preço unitário (C6_PRCVEN)" },
+        { name = "total_value", type = "double", comment = "Valor total do item (C6_VALOR)" },
+        { name = "tes_code", type = "string", comment = "TES do item (C6_TES)" },
+
+        { name = "issue_date", type = "date", comment = "Data de emissão do pedido (C5_EMISSAO)" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido na Shopify armazenado no Protheus (C5_PEDECOM)" },
+        { name = "customer_order_xid", type = "string", comment = "Identificador adicional do pedido/cliente (C5_XID)" },
+        { name = "customer_code", type = "string", comment = "Código do cliente (C5_CLIENTE)" },
+        { name = "customer_store", type = "string", comment = "Loja do cliente (C5_LOJACLI)" },
+
+        { name = "item_updated_at", type = "timestamp", comment = "Timestamp técnico do item no Protheus" },
+        { name = "order_updated_at", type = "timestamp", comment = "Timestamp técnico do pedido no Protheus" },
+        { name = "updated_at", type = "timestamp", comment = "Maior timestamp técnico disponível entre item e pedido" },
       ]
 
       partition_keys = [

@@ -1,9 +1,77 @@
 locals {
   views = {
-    dm_product_sales_daily = {
+    dm_product_catalog = {
+      sql = <<-SQL
+        SELECT
+          id,
+          product_id,
+          product_code,
+          description,
+          created_at,
+          launch_end_date,
+          updated_by
+        FROM ${var.database_name}.dim_product
+      SQL
+
+      quicksight = {
+        enabled                 = true
+        data_source_key         = "gold"
+        import_mode             = "SPICE"
+        create_refresh_schedule = true
+        start_after_date_time   = "2026-04-07T03:00:00"
+        schedule_id             = "daily"
+        refresh_interval        = "DAILY"
+        refresh_type            = "FULL_REFRESH"
+      }
+    }
+
+    dm_revenue_daily = {
       sql = <<-SQL
         SELECT
           f.date,
+          d.day,
+          d.month,
+          d.quarter,
+          d.semester,
+          d.year,
+
+          f.total_sales_quantity,
+          f.total_gross_sale_amount,
+          f.total_discount_amount,
+          f.total_realized_sale_amount,
+
+          f.launch_sales_quantity,
+          f.launch_gross_sale_amount,
+          f.launch_discount_amount,
+          f.launch_realized_sale_amount
+
+        FROM ${var.database_name}.fact_revenue_daily f
+        LEFT JOIN ${var.database_name}.ga4_dim_date d
+          ON f.date = d.date
+      SQL
+
+      quicksight = {
+        enabled                 = true
+        data_source_key         = "gold"
+        import_mode             = "SPICE"
+        create_refresh_schedule = true
+        start_after_date_time   = "2026-04-07T03:00:00"
+        schedule_id             = "daily"
+        refresh_interval        = "DAILY"
+        refresh_type            = "FULL_REFRESH"
+      }
+    }
+
+    dm_product_sales = {
+      sql = <<-SQL
+        SELECT
+          f.date,
+          d.day,
+          d.month,
+          d.quarter,
+          d.semester,
+          d.year,
+
           f.product_id,
           COALESCE(p.product_id, -99) AS omie_product_id,
           COALESCE(p.product_code, 'NA') AS product_code,
@@ -12,16 +80,19 @@ locals {
           p.launch_end_date,
           COALESCE(p.updated_by, 'NA') AS updated_by,
 
-          f.document_id,
+          f.source_system,
+          f.source_item_id,
+          f.source_document_id,
           f.quantity,
           f.gross_sale_amount,
           f.discount_amount,
           f.realized_sale_amount,
-          f.is_launch_product,
-          COALESCE(f.launch_type, 'NA') AS launch_type
+          f.is_launch_sale
         FROM ${var.database_name}.fact_product_sales f
         LEFT JOIN ${var.database_name}.dim_product p
           ON f.product_id = p.id
+        LEFT JOIN ${var.database_name}.ga4_dim_date d
+          ON f.date = d.date
       SQL
 
       quicksight = {
@@ -29,7 +100,35 @@ locals {
         data_source_key         = "gold"
         import_mode             = "SPICE"
         create_refresh_schedule = true
-        start_after_date_time   = "2026-04-01T03:00:00"
+        start_after_date_time   = "2026-04-07T03:00:00"
+        schedule_id             = "daily"
+        refresh_interval        = "DAILY"
+        refresh_type            = "FULL_REFRESH"
+      }
+    }
+
+    dm_launch_share_monthly = {
+      sql = <<-SQL
+        SELECT
+          f.month,
+          d.month AS month_number,
+          d.quarter,
+          d.semester,
+          d.year,
+          f.total_realized_sale_amount,
+          f.launch_realized_sale_amount,
+          f.launch_revenue_share
+        FROM ${var.database_name}.fact_launch_revenue_share_monthly f
+        LEFT JOIN ${var.database_name}.ga4_dim_date d
+          ON f.month = d.date
+      SQL
+
+      quicksight = {
+        enabled                 = true
+        data_source_key         = "gold"
+        import_mode             = "SPICE"
+        create_refresh_schedule = true
+        start_after_date_time   = "2026-04-07T03:00:00"
         schedule_id             = "daily"
         refresh_interval        = "DAILY"
         refresh_type            = "FULL_REFRESH"

@@ -52,6 +52,56 @@ locals {
       }
     }
 
+    fact_revenue_daily = {
+      description = "Fato diária consolidada de faturamento total e de lançamentos. Serve como base analítica do indicador de participação do faturamento de lançamentos."
+
+      location = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_revenue_daily/"
+
+      columns = [
+        { name = "total_sales_quantity",         type = "double", comment = "Quantidade total vendida no dia" },
+        { name = "total_gross_sale_amount",      type = "double", comment = "Valor bruto total vendido no dia" },
+        { name = "total_discount_amount",        type = "double", comment = "Valor total de desconto aplicado no dia" },
+        { name = "total_realized_sale_amount",   type = "double", comment = "Valor líquido total realizado no dia" },
+
+        { name = "launch_sales_quantity",        type = "double", comment = "Quantidade vendida de produtos em lançamento no dia" },
+        { name = "launch_gross_sale_amount",     type = "double", comment = "Valor bruto vendido de produtos em lançamento no dia" },
+        { name = "launch_discount_amount",       type = "double", comment = "Valor total de desconto aplicado em produtos em lançamento no dia" },
+        { name = "launch_realized_sale_amount",  type = "double", comment = "Valor líquido realizado de produtos em lançamento no dia" }
+      ]
+
+      partition_keys = [
+        { name = "date", type = "date", comment = "Data de referência do faturamento (YYYY-MM-DD)" }
+      ]
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
+    fact_launch_revenue_share_monthly = {
+      description = "Fato mensal de participação do faturamento de lançamentos sobre o faturamento total realizado."
+
+      location = "s3://${var.bucket}/domain=${var.domain}/dataset=fact_launch_revenue_share_monthly/"
+
+      columns = [
+        { name = "total_realized_sale_amount",  type = "double", comment = "Valor líquido total realizado no mês" },
+        { name = "launch_realized_sale_amount", type = "double", comment = "Valor líquido realizado de lançamentos no mês" },
+        { name = "launch_revenue_share",        type = "double", comment = "Participação do faturamento de lançamentos sobre o faturamento total no mês" }
+      ]
+
+      partition_keys = [
+        { name = "month", type = "date", comment = "Primeiro dia do mês de referência (YYYY-MM-01)" }
+      ]
+
+      quicksight = {
+        enabled         = false
+        data_source_key = "gold"
+        import_mode     = "SPICE"
+      }
+    }
+
     # Dimensão de clientes. Populada pelo job dim-customers-s2g.
     dim_customers = {
       description = "Dimensão de clientes consolidada na Gold com dados cadastrais e datas da primeira e última compra."
