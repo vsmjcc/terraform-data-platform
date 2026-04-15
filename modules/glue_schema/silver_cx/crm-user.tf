@@ -364,7 +364,6 @@ locals {
         { name = "form_id",             type = "string",    comment = "ID do formulário" },
         { name = "form_title",          type = "string",    comment = "Título do formulário" },
         { name = "submitted_at",        type = "timestamp", comment = "Data/hora de envio" },
-        { name = "submitted_date",      type = "date",      comment = "Data de submissão usada para particionamento" },
         { name = "landed_at",           type = "timestamp", comment = "Data/hora de entrada na página" },
         { name = "customer_id",         type = "string",    comment = "ID do cliente (hidden.customerid)" },
         { name = "email",               type = "string",    comment = "E-mail normalizado (lowercase)" },
