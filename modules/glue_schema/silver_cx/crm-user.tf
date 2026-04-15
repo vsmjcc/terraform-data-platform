@@ -364,6 +364,7 @@ locals {
         { name = "form_id",             type = "string",    comment = "ID do formulário" },
         { name = "form_title",          type = "string",    comment = "Título do formulário" },
         { name = "submitted_at",        type = "timestamp", comment = "Data/hora de envio" },
+        { name = "submitted_date",      type = "date",      comment = "Data de submissão usada para particionamento" },
         { name = "landed_at",           type = "timestamp", comment = "Data/hora de entrada na página" },
         { name = "customer_id",         type = "string",    comment = "ID do cliente (hidden.customerid)" },
         { name = "email",               type = "string",    comment = "E-mail normalizado (lowercase)" },
@@ -379,11 +380,12 @@ locals {
         { name = "question_label",      type = "string",    comment = "Título da pergunta (Typeform)" },
         { name = "answer_value",        type = "string",    comment = "Resposta normalizada (texto/número/choice/boolean)" },
         { name = "request_id",          type = "string",    comment = "Request ID (_request_id)" },
-        { name = "ingestion_ts",        type = "timestamp", comment = "Timestamp de ingestão (_ingestion_ts)" }
+        { name = "ingestion_ts",        type = "timestamp", comment = "Timestamp de ingestão (_ingestion_ts)" },
+        { name = "ingestion_date",      type = "date",      comment = "Data de ingestão original do lote" }
       ]
 
       partition_keys = [
-        { name = "ingestion_date", type = "date", comment = "Data de ingestão usada para particionamento incremental" }
+        { name = "submitted_date", type = "date", comment = "Data de submissão usada para particionamento" }
       ]
     }
 
