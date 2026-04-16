@@ -795,6 +795,8 @@ locals {
         { name = "omie_product_code", type = "string", comment = "SKU Omie (B1_XSKUOMI)" },
         { name = "description", type = "string", comment = "Descrição (B1_DESC)" },
         { name = "product_type", type = "string", comment = "Tipo (B1_TIPO)" },
+        { name = "product_collection", type = "string", comment = "Coleção (B1_XCOLECC)" },
+        { name = "product_collection_year", type = "int", comment = "Tipo (B1_XANOLCT)" },
         { name = "unit", type = "string", comment = "Unidade de medida (B1_UM)" },
         { name = "group_code", type = "string", comment = "Grupo (B1_GRUPO)" },
         { name = "ncm", type = "string", comment = "NCM / posição IPI (B1_POSIPI)" },
