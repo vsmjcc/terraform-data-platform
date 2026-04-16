@@ -70,7 +70,7 @@ locals {
         { name = "customer_id", type = "string", comment = "Identificador do cliente Shopify" },
         { name = "email", type = "string", comment = "Email do cliente Shopify" },
         { name = "customer_document", type = "string", comment = "Documento do cliente (CPF/CNPJ normalizado)" },
-        { name = "consumer_identity_status", type = "string", comment = "Status da identificação do consumidor: IDENTIFIED ou ANONYMOUS" },
+        { name = "consumer_identity_status", type = "string", comment = "Status da identificação do consumidor: IDENTIFIED, IDENTIFIED_WITHOUT_DOCUMENT ou ANONYMOUS" },
 
         { name = "financial_status", type = "string", comment = "Status financeiro" },
         { name = "fulfillment_status", type = "string", comment = "Status de fulfillment" },
