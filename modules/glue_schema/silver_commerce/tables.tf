@@ -64,8 +64,8 @@ locals {
 
         { name = "order_name", type = "string", comment = "Nome/identificador do pedido" },
         { name = "order_number", type = "bigint", comment = "Número do pedido" },
-        { name = "number_internal", type = "bigint", comment = "Número interno do pedido" },
-
+        { name = "order_channel", type = "string", comment = "Canal operacional do pedido: ECOMMERCE, STORE ou OMNI" },
+        
         { name = "customer_id", type = "string", comment = "Identificador do cliente Shopify" },
         { name = "email", type = "string", comment = "Email do cliente Shopify" },
         { name = "customer_document", type = "string", comment = "Documento do cliente (CPF/CNPJ normalizado)" },
