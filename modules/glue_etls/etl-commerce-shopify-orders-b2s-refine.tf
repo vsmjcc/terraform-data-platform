@@ -12,7 +12,7 @@ module "glue_job_shopify_orders_to_silver" {
     var.bronze_bucket,
     var.silver_bucket,
   ]
-  # number_of_workers  = 8
+  number_of_workers  = 4
   use_vpc            = true
   subnet_ids         = var.private_subnet_ids
   security_group_ids = [local.glue_sg_id]
