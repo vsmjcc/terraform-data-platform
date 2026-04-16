@@ -5,7 +5,7 @@ module "glue_job_orders_s2s_enriched" {
   name = "orders-s2s-enriched"
 
   script_bucket = var.etls_bucket
-  script_key    = "glue/glue-s2s/orders-s2s-enriched.py"
+  script_key    = "glue/glue-s2s/orders-s2s-glue.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [
