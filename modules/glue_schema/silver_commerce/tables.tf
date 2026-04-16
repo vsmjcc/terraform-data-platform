@@ -230,7 +230,7 @@ locals {
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
       ]
     }
-    
+
     order_fulfillments = {
       description = "Fulfillments (envios) por pedido."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_fulfillments/"
@@ -269,6 +269,24 @@ locals {
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
+      ]
+    }
+
+    iglu_returns = {
+      description = "Iglu returns, normalized from the public returns report."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=iglu/dataset=returns/"
+      columns = [
+        { name = "return_document_key", type = "string", comment = "Return fiscal document key" },
+        { name = "sale_document_key", type = "string", comment = "Original sale fiscal document key" },
+        { name = "return_store", type = "string", comment = "Store where the return was registered" },
+        { name = "sale_store", type = "string", comment = "Store where the original sale was registered" },
+        { name = "shopify_order_name", type = "string", comment = "Associated Shopify order name" },
+        { name = "returned_at", type = "timestamp", comment = "Return date and time" },
+        { name = "return_amount", type = "decimal(18,2)", comment = "Returned amount" },
+        { name = "_ingestion_ts", type = "timestamp", comment = "Data lake ingestion timestamp" }
+      ]
+      partition_keys = [
+        { name = "return_date", type = "date", comment = "Partition by return date" }
       ]
     }
 
