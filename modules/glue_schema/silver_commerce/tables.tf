@@ -93,7 +93,7 @@ locals {
 
         { name = "tags", type = "array<string>", comment = "Tags do pedido em uppercase" },
         { name = "custom_attributes", type = "map<string,string>", comment = "Atributos personalizados do pedido" },
-        { name = "shipping_delivery_time", type = "string", comment = "Prazo de entrega informado no checkout/Iglu" },
+        { name = "shipping_delivery_time", type = "int", comment = "Prazo de entrega em dias, extraído do checkout/Iglu" },
         { name = "seller_id", type = "string", comment = "ID do vendedor responsável pelo pedido" },
         { name = "seller_name", type = "string", comment = "Nome do vendedor responsável pelo pedido" },
         { name = "location_id", type = "string", comment = "ID da loja/localização do pedido" },
