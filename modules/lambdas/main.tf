@@ -242,9 +242,9 @@ module "airflow_dags_sync_lambda" {
 locals {
   lambda_modules = {
     typeform          = module.typeform_lambda
-    shopify_orders    = module.shopify_orders_lambda
-    shopify_products  = module.shopify_products_lambda
-    shopify_customers = module.shopify_customers_lambda
+    # shopify_orders    = module.shopify_orders_lambda
+    # shopify_products  = module.shopify_products_lambda
+    # shopify_customers = module.shopify_customers_lambda
     invoice_search    = module.invoice_search_lambda
 
     # airflow_dags_sync = module.airflow_dags_sync_lambda
