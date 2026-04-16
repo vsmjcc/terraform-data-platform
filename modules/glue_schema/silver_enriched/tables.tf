@@ -79,9 +79,9 @@ locals {
       partition_keys = []
     }
 
-    orders_items_enriched = {
+    order_items = {
       description = "Order items consolidados e reconciliados de Shopify, Omie e Protheus (S2S Enriched) - Silver Enriched"
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=orders_items_enriched/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=order_items/"
 
       columns = [
         { name = "order_id", type = "string", comment = "Identificador canônico do pedido na S2S" },

@@ -33,7 +33,7 @@ module "glue_job_fact_gsc_metrics_s2g" {
 # ============================================================
 # GOLD - FACT PRODUCT SALES
 # ============================================================
-# Lê Silver Enriched (orders_items_enriched), junta com dim_product
+# Lê Silver Enriched (order_items), junta com dim_product
 # e gera a fato detalhada de vendas por produto em granularidade de item vendido.
 # Suporta conferência manual e validação do indicador de faturamento de lançamentos.
 # ============================================================
