@@ -2,7 +2,7 @@ locals {
   tables = {
     orders = {
       description = "Orders Shopify refinadas (S2S Enriched) - Silver Enriched"
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=orders/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=orders/"
       columns = [
         { name = "source_order_id", type = "string", comment = "ID do pedido concatenado" },
         { name = "shopify_order_id", type = "string", comment = "ID do pedido shopify" },
@@ -50,7 +50,7 @@ locals {
 
     customers = {
       description = "Customers consolidados de Shopify, Protheus e Omie (S2S Enriched) - Silver Enriched"
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=customers/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=customers/"
       columns = [
         { name = "customer_id", type = "string", comment = "Identificador único consolidado do cliente" },
         { name = "shopify_customer_ids", type = "array<string>", comment = "Lista de IDs do cliente na fonte Shopify" },
@@ -81,7 +81,7 @@ locals {
 
     order_items = {
       description = "Order items consolidados e reconciliados de Shopify, Omie e Protheus (S2S Enriched) - Silver Enriched"
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=order_items/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=order_items/"
 
       columns = [
         { name = "order_id", type = "string", comment = "Identificador canônico do pedido na S2S" },
@@ -132,7 +132,7 @@ locals {
     # S2S: produtos refinados (subset de colunas para análise)
     products = {
       description = "Produtos refinados (S2S): subset de colunas (identificação, estoque, datas); particionado por ingestion_date."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=products/"
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=products/"
 
       columns = [
         { name = "product_id", type = "string", comment = "ID interno do produto" },
