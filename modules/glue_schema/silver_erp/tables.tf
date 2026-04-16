@@ -1,41 +1,6 @@
 locals {
   tables = {
 
-    nps_form = {
-      description = "Respostas NPS normalizadas por submissão (Silver CX)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=nps_form/"
-
-      columns = [
-        { name = "source",              type = "string",    comment = "Fonte (ex.: typeform)" },
-        { name = "dataset",             type = "string",    comment = "Nome do dataset" },
-        { name = "event_id",            type = "string",    comment = "Event ID da resposta" },
-        { name = "form_id",             type = "string",    comment = "ID do formulário" },
-        { name = "form_title",          type = "string",    comment = "Título do formulário" },
-        { name = "submitted_at",        type = "timestamp", comment = "Data/hora de envio" },
-        { name = "landed_at",           type = "timestamp", comment = "Data/hora de entrada na página" },
-        { name = "customer_id",         type = "string",    comment = "ID do cliente no Typeform" },
-        { name = "email",               type = "string",    comment = "Email do cliente" },
-        { name = "customer_name",       type = "string",    comment = "Nome do cliente" },
-        { name = "order_number",        type = "string",    comment = "Order name / número do pedido vindo do form" },
-        { name = "store_name",          type = "string",    comment = "Nome da loja" },
-        { name = "store_id",            type = "string",    comment = "ID da loja" },
-        { name = "seller_name",         type = "string",    comment = "Nome do vendedor" },
-        { name = "seller_id",           type = "string",    comment = "ID do vendedor" },
-        { name = "phonenumber",         type = "string",    comment = "Telefone" },
-        { name = "shopify_customer_id", type = "string",    comment = "ID do cliente no Shopify" },
-        { name = "shopify_order_id",    type = "string",    comment = "ID do pedido no Shopify" },
-        { name = "question_ref",        type = "string",    comment = "Ref da pergunta no Typeform" },
-        { name = "question_label",      type = "string",    comment = "Texto da pergunta" },
-        { name = "answer_value",        type = "string",    comment = "Resposta normalizada" },
-        { name = "request_id",          type = "string",    comment = "Request ID" },
-        { name = "ingestion_ts",        type = "timestamp", comment = "Timestamp de ingestão" },
-        { name = "ingestion_date",      type = "date",      comment = "Data de ingestão original" }
-      ]
-
-      partition_keys = [
-        { name = "submitted_date", type = "date", comment = "Data de submissão usada para particionamento" }
-      ]
-    }
     omie_products = {
       description = "Catálogo de produtos do Omie (flattened a nível de produto)."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=omie/dataset=omie_products/"
