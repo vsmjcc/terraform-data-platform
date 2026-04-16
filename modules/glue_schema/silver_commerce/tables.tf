@@ -64,11 +64,13 @@ locals {
 
         { name = "order_name", type = "string", comment = "Nome/identificador do pedido" },
         { name = "order_number", type = "bigint", comment = "Número do pedido" },
-        { name = "order_channel", type = "string", comment = "Canal operacional do pedido: ECOMMERCE, STORE ou OMNI" },
-        
+        { name = "order_channel", type = "string", comment = "Canal operacional do pedido: ECOMMERCE, STORE, OMNI ou MANUAL" },
+        { name = "iglu_order_id", type = "string", comment = "ID do pedido no Iglu" },
+
         { name = "customer_id", type = "string", comment = "Identificador do cliente Shopify" },
         { name = "email", type = "string", comment = "Email do cliente Shopify" },
         { name = "customer_document", type = "string", comment = "Documento do cliente (CPF/CNPJ normalizado)" },
+        { name = "consumer_identity_status", type = "string", comment = "Status da identificação do consumidor: IDENTIFIED ou ANONYMOUS" },
 
         { name = "financial_status", type = "string", comment = "Status financeiro" },
         { name = "fulfillment_status", type = "string", comment = "Status de fulfillment" },
@@ -91,6 +93,11 @@ locals {
 
         { name = "tags", type = "array<string>", comment = "Tags do pedido em uppercase" },
         { name = "custom_attributes", type = "map<string,string>", comment = "Atributos personalizados do pedido" },
+        { name = "shipping_delivery_time", type = "string", comment = "Prazo de entrega informado no checkout/Iglu" },
+        { name = "seller_id", type = "string", comment = "ID do vendedor responsável pelo pedido" },
+        { name = "seller_name", type = "string", comment = "Nome do vendedor responsável pelo pedido" },
+        { name = "location_id", type = "string", comment = "ID da loja/localização do pedido" },
+        { name = "location_name", type = "string", comment = "Nome da loja/localização do pedido" },
         { name = "note", type = "string", comment = "Nota do pedido" },
       ]
       partition_keys = [
@@ -275,4 +282,3 @@ module "tables" {
   partition_keys = each.value.partition_keys
   parameters     = { classification = "parquet", compressionType = "snappy" }
 }
-
