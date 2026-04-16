@@ -353,34 +353,25 @@ locals {
       partition_keys = []
     }
 
-    nps_form = {
-      description = "Respostas NPS normalizadas por submissão (Silver CX)."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=nps_form/"
+    form_nps_response = {
+      description = "Resposta NPS refinada com canal de venda."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=form_nps_response/"
 
       columns = [
-        { name = "source",              type = "string",    comment = "Fonte (ex.: typeform)" },
-        { name = "dataset",             type = "string",    comment = "Nome do dataset (ex.: nps)" },
-        { name = "event_id",            type = "string",    comment = "Event ID" },
-        { name = "form_id",             type = "string",    comment = "ID do formulário" },
-        { name = "form_title",          type = "string",    comment = "Título do formulário" },
-        { name = "submitted_at",        type = "timestamp", comment = "Data/hora de envio" },
-        { name = "landed_at",           type = "timestamp", comment = "Data/hora de entrada na página" },
-        { name = "customer_id",         type = "string",    comment = "ID do cliente (hidden.customerid)" },
-        { name = "email",               type = "string",    comment = "E-mail normalizado (lowercase)" },
-        { name = "customer_name",       type = "string",    comment = "Nome do cliente" },
-        { name = "order_number",        type = "string",    comment = "Número do pedido" },
-        { name = "store_name",          type = "string",    comment = "Loja (hidden.store)" },
-        { name = "store_id",            type = "string",    comment = "ID da loja" },
-        { name = "seller_name",         type = "string",    comment = "Vendedor (hidden.seller)" },
-        { name = "seller_id",           type = "string",    comment = "ID do vendedor" },
-        { name = "phonenumber",         type = "string",    comment = "Telefone" },
-        { name = "shopify_customer_id", type = "string",    comment = "ID do cliente no Shopify" },
-        { name = "question_ref",        type = "string",    comment = "Ref da pergunta (Typeform)" },
-        { name = "question_label",      type = "string",    comment = "Título da pergunta (Typeform)" },
-        { name = "answer_value",        type = "string",    comment = "Resposta normalizada (texto/número/choice/boolean)" },
-        { name = "request_id",          type = "string",    comment = "Request ID (_request_id)" },
-        { name = "ingestion_ts",        type = "timestamp", comment = "Timestamp de ingestão (_ingestion_ts)" },
-        { name = "ingestion_date",      type = "date",      comment = "Data de ingestão original do lote" }
+        { name = "response_id",          type = "string", comment = "ID da resposta no Typeform" },
+        { name = "date",                 type = "date",   comment = "Data da submissão" },
+        { name = "typeform_customer_id", type = "string", comment = "ID do cliente no Typeform" },
+        { name = "shopify_customer_id",  type = "string", comment = "ID do cliente no Shopify" },
+        { name = "shopify_order_id",     type = "string", comment = "ID do pedido no Shopify" },
+        { name = "id_form",              type = "string", comment = "ID do formulário Typeform" },
+        { name = "store_id",             type = "string", comment = "ID da loja" },
+        { name = "store_name",           type = "string", comment = "Nome da loja" },
+        { name = "seller_id",            type = "string", comment = "ID do vendedor" },
+        { name = "seller_name",          type = "string", comment = "Nome do vendedor" },
+        { name = "nps",                  type = "int",    comment = "Nota NPS" },
+        { name = "nps_type",             type = "string", comment = "Classificação do NPS" },
+        { name = "sales_channel",        type = "string", comment = "Canal de venda" },
+        { name = "ingestion_date",       type = "date",   comment = "Data de ingestão original" }
       ]
 
       partition_keys = [
