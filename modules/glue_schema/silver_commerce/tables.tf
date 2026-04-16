@@ -204,7 +204,7 @@ locals {
     }
 
     order_payments = {
-      description = "Pagamentos associados aos pedidos, derivados de transactions do Shopify."
+      description = "Pagamentos associados aos pedidos, derivados de transactions do Shopify e enriquecidos com pagamentos do Iglu/POS."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_payments/"
       columns = [
         { name = "order_id", type = "string", comment = "ID do pedido" },
@@ -216,6 +216,12 @@ locals {
         { name = "gateway", type = "string", comment = "Gateway da transação" },
         { name = "formatted_gateway", type = "string", comment = "Nome formatado do gateway" },
         { name = "payment_id", type = "string", comment = "Identificador do pagamento no provedor" },
+        { name = "payment_method", type = "string", comment = "Método de pagamento informado pelo Iglu/POS" },
+        { name = "nsu", type = "string", comment = "NSU da transação informado pelo Iglu/POS" },
+        { name = "installments", type = "int", comment = "Quantidade de parcelas do pagamento" },
+        { name = "authorization_code", type = "string", comment = "Código de autorização da transação" },
+        { name = "card_brand", type = "string", comment = "Bandeira do cartão informada pelo Iglu/POS" },
+        { name = "conciliation", type = "boolean", comment = "Indicador de conciliação informado pelo Iglu/POS" },
         { name = "manually_capturable", type = "boolean", comment = "Indica se a captura é manual" },
         { name = "processed_at", type = "timestamp", comment = "Data/hora de processamento da transação" },
         { name = "amount", type = "decimal(18,2)", comment = "Valor da transação" }
