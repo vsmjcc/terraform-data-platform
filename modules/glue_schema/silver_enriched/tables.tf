@@ -185,52 +185,56 @@ locals {
     }
 
     form_nps_response = {
-      description = "Resposta principal de NPS do formulário Typeform (S2S) - Customer Experience"
-      location    = "s3://${var.bucket}/domain=customer_experience/source=typeform/dataset=form_nps_response/"
+      description = "Resposta NPS refinada com canal de venda."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=form_nps_response/"
 
       columns = [
-        { name = "response_id",          type = "string", comment = "Identificador único da submissão/resposta do formulário" },
-        { name = "date",                 type = "date",   comment = "Data da resposta/submissão" },
-        { name = "typeform_customer_id", type = "string", comment = "Identificador do customer enviado no hidden.customerid do Typeform" },
-        { name = "shopify_customer_id",  type = "string", comment = "Identificador do customer no Shopify enviado no formulário" },
-        { name = "id_form",              type = "string", comment = "Identificador do formulário Typeform" },
-        { name = "order_number",         type = "string", comment = "Número do pedido relacionado à resposta" },
-        { name = "store_id",             type = "string", comment = "Identificador da loja associado à resposta" },
-        { name = "store_name",           type = "string", comment = "Nome da loja associado à resposta" },
-        { name = "seller_id",            type = "string", comment = "Identificador do vendedor associado à resposta" },
-        { name = "seller_name",          type = "string", comment = "Nome do vendedor associado à resposta" },
-        { name = "nps",                  type = "int",    comment = "Valor da resposta de NPS de 0 a 10" },
-        { name = "nps_type",             type = "string", comment = "Classificação do NPS: Detrator, Neutro ou Promotor" }
+        { name = "response_id",          type = "string", comment = "ID da resposta no Typeform" },
+        { name = "date",                 type = "date",   comment = "Data da submissão" },
+        { name = "typeform_customer_id", type = "string", comment = "ID do cliente no Typeform" },
+        { name = "shopify_customer_id",  type = "string", comment = "ID do cliente no Shopify" },
+        { name = "shopify_order_id",     type = "string", comment = "ID do pedido no Shopify" },
+        { name = "id_form",              type = "string", comment = "ID do formulário Typeform" },
+        { name = "store_id",             type = "string", comment = "ID da loja" },
+        { name = "store_name",           type = "string", comment = "Nome da loja" },
+        { name = "seller_id",            type = "string", comment = "ID do vendedor" },
+        { name = "seller_name",          type = "string", comment = "Nome do vendedor" },
+        { name = "nps",                  type = "int",    comment = "Nota NPS" },
+        { name = "nps_type",             type = "string", comment = "Classificação do NPS" },
+        { name = "sales_channel",        type = "string", comment = "Canal de venda" },
+        { name = "ingestion_date",       type = "date",   comment = "Data de ingestão original" }
       ]
 
       partition_keys = [
-        { name = "ingestion_date", type = "date", comment = "Data de ingestão usada para particionamento incremental" }
+        { name = "submitted_date", type = "date", comment = "Data de submissão usada para particionamento" }
       ]
     }
 
     form_nps_additional_responses = {
-      description = "Respostas adicionais do formulário Typeform, excluindo a pergunta de NPS (S2S) - Customer Experience"
-      location    = "s3://${var.bucket}/domain=customer_experience/source=typeform/dataset=form_nps_additional_responses/"
+      description = "Respostas adicionais do NPS refinadas com canal de venda."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=typeform/dataset=form_nps_additional_responses/"
 
       columns = [
-        { name = "response_id",          type = "string", comment = "Identificador único da submissão/resposta do formulário" },
-        { name = "question_id",          type = "string", comment = "Identificador da pergunta no formulário" },
-        { name = "question_desc",        type = "string", comment = "Descrição ou texto da pergunta" },
-        { name = "answer_desc",          type = "string", comment = "Resposta fornecida pelo usuário" },
-        { name = "type",                 type = "string", comment = "Tipo da pergunta ou resposta quando disponível" },
-        { name = "date",                 type = "date",   comment = "Data da resposta/submissão" },
-        { name = "typeform_customer_id", type = "string", comment = "Identificador do customer enviado no hidden.customerid do Typeform" },
-        { name = "shopify_customer_id",  type = "string", comment = "Identificador do customer no Shopify enviado no formulário" },
-        { name = "id_form",              type = "string", comment = "Identificador do formulário Typeform" },
-        { name = "order_number",         type = "string", comment = "Número do pedido relacionado à resposta" },
-        { name = "store_id",             type = "string", comment = "Identificador da loja associado à resposta" },
-        { name = "store_name",           type = "string", comment = "Nome da loja associado à resposta" },
-        { name = "seller_id",            type = "string", comment = "Identificador do vendedor associado à resposta" },
-        { name = "seller_name",          type = "string", comment = "Nome do vendedor associado à resposta" }
+        { name = "response_id",          type = "string", comment = "ID da resposta no Typeform" },
+        { name = "question_id",          type = "string", comment = "Ref da pergunta" },
+        { name = "question_desc",        type = "string", comment = "Texto da pergunta" },
+        { name = "answer_desc",          type = "string", comment = "Texto da resposta" },
+        { name = "type",                 type = "string", comment = "Tipo da resposta" },
+        { name = "date",                 type = "date",   comment = "Data da submissão" },
+        { name = "typeform_customer_id", type = "string", comment = "ID do cliente no Typeform" },
+        { name = "shopify_customer_id",  type = "string", comment = "ID do cliente no Shopify" },
+        { name = "shopify_order_id",     type = "string", comment = "ID do pedido no Shopify" },
+        { name = "id_form",              type = "string", comment = "ID do formulário Typeform" },
+        { name = "store_id",             type = "string", comment = "ID da loja" },
+        { name = "store_name",           type = "string", comment = "Nome da loja" },
+        { name = "seller_id",            type = "string", comment = "ID do vendedor" },
+        { name = "seller_name",          type = "string", comment = "Nome do vendedor" },
+        { name = "sales_channel",        type = "string", comment = "Canal de venda" },
+        { name = "ingestion_date",       type = "date",   comment = "Data de ingestão original" }
       ]
 
       partition_keys = [
-        { name = "ingestion_date", type = "date", comment = "Data de ingestão usada para particionamento incremental" }
+        { name = "submitted_date", type = "date", comment = "Data de submissão usada para particionamento" }
       ]
     }
 
