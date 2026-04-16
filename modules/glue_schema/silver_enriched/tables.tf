@@ -1,12 +1,8 @@
 locals {
   tables = {
-    # Nome alinhado com o DAG Airflow:
-    # `modules/glue_schema/silver_enriched/orders-s2s-enriched-dag.py` passa `--GLUE_TABLE orders_enriched`.
-    # Sem este catálogo, o script faz fallback para `source=conformed/dataset=orders_enriched`
-    # e o Athena pode ficar consultando uma partição antiga em outro location.
-    orders_enriched = {
-      description = "Orders Shopify refinadas (S2S Enriched) - Silver Enriched (orders_enriched)"
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=orders_enriched/"
+    orders = {
+      description = "Orders Shopify refinadas (S2S Enriched) - Silver Enriched"
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=conformed/dataset=orders/"
       columns = [
         { name = "source_order_id", type = "string", comment = "ID do pedido concatenado" },
         { name = "shopify_order_id", type = "string", comment = "ID do pedido shopify" },
