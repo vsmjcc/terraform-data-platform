@@ -319,7 +319,7 @@ module "data_lake_settings" {
   private_subnet_ids = module.vpc.private_subnet_ids
   public_subnet_ids  = module.vpc.public_subnet_ids
 
-  ecs_cluster_name   = module.ecs_cluster.name
+  ecs_cluster_name = module.ecs_cluster.name
 
   subdomain = "settings"
 
@@ -375,8 +375,8 @@ module "quicksight" {
 module "quicksight_folders" {
   source = "./modules/quicksight-folders"
 
-  environment               = var.environment
-  namespace                 = "default"
+  environment = var.environment
+  namespace   = "default"
 
   admin_group_names = [
     "aws-qs-${var.environment}-admins"
@@ -431,13 +431,14 @@ module "glue_etls" {
   source = "./modules/glue_etls"
 
   environment        = var.environment
+  region             = var.region
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
 
-  bronze_bucket             = module.buckets.bronze_bucket_name
-  silver_bucket             = module.buckets.silver_bucket_name
-  gold_bucket               = module.buckets.gold_bucket_name
-  etls_bucket               = module.buckets.etls_bucket_name
+  bronze_bucket = module.buckets.bronze_bucket_name
+  silver_bucket = module.buckets.silver_bucket_name
+  gold_bucket   = module.buckets.gold_bucket_name
+  etls_bucket   = module.buckets.etls_bucket_name
 }
 
 
@@ -658,5 +659,4 @@ resource "aws_athena_workgroup" "primary" {
     }
   }
 }
-
 
