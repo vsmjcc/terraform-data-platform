@@ -197,7 +197,7 @@ resource "aws_ecs_task_definition" "airflow_worker" {
         { name = "AIRFLOW__CORE__EXECUTOR", value = "CeleryExecutor" },
         { name = "AIRFLOW__LOGGING__LOGGING_LEVEL", value = "DEBUG" },
         { name = "AIRFLOW__CELERY__BROKER_URL", value = "redis://${var.redis_host}:6379/0" },
-        { name = "AIRFLOW__CELERY__WORKER_CONCURRENCY", value = "2" },
+        { name = "AIRFLOW__CELERY__WORKER_CONCURRENCY", value = "4" },
         { name = "AIRFLOW__CELERY__WORKER_MAX_TASKS_PER_CHILD", value = "5" },
         { name = "AIRFLOW__LOGGING__REMOTE_LOGGING", value = "true" },
         { name = "AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER", value = "s3://${module.airflow_logs_bucket.bucket_name}" },
@@ -245,7 +245,7 @@ resource "aws_ecs_service" "airflow_worker" {
   name                   = "airflow-${var.environment}-worker-${count.index}"
   cluster                = var.cluster_name
   launch_type            = "FARGATE"
-  desired_count          = 1
+  desired_count          = 2
   enable_execute_command = true
   task_definition        = aws_ecs_task_definition.airflow_worker[count.index].arn
 
