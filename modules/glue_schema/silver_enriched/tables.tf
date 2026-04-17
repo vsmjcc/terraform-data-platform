@@ -1,46 +1,70 @@
 locals {
   tables = {
     orders = {
-      description = "Orders Shopify refinadas (S2S Enriched) - Silver Enriched"
+      description = "Pedidos enriquecidos em nível de pedido. Grão: 1 linha por pedido do e-commerce."
       location    = "s3://${var.bucket}/domain=${var.domain}/dataset=orders/"
       columns = [
-        { name = "source_order_id", type = "string", comment = "ID do pedido concatenado" },
-        { name = "shopify_order_id", type = "string", comment = "ID do pedido shopify" },
-        { name = "omie_order_id", type = "string", comment = "ID do pedido omie" },
+        { name = "order_id", type = "string", comment = "ID canônico do pedido na camada enriched. Atualmente igual ao ID legado do Shopify" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify, preservado para rastreabilidade da plataforma de origem" },
+        { name = "order_number", type = "bigint", comment = "Número do pedido usado como referência comercial para conciliação" },
+
         { name = "created_at", type = "timestamp", comment = "Data/hora de criação" },
         { name = "updated_at", type = "timestamp", comment = "Data/hora da última atualização" },
         { name = "processed_at", type = "timestamp", comment = "Data/hora de processamento" },
         { name = "cancelled_at", type = "timestamp", comment = "Data/hora de cancelamento" },
         { name = "closed_at", type = "timestamp", comment = "Data/hora de fechamento" },
 
-        { name = "order_name", type = "string", comment = "Nome/identificador do pedido" },
-        { name = "order_number", type = "bigint", comment = "Número do pedido" },
         { name = "order_channel", type = "string", comment = "Canal operacional do pedido: ECOMMERCE, STORE, OMNI ou MANUAL" },
         { name = "iglu_order_id", type = "string", comment = "ID do pedido no Iglu" },
-        { name = "consumer_identity_status", type = "string", comment = "Status da identificação do consumidor" },
-        { name = "shipping_delivery_time", type = "int", comment = "Prazo de entrega em dias, extraído do checkout/Iglu" },
+        { name = "source_name", type = "string", comment = "Nome da origem no Shopify" },
+        { name = "source_identifier", type = "string", comment = "Identificador da origem no Shopify" },
+        { name = "tags", type = "array<string>", comment = "Tags do pedido normalizadas em uppercase" },
+
         { name = "seller_id", type = "string", comment = "ID do vendedor responsável pelo pedido" },
         { name = "seller_name", type = "string", comment = "Nome do vendedor responsável pelo pedido" },
         { name = "location_id", type = "string", comment = "ID da loja/localização do pedido" },
         { name = "location_name", type = "string", comment = "Nome da loja/localização do pedido" },
+        { name = "shipping_delivery_time", type = "int", comment = "Prazo de entrega em dias, extraído do checkout/Iglu" },
 
         { name = "financial_status", type = "string", comment = "Status financeiro" },
         { name = "fulfillment_status", type = "string", comment = "Status de fulfillment" },
         { name = "confirmed", type = "boolean", comment = "Pedido confirmado" },
 
-        { name = "shopify_customer_id", type = "string", comment = "Identificador do customer no shopify" },
-        { name = "customer_id", type = "string", comment = "Identificador do customer" },
-        { name = "document_id", type = "string", comment = "Identificador da nota fiscal" },
-        { name = "customer_document", type = "string", comment = "CPF" },
-        { name = "customer_document_raw", type = "string", comment = "CPF original" },
-        { name = "email", type = "string", comment = "email" },
+        { name = "customer_id", type = "string", comment = "ID consolidado do cliente na camada enriched" },
+        { name = "shopify_customer_id", type = "string", comment = "ID do cliente no Shopify" },
+        { name = "customer_id_resolution_status", type = "string", comment = "Status da resolução do customer_id consolidado: RESOLVED, UNRESOLVED_SHOPIFY_FALLBACK ou MISSING_SOURCE_CUSTOMER_ID" },
+        { name = "customer_document", type = "string", comment = "Documento do cliente normalizado/hash conforme regra de identidade" },
+        { name = "consumer_identity_status", type = "string", comment = "Status da identificação do consumidor: IDENTIFIED, IDENTIFIED_WITHOUT_DOCUMENT ou ANONYMOUS" },
+        { name = "email", type = "string", comment = "Email do cliente no pedido" },
 
         { name = "currency", type = "string", comment = "Moeda" },
         { name = "subtotal_price", type = "decimal(18,2)", comment = "Subtotal" },
         { name = "total_price", type = "decimal(18,2)", comment = "Total" },
+        { name = "total_tax", type = "decimal(18,2)", comment = "Total de impostos" },
         { name = "total_discounts", type = "decimal(18,2)", comment = "Total de descontos" },
+        { name = "total_line_items_price", type = "decimal(18,2)", comment = "Total dos itens" },
+        { name = "current_subtotal_price", type = "decimal(18,2)", comment = "Subtotal atual" },
         { name = "current_total_discounts", type = "decimal(18,2)", comment = "Descontos atuais" },
         { name = "current_total_price", type = "decimal(18,2)", comment = "Total atual" },
+
+        { name = "payment_total_amount", type = "decimal(18,2)", comment = "Soma dos pagamentos/transações vinculados ao pedido" },
+        { name = "payment_methods", type = "array<string>", comment = "Métodos de pagamento identificados no pedido" },
+        { name = "payment_transactions_count", type = "int", comment = "Quantidade de transações/pagamentos vinculados" },
+        { name = "paid_at", type = "timestamp", comment = "Primeira data/hora de pagamento aprovado/capturado" },
+        { name = "payment_status_summary", type = "string", comment = "Resumo de pagamento: PAID, PARTIALLY_PAID, UNPAID, REFUNDED ou UNKNOWN" },
+
+        { name = "has_fiscal_document", type = "boolean", comment = "Indica se o pedido possui ao menos um documento fiscal vinculado" },
+        { name = "fiscal_document_count", type = "int", comment = "Quantidade de documentos fiscais vinculados ao pedido" },
+        { name = "first_fiscal_document_id", type = "string", comment = "Primeiro documento fiscal vinculado ao pedido, para atalho analítico" },
+        { name = "first_fiscal_document_issue_date", type = "date", comment = "Data de emissão do primeiro documento fiscal vinculado" },
+        { name = "invoicing_status", type = "string", comment = "Status de faturamento do pedido: NOT_INVOICED, PARTIALLY_INVOICED, INVOICED, OVER_INVOICED ou UNKNOWN" },
+
+        { name = "shipping_city", type = "string", comment = "Cidade de entrega resumida do pedido" },
+        { name = "shipping_state", type = "string", comment = "UF/estado de entrega resumido do pedido" },
+        { name = "shipping_zip", type = "string", comment = "CEP de entrega resumido do pedido" },
+        { name = "billing_city", type = "string", comment = "Cidade de cobrança resumida do pedido" },
+        { name = "billing_state", type = "string", comment = "UF/estado de cobrança resumido do pedido" },
+        { name = "billing_zip", type = "string", comment = "CEP de cobrança resumido do pedido" },
       ]
 
       partition_keys = [
@@ -80,52 +104,202 @@ locals {
     }
 
     order_items = {
-      description = "Order items consolidados e reconciliados de Shopify, Omie e Protheus (S2S Enriched) - Silver Enriched"
+      description = "Itens de pedidos enriquecidos. Grão: 1 linha por item do pedido do e-commerce."
       location    = "s3://${var.bucket}/domain=${var.domain}/dataset=order_items/"
 
       columns = [
-        { name = "order_id", type = "string", comment = "Identificador canônico do pedido na S2S" },
-        { name = "source_system", type = "string", comment = "Sistema da linha que prevaleceu após a reconciliação" },
-        { name = "source_type", type = "string", comment = "Tipo de origem da linha vencedora" },
-        { name = "matched_sources", type = "array<string>", comment = "Lista das fontes onde o item/pedido foi encontrado" },
-        { name = "source_priority", type = "int", comment = "Prioridade usada na retenção: Protheus=1, Omie=2, Shopify=3" },
-        { name = "reconciliation_status", type = "string", comment = "Status final da conciliação: reconciled ou unmatched" },
-        { name = "matched_by", type = "string", comment = "Regra usada no match: document_id, order_bridge ou none" },
-        { name = "reconciliation_scope", type = "string", comment = "Escopo base usado na conciliação do item" },
-        { name = "item_reconciliation_key", type = "string", comment = "Chave final da linha reconciliada" },
+        { name = "order_id", type = "string", comment = "ID canônico do pedido na camada enriched. Atualmente igual ao ID legado do Shopify" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify" },
+        { name = "order_number", type = "bigint", comment = "Número do pedido usado como referência comercial para conciliação" },
+        { name = "item_pos", type = "int", comment = "Posição do item no pedido" },
+        { name = "item_id", type = "string", comment = "ID do item no Shopify" },
 
-        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify quando houver" },
-        { name = "omie_order_id", type = "string", comment = "ID do pedido/documento no Omie quando houver" },
-        { name = "protheus_order_id", type = "string", comment = "ID do pedido/documento no Protheus quando houver" },
+        { name = "product_id", type = "string", comment = "ID do produto na plataforma de origem" },
+        { name = "variant_id", type = "string", comment = "ID da variante na plataforma de origem" },
+        { name = "sku", type = "string", comment = "SKU informado no pedido" },
+        { name = "product_code", type = "string", comment = "Código canônico do produto, quando enriquecido por produtos" },
+        { name = "title", type = "string", comment = "Título do item" },
+        { name = "variant_title", type = "string", comment = "Título da variante" },
+        { name = "name", type = "string", comment = "Nome completo do item" },
+        { name = "vendor", type = "string", comment = "Fornecedor/marca" },
 
-        { name = "source_item_id", type = "string", comment = "ID do item da linha vencedora, mantido apenas para rastreabilidade" },
-        { name = "document_id", type = "string", comment = "Documento fiscal canônico. Se existir e for diferente entre plataformas, não há match" },
-        { name = "source_document_id", type = "string", comment = "Alias do document_id para compatibilidade com consumidores downstream" },
-        { name = "document_key", type = "string", comment = "Chave do documento fiscal quando existir" },
-        { name = "document_number", type = "string", comment = "Número do documento fiscal quando existir" },
-        { name = "document_series", type = "string", comment = "Série do documento fiscal quando existir" },
-        { name = "purchase_order", type = "string", comment = "Código comercial do pedido usado na ponte Shopify x Omie" },
+        { name = "quantity", type = "int", comment = "Quantidade pedida" },
+        { name = "price", type = "decimal(18,2)", comment = "Preço unitário do item" },
+        { name = "total_discount", type = "decimal(18,2)", comment = "Desconto total alocado ao item" },
+        { name = "gross_amount", type = "decimal(18,2)", comment = "Valor bruto calculado do item" },
+        { name = "net_amount", type = "decimal(18,2)", comment = "Valor líquido calculado do item" },
+        { name = "currency", type = "string", comment = "Moeda" },
 
-        { name = "sale_date", type = "date", comment = "Data de venda do item" },
-        { name = "document_date", type = "date", comment = "Data do documento fiscal" },
-        { name = "created_date", type = "date", comment = "Data de criação/ingestão de referência" },
+        { name = "taxable", type = "boolean", comment = "Indica se o item é tributável" },
+        { name = "gift_card", type = "boolean", comment = "Indica se o item é gift card" },
+        { name = "requires_shipping", type = "boolean", comment = "Indica se o item requer envio" },
+        { name = "fulfillable_quantity", type = "int", comment = "Quantidade ainda atendível" },
 
-        { name = "product_id", type = "string", comment = "Identificador do produto quando existir" },
-        { name = "product_code", type = "string", comment = "Código principal do produto" },
-        { name = "variant_id", type = "string", comment = "Identificador da variante quando existir" },
-        { name = "sku", type = "string", comment = "SKU informado na origem" },
-        { name = "product_name", type = "string", comment = "Nome do produto" },
+        { name = "order_channel", type = "string", comment = "Canal operacional do pedido" },
+        { name = "customer_id", type = "string", comment = "ID consolidado do cliente na camada enriched" },
+        { name = "shopify_customer_id", type = "string", comment = "ID original do cliente no Shopify" },
+        { name = "customer_id_resolution_status", type = "string", comment = "Status da resolução do customer_id consolidado: RESOLVED, UNRESOLVED_SHOPIFY_FALLBACK ou MISSING_SOURCE_CUSTOMER_ID" },
+        { name = "location_id", type = "string", comment = "ID da loja/localização do pedido" },
+        { name = "location_name", type = "string", comment = "Nome da loja/localização do pedido" },
+        { name = "seller_id", type = "string", comment = "ID do vendedor responsável pelo pedido" },
+        { name = "seller_name", type = "string", comment = "Nome do vendedor responsável pelo pedido" },
 
-        { name = "quantity", type = "double", comment = "Quantidade vendida/faturada" },
-        { name = "unit_price", type = "decimal(18,2)", comment = "Preço unitário" },
-        { name = "gross_amount", type = "decimal(18,2)", comment = "Valor bruto do item" },
-        { name = "discount_amount", type = "decimal(18,2)", comment = "Valor de desconto do item" },
-        { name = "net_amount", type = "decimal(18,2)", comment = "Valor líquido do item" },
-        { name = "currency", type = "string", comment = "Moeda" }
+        { name = "is_invoiced", type = "boolean", comment = "Indica se o item possui faturamento fiscal vinculado" },
+        { name = "invoicing_status", type = "string", comment = "Status de faturamento do item: NOT_INVOICED, PARTIALLY_INVOICED, INVOICED, OVER_INVOICED ou UNKNOWN" },
+        { name = "invoiced_quantity", type = "double", comment = "Quantidade faturada vinculada ao item" },
+        { name = "invoiced_amount", type = "decimal(18,2)", comment = "Valor faturado vinculado ao item" },
+        { name = "fiscal_document_ids", type = "array<string>", comment = "Documentos fiscais vinculados ao item" },
+        { name = "invoicing_match_rule", type = "string", comment = "Regra usada para vincular o item ao documento fiscal" },
+        { name = "invoicing_difference_quantity", type = "double", comment = "Diferença entre quantidade pedida e faturada" },
+        { name = "invoicing_difference_amount", type = "decimal(18,2)", comment = "Diferença entre valor líquido pedido e valor faturado" }
       ]
 
       partition_keys = [
-        { name = "order_date", type = "date", comment = "Partição por data do pedido/documento (YYYY-MM-DD)" }
+        { name = "order_date", type = "date", comment = "Partição por data do pedido (YYYY-MM-DD)" }
+      ]
+    }
+
+    order_payments = {
+      description = "Pagamentos enriquecidos dos pedidos. Grão: 1 linha por transação/pagamento do pedido."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=order_payments/"
+
+      columns = [
+        { name = "order_id", type = "string", comment = "ID canônico do pedido na camada enriched" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify" },
+        { name = "order_number", type = "bigint", comment = "Número do pedido" },
+        { name = "customer_id", type = "string", comment = "ID consolidado do cliente" },
+        { name = "shopify_customer_id", type = "string", comment = "ID original do cliente no Shopify" },
+        { name = "customer_id_resolution_status", type = "string", comment = "Status da resolução do customer_id consolidado: RESOLVED, UNRESOLVED_SHOPIFY_FALLBACK ou MISSING_SOURCE_CUSTOMER_ID" },
+        { name = "order_channel", type = "string", comment = "Canal operacional do pedido" },
+        { name = "location_id", type = "string", comment = "ID da loja/localização do pedido" },
+        { name = "location_name", type = "string", comment = "Nome da loja/localização do pedido" },
+        { name = "seller_id", type = "string", comment = "ID do vendedor responsável pelo pedido" },
+        { name = "seller_name", type = "string", comment = "Nome do vendedor responsável pelo pedido" },
+
+        { name = "currency", type = "string", comment = "Moeda da transação" },
+        { name = "payment_pos", type = "int", comment = "Posição da transação no pedido" },
+        { name = "transaction_id", type = "string", comment = "ID da transação" },
+        { name = "kind", type = "string", comment = "Tipo da transação" },
+        { name = "status", type = "string", comment = "Status da transação" },
+        { name = "gateway", type = "string", comment = "Gateway da transação" },
+        { name = "formatted_gateway", type = "string", comment = "Nome formatado do gateway" },
+        { name = "payment_id", type = "string", comment = "Identificador do pagamento no provedor" },
+        { name = "payment_method", type = "string", comment = "Método de pagamento informado pelo Iglu/POS" },
+        { name = "nsu", type = "string", comment = "NSU da transação informado pelo Iglu/POS" },
+        { name = "installments", type = "int", comment = "Quantidade de parcelas do pagamento" },
+        { name = "authorization_code", type = "string", comment = "Código de autorização da transação" },
+        { name = "card_brand", type = "string", comment = "Bandeira do cartão informada pelo Iglu/POS" },
+        { name = "conciliation", type = "boolean", comment = "Indicador de conciliação informado pelo Iglu/POS" },
+        { name = "manually_capturable", type = "boolean", comment = "Indica se a captura é manual" },
+        { name = "processed_at", type = "timestamp", comment = "Data/hora de processamento da transação" },
+        { name = "amount", type = "decimal(18,2)", comment = "Valor da transação" }
+      ]
+
+      partition_keys = [
+        { name = "order_date", type = "date", comment = "Partição por data do pedido (YYYY-MM-DD)" }
+      ]
+    }
+
+    order_addresses = {
+      description = "Endereços enriquecidos dos pedidos. Grão: 1 linha por pedido e tipo de endereço."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=order_addresses/"
+
+      columns = [
+        { name = "order_id", type = "string", comment = "ID canônico do pedido na camada enriched" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify" },
+        { name = "order_number", type = "bigint", comment = "Número do pedido" },
+        { name = "customer_id", type = "string", comment = "ID consolidado do cliente" },
+        { name = "shopify_customer_id", type = "string", comment = "ID original do cliente no Shopify" },
+        { name = "customer_id_resolution_status", type = "string", comment = "Status da resolução do customer_id consolidado: RESOLVED, UNRESOLVED_SHOPIFY_FALLBACK ou MISSING_SOURCE_CUSTOMER_ID" },
+        { name = "order_channel", type = "string", comment = "Canal operacional do pedido" },
+
+        { name = "address_type", type = "string", comment = "Tipo de endereço: shipping ou billing" },
+        { name = "address_source", type = "string", comment = "Fonte usada para o endereço: SHOPIFY, ZSHIP_CUSTOM_ATTRIBUTE, ZBILL_CUSTOM_ATTRIBUTE ou POS_CUSTOM_ATTRIBUTE" },
+        { name = "name", type = "string", comment = "Nome completo associado ao endereço" },
+        { name = "first_name", type = "string", comment = "Primeiro nome" },
+        { name = "last_name", type = "string", comment = "Sobrenome" },
+        { name = "company", type = "string", comment = "Empresa" },
+        { name = "phone", type = "string", comment = "Telefone" },
+
+        { name = "address1", type = "string", comment = "Endereço 1 original/selecionado" },
+        { name = "address2", type = "string", comment = "Endereço 2 original/selecionado" },
+        { name = "street", type = "string", comment = "Logradouro normalizado" },
+        { name = "number", type = "string", comment = "Número normalizado" },
+        { name = "complement", type = "string", comment = "Complemento normalizado" },
+        { name = "neighborhood", type = "string", comment = "Bairro normalizado" },
+        { name = "city", type = "string", comment = "Cidade" },
+        { name = "state", type = "string", comment = "UF/estado" },
+        { name = "province", type = "string", comment = "Estado/província original" },
+        { name = "province_code", type = "string", comment = "Código da província original" },
+        { name = "country", type = "string", comment = "País" },
+        { name = "country_code", type = "string", comment = "Código do país" },
+        { name = "zip", type = "string", comment = "CEP" },
+        { name = "latitude", type = "double", comment = "Latitude" },
+        { name = "longitude", type = "double", comment = "Longitude" }
+      ]
+
+      partition_keys = [
+        { name = "order_date", type = "date", comment = "Partição por data do pedido (YYYY-MM-DD)" }
+      ]
+    }
+
+    order_documents = {
+      description = "Amarrações entre pedidos e documentos fiscais. Grão: 1 linha por vínculo pedido x documento."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=order_documents/"
+
+      columns = [
+        { name = "order_id", type = "string", comment = "ID canônico do pedido na camada enriched" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify" },
+        { name = "order_number", type = "bigint", comment = "Número do pedido usado como referência comercial" },
+        { name = "document_id", type = "string", comment = "ID canônico do documento fiscal" },
+        { name = "document_key", type = "string", comment = "Chave fiscal do documento" },
+        { name = "document_number", type = "string", comment = "Número do documento fiscal" },
+        { name = "document_series", type = "string", comment = "Série do documento fiscal" },
+        { name = "document_type", type = "string", comment = "Tipo/modelo do documento fiscal" },
+        { name = "purchase_order", type = "string", comment = "Pedido de compra/venda informado no documento fiscal" },
+        { name = "issue_date", type = "date", comment = "Data de emissão do documento fiscal" },
+        { name = "issuer_cnpj", type = "string", comment = "CNPJ do emitente do documento fiscal" },
+        { name = "issuer_name", type = "string", comment = "Nome do emitente do documento fiscal" },
+        { name = "total_products", type = "decimal(18,2)", comment = "Valor total dos produtos no documento" },
+        { name = "total_discounts", type = "decimal(18,2)", comment = "Valor total de descontos no documento" },
+        { name = "total_invoice", type = "decimal(18,2)", comment = "Valor total do documento fiscal" },
+        { name = "match_rule", type = "string", comment = "Regra usada para amarrar pedido e documento" },
+        { name = "match_confidence", type = "string", comment = "Confiança do vínculo: HIGH, MEDIUM, LOW ou MANUAL" },
+        { name = "is_matched", type = "boolean", comment = "Indica se o documento foi amarrado ao pedido" }
+      ]
+
+      partition_keys = [
+        { name = "order_date", type = "date", comment = "Partição por data do pedido (YYYY-MM-DD)" }
+      ]
+    }
+
+    order_item_documents = {
+      description = "Amarrações entre itens de pedido e itens fiscais. Grão: 1 linha por vínculo item do pedido x item fiscal."
+      location    = "s3://${var.bucket}/domain=${var.domain}/dataset=order_item_documents/"
+
+      columns = [
+        { name = "order_id", type = "string", comment = "ID canônico do pedido na camada enriched" },
+        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify" },
+        { name = "order_number", type = "bigint", comment = "Número do pedido usado como referência comercial" },
+        { name = "item_id", type = "string", comment = "ID do item no Shopify" },
+        { name = "sku", type = "string", comment = "SKU do item do pedido" },
+        { name = "document_id", type = "string", comment = "ID canônico do documento fiscal" },
+        { name = "document_key", type = "string", comment = "Chave fiscal do documento" },
+        { name = "document_item_seq", type = "string", comment = "Sequência/identificador do item no documento fiscal" },
+        { name = "document_product_code", type = "string", comment = "Código do produto no item fiscal" },
+        { name = "document_product_name", type = "string", comment = "Nome do produto no item fiscal" },
+        { name = "ordered_quantity", type = "double", comment = "Quantidade pedida" },
+        { name = "invoiced_quantity", type = "double", comment = "Quantidade faturada vinculada" },
+        { name = "ordered_amount", type = "decimal(18,2)", comment = "Valor líquido pedido" },
+        { name = "invoiced_amount", type = "decimal(18,2)", comment = "Valor faturado vinculado" },
+        { name = "match_rule", type = "string", comment = "Regra usada para amarrar item do pedido e item fiscal" },
+        { name = "invoicing_status", type = "string", comment = "Status de faturamento do item" },
+        { name = "quantity_difference", type = "double", comment = "Diferença entre quantidade pedida e faturada" },
+        { name = "amount_difference", type = "decimal(18,2)", comment = "Diferença entre valor pedido e faturado" }
+      ]
+
+      partition_keys = [
+        { name = "order_date", type = "date", comment = "Partição por data do pedido (YYYY-MM-DD)" }
       ]
     }
 
