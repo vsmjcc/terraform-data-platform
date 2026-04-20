@@ -333,17 +333,20 @@ locals {
         { name = "response_id", type = "string", comment = "ID da resposta no Typeform" },
         { name = "date", type = "date", comment = "Data da submissão" },
         { name = "typeform_customer_id", type = "string", comment = "ID do cliente no Typeform" },
-        { name = "shopify_customer_id", type = "string", comment = "ID do cliente no Shopify" },
-        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify" },
-        { name = "id_form", type = "string", comment = "ID do formulário Typeform" },
-        { name = "store_id", type = "string", comment = "ID da loja" },
-        { name = "store_name", type = "string", comment = "Nome da loja" },
-        { name = "seller_id", type = "string", comment = "ID do vendedor" },
-        { name = "seller_name", type = "string", comment = "Nome do vendedor" },
-        { name = "nps", type = "int", comment = "Nota NPS" },
-        { name = "nps_type", type = "string", comment = "Classificação do NPS" },
-        { name = "sales_channel", type = "string", comment = "Canal de venda" },
-        { name = "ingestion_date", type = "date", comment = "Data de ingestão original" }
+        { name = "shopify_customer_id",  type = "string", comment = "ID do cliente no Shopify" },
+        { name = "shopify_order_id",     type = "string", comment = "ID do pedido no Shopify" },
+        { name = "id_form",              type = "string", comment = "ID do formulário Typeform" },
+        { name = "order_name",           type = "string", comment = "Nome do pedido resolvido no Shopify" },
+        { name = "customer_name",        type = "string", comment = "Nome do cliente do formulário" }, 
+        { name = "order_created_at",     type = "timestamp", comment = "Data/hora de criação do pedido" }, 
+        { name = "store_id",             type = "string", comment = "ID da loja" },
+        { name = "store_name",           type = "string", comment = "Nome da loja" },
+        { name = "seller_id",            type = "string", comment = "ID do vendedor" },
+        { name = "seller_name",          type = "string", comment = "Nome do vendedor" },
+        { name = "nps",                  type = "int",    comment = "Nota NPS" },
+        { name = "nps_type",             type = "string", comment = "Classificação do NPS" },
+        { name = "sales_channel",        type = "string", comment = "Canal de venda" },
+        { name = "ingestion_date",       type = "date",   comment = "Data de ingestão original" }
       ]
 
       partition_keys = [
@@ -363,15 +366,18 @@ locals {
         { name = "type", type = "string", comment = "Tipo da resposta" },
         { name = "date", type = "date", comment = "Data da submissão" },
         { name = "typeform_customer_id", type = "string", comment = "ID do cliente no Typeform" },
-        { name = "shopify_customer_id", type = "string", comment = "ID do cliente no Shopify" },
-        { name = "shopify_order_id", type = "string", comment = "ID do pedido no Shopify" },
-        { name = "id_form", type = "string", comment = "ID do formulário Typeform" },
-        { name = "store_id", type = "string", comment = "ID da loja" },
-        { name = "store_name", type = "string", comment = "Nome da loja" },
-        { name = "seller_id", type = "string", comment = "ID do vendedor" },
-        { name = "seller_name", type = "string", comment = "Nome do vendedor" },
-        { name = "sales_channel", type = "string", comment = "Canal de venda" },
-        { name = "ingestion_date", type = "date", comment = "Data de ingestão original" }
+        { name = "shopify_customer_id",  type = "string", comment = "ID do cliente no Shopify" },
+        { name = "shopify_order_id",     type = "string", comment = "ID do pedido no Shopify" },
+        { name = "id_form",              type = "string", comment = "ID do formulário Typeform" },
+        { name = "order_name",           type = "string", comment = "Nome do pedido resolvido no Shopify" },
+        { name = "customer_name",        type = "string", comment = "Nome do cliente do formulário" }, 
+        { name = "order_created_at",     type = "timestamp", comment = "Data/hora de criação do pedido" },
+        { name = "store_id",             type = "string", comment = "ID da loja" },
+        { name = "store_name",           type = "string", comment = "Nome da loja" },
+        { name = "seller_id",            type = "string", comment = "ID do vendedor" },
+        { name = "seller_name",          type = "string", comment = "Nome do vendedor" },
+        { name = "sales_channel",        type = "string", comment = "Canal de venda" },
+        { name = "ingestion_date",       type = "date",   comment = "Data de ingestão original" }
       ]
 
       partition_keys = [
