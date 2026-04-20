@@ -45,11 +45,6 @@ locals {
         { name = "source_medium", type = "string", comment = "Fonte / Mídia atribuídas" },
         { name = "campaign_name", type = "string", comment = "Nome da campanha atribuída" },
 
-        #taxonomia
-        { name = "class1", type = "string", comment = "Class1" },
-        { name = "class2", type = "string", comment = "Class2" },
-        { name = "class3", type = "string", comment = "Class3" },
-
         # Métricas
         { name = "conversions", type = "bigint", comment = "Número de conversões atribuídas" },
         { name = "total_revenue", type = "double", comment = "Receita total atribuída (moeda da propriedade/relatório)" },

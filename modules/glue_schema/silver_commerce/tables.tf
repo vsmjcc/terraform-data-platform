@@ -50,11 +50,11 @@ locals {
       partition_keys = []
     }
 
+
     orders = {
       description = "Pedidos de e-commerce (Shopify), normalizados."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=orders/"
       columns = [
-        # chaves e datas
         { name = "order_id", type = "string", comment = "ID do pedido (Shopify, como string)" },
         { name = "created_at", type = "timestamp", comment = "Data/hora de criação" },
         { name = "updated_at", type = "timestamp", comment = "Data/hora da última atualização" },
@@ -62,70 +62,43 @@ locals {
         { name = "cancelled_at", type = "timestamp", comment = "Data/hora de cancelamento" },
         { name = "closed_at", type = "timestamp", comment = "Data/hora de fechamento" },
 
-        # identificação/nomes
         { name = "order_name", type = "string", comment = "Nome/identificador do pedido" },
         { name = "order_number", type = "bigint", comment = "Número do pedido" },
-        { name = "number_internal", type = "bigint", comment = "Número interno" },
+        { name = "order_channel", type = "string", comment = "Canal operacional do pedido: ECOMMERCE, STORE, OMNI ou MANUAL" },
+        { name = "iglu_order_id", type = "string", comment = "ID do pedido no Iglu" },
 
-        # clientes
-        { name = "customer_id", type = "string", comment = "identificador do cliente shopify" },
-        { name = "email", type = "string", comment = "email do cliente shopify" },
-        { name = "customer_document", type = "string", comment = "cpf do cliente shopify" },
-        
-        # status
+        { name = "customer_id", type = "string", comment = "Identificador do cliente Shopify" },
+        { name = "email", type = "string", comment = "Email do cliente Shopify" },
+        { name = "customer_document", type = "string", comment = "Documento do cliente (CPF/CNPJ normalizado)" },
+        { name = "consumer_identity_status", type = "string", comment = "Status da identificação do consumidor: IDENTIFIED, IDENTIFIED_WITHOUT_DOCUMENT ou ANONYMOUS" },
+
         { name = "financial_status", type = "string", comment = "Status financeiro" },
         { name = "fulfillment_status", type = "string", comment = "Status de fulfillment" },
         { name = "confirmed", type = "boolean", comment = "Pedido confirmado" },
 
-        # moeda/valores
-        { name = "currency", type = "string", comment = "Moeda" },
+        { name = "currency", type = "string", comment = "Moeda da loja" },
         { name = "presentment_currency", type = "string", comment = "Moeda de apresentação" },
         { name = "subtotal_price", type = "decimal(18,2)", comment = "Subtotal" },
         { name = "total_price", type = "decimal(18,2)", comment = "Total" },
         { name = "total_tax", type = "decimal(18,2)", comment = "Total de impostos" },
         { name = "total_discounts", type = "decimal(18,2)", comment = "Total de descontos" },
-        { name = "total_line_items_price", type = "decimal(18,2)", comment = "Total dos itens de linha" },
+        { name = "total_line_items_price", type = "decimal(18,2)", comment = "Total dos itens" },
         { name = "current_subtotal_price", type = "decimal(18,2)", comment = "Subtotal atual" },
         { name = "current_total_discounts", type = "decimal(18,2)", comment = "Descontos atuais" },
         { name = "current_total_price", type = "decimal(18,2)", comment = "Total atual" },
-        { name = "current_total_tax", type = "decimal(18,2)", comment = "Impostos atuais" },
-        { name = "total_outstanding", type = "decimal(18,2)", comment = "Saldo em aberto" },
-        { name = "total_tip_received", type = "decimal(18,2)", comment = "Total de gorjetas recebidas" },
-        { name = "total_weight", type = "bigint", comment = "Peso total" },
 
-        # origem/fonte
         { name = "source_name", type = "string", comment = "Nome da origem" },
         { name = "source_identifier", type = "string", comment = "Identificador da origem" },
-        { name = "source_url", type = "string", comment = "URL da origem" },
-        { name = "gateway", type = "string", comment = "Gateway de pagamento" },
-        { name = "referring_site", type = "string", comment = "Site de referência" },
-        { name = "landing_site", type = "string", comment = "Landing site" },
-        { name = "landing_site_ref", type = "string", comment = "Referência do landing site" },
-        { name = "browser_ip", type = "string", comment = "IP do navegador" },
+        { name = "gateway", type = "array<string>", comment = "Gateways de pagamento do pedido" },
 
-        # checkout/cart
-        { name = "checkout_id", type = "string", comment = "ID do checkout" },
-        { name = "checkout_token", type = "string", comment = "Token do checkout" },
-        { name = "cart_token", type = "string", comment = "Token do carrinho" },
-
-        # metadados diversos
-        { name = "tags", type = "string", comment = "Tags do pedido" },
+        { name = "tags", type = "array<string>", comment = "Tags do pedido em uppercase" },
+        { name = "custom_attributes", type = "map<string,string>", comment = "Atributos personalizados do pedido" },
+        { name = "shipping_delivery_time", type = "int", comment = "Prazo de entrega em dias, extraído do checkout/Iglu" },
+        { name = "seller_id", type = "string", comment = "ID do vendedor responsável pelo pedido" },
+        { name = "seller_name", type = "string", comment = "Nome do vendedor responsável pelo pedido" },
+        { name = "location_id", type = "string", comment = "ID da loja/localização do pedido" },
+        { name = "location_name", type = "string", comment = "Nome da loja/localização do pedido" },
         { name = "note", type = "string", comment = "Nota do pedido" },
-        { name = "po_number", type = "string", comment = "Número de pedido de compra" },
-        { name = "confirmation_number", type = "string", comment = "Número de confirmação" },
-        { name = "admin_graphql_api_id", type = "string", comment = "Admin GraphQL API ID" },
-        { name = "app_id", type = "string", comment = "ID do app" },
-        { name = "company", type = "string", comment = "Empresa" },
-        { name = "device_id", type = "string", comment = "ID do dispositivo" },
-        { name = "location_id", type = "string", comment = "ID da localização" },
-        { name = "merchant_of_record_app_id", type = "string", comment = "App merchant of record" },
-        { name = "merchant_business_entity_id", type = "string", comment = "Entidade de negócio" },
-        { name = "order_status_url", type = "string", comment = "URL de status do pedido" },
-
-        # arrays/structs (removidos do Glue Catalog como workaround)
-        # Esses campos aparecem como nested/complex no Parquet de partições já existentes,
-        # e o Athena/Trino está falhando ao abrir o split.
-        # Quando reprocessar as partições com o script atualizado, podemos reintroduzir.
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
@@ -148,19 +121,18 @@ locals {
         { name = "name", type = "string", comment = "Nome completo do item" },
         { name = "vendor", type = "string", comment = "Fornecedor" },
         { name = "quantity", type = "int", comment = "Quantidade" },
-        { name = "price", type = "decimal(18,2)", comment = "Preço" },
-        { name = "total_discount", type = "decimal(18,2)", comment = "Desconto total" },
+        { name = "price", type = "decimal(18,2)", comment = "Preço unitário" },
+        { name = "total_discount", type = "decimal(18,2)", comment = "Desconto total alocado no item" },
         { name = "taxable", type = "boolean", comment = "Se é tributável" },
         { name = "gift_card", type = "boolean", comment = "Se é gift card" },
         { name = "requires_shipping", type = "boolean", comment = "Se requer envio" },
-        { name = "fulfillable_quantity", type = "int", comment = "Quantidade atendível" },
-        { name = "fulfillment_status", type = "string", comment = "Status de fulfillment" },
-        { name = "grams", type = "int", comment = "Peso em gramas" }
+        { name = "fulfillable_quantity", type = "int", comment = "Quantidade atendível" }
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
       ]
     }
+
 
     order_customers = {
       description = "Clientes associados aos pedidos (Shopify)."
@@ -174,7 +146,7 @@ locals {
         { name = "phone", type = "string", comment = "Telefone" },
         { name = "state", type = "string", comment = "Estado" },
         { name = "verified_email", type = "boolean", comment = "Email verificado" },
-        { name = "customer_tags", type = "string", comment = "Tags do cliente" },
+        { name = "customer_tags", type = "array<string>", comment = "Tags do cliente" },
         { name = "orders_count", type = "int", comment = "Quantidade de pedidos do cliente" },
         { name = "total_spent", type = "decimal(18,2)", comment = "Total gasto pelo cliente" },
         { name = "customer_note", type = "string", comment = "Nota do cliente" },
@@ -212,35 +184,19 @@ locals {
       ]
     }
 
-    order_discount_codes = {
-      description = "Códigos de desconto aplicados nos pedidos."
-      location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_discount_codes/"
-      columns = [
-        { name = "order_id", type = "string", comment = "ID do pedido" },
-        { name = "code_pos", type = "int", comment = "Posição do código" },
-        { name = "code", type = "string", comment = "Código de desconto" },
-        { name = "type", type = "string", comment = "Tipo de desconto" },
-        { name = "amount", type = "decimal(18,2)", comment = "Valor do desconto" }
-      ]
-      partition_keys = [
-        { name = "order_date", type = "date", comment = "Partição por data do pedido" }
-      ]
-    }
-
     order_discount_applications = {
-      description = "Aplicações de desconto (discount_applications) por pedido."
+      description = "Aplicações de desconto por pedido."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_discount_applications/"
       columns = [
         { name = "order_id", type = "string", comment = "ID do pedido" },
         { name = "app_pos", type = "int", comment = "Posição da aplicação" },
-        { name = "type", type = "string", comment = "Tipo" },
-        { name = "value", type = "decimal(18,2)", comment = "Valor" },
-        { name = "value_type", type = "string", comment = "Tipo de valor" },
+        { name = "type", type = "string", comment = "Tipo da aplicação de desconto" },
         { name = "allocation_method", type = "string", comment = "Método de alocação" },
         { name = "target_selection", type = "string", comment = "Seleção de alvo" },
         { name = "target_type", type = "string", comment = "Tipo de alvo" },
-        { name = "title", type = "string", comment = "Título" },
-        { name = "description", type = "string", comment = "Descrição" }
+        { name = "code", type = "string", comment = "Código do desconto, quando aplicável" },
+        { name = "title", type = "string", comment = "Título do desconto" },
+        { name = "description", type = "string", comment = "Descrição do desconto" }
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
@@ -248,13 +204,27 @@ locals {
     }
 
     order_payments = {
-      description = "Pagamentos associados aos pedidos (gateway names)."
+      description = "Pagamentos associados aos pedidos, derivados de transactions do Shopify e enriquecidos com pagamentos do Iglu/POS."
       location    = "s3://${var.bucket}/domain=${var.domain}/source=shopify/dataset=order_payments/"
       columns = [
         { name = "order_id", type = "string", comment = "ID do pedido" },
-        { name = "currency", type = "string", comment = "Moeda" },
-        { name = "payment_pos", type = "int", comment = "Posição do gateway" },
-        { name = "gateway", type = "string", comment = "Nome do gateway" }
+        { name = "currency", type = "string", comment = "Moeda da transação" },
+        { name = "payment_pos", type = "int", comment = "Posição da transação no pedido" },
+        { name = "transaction_id", type = "string", comment = "ID da transação" },
+        { name = "kind", type = "string", comment = "Tipo da transação" },
+        { name = "status", type = "string", comment = "Status da transação" },
+        { name = "gateway", type = "string", comment = "Gateway da transação" },
+        { name = "formatted_gateway", type = "string", comment = "Nome formatado do gateway" },
+        { name = "payment_id", type = "string", comment = "Identificador do pagamento no provedor" },
+        { name = "payment_method", type = "string", comment = "Método de pagamento informado pelo Iglu/POS" },
+        { name = "nsu", type = "string", comment = "NSU da transação informado pelo Iglu/POS" },
+        { name = "installments", type = "int", comment = "Quantidade de parcelas do pagamento" },
+        { name = "authorization_code", type = "string", comment = "Código de autorização da transação" },
+        { name = "card_brand", type = "string", comment = "Bandeira do cartão informada pelo Iglu/POS" },
+        { name = "conciliation", type = "boolean", comment = "Indicador de conciliação informado pelo Iglu/POS" },
+        { name = "manually_capturable", type = "boolean", comment = "Indica se a captura é manual" },
+        { name = "processed_at", type = "timestamp", comment = "Data/hora de processamento da transação" },
+        { name = "amount", type = "decimal(18,2)", comment = "Valor da transação" }
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
@@ -270,16 +240,13 @@ locals {
         { name = "fulfillment_id", type = "string", comment = "ID do fulfillment" },
         { name = "created_at", type = "timestamp", comment = "Criação do fulfillment" },
         { name = "updated_at", type = "timestamp", comment = "Atualização do fulfillment" },
-        { name = "status", type = "string", comment = "Status" },
-        { name = "shipment_status", type = "string", comment = "Status de envio" },
-        { name = "service", type = "string", comment = "Serviço" },
+        { name = "status", type = "string", comment = "Status do fulfillment" },
+        { name = "shipment_status", type = "string", comment = "Status de envio exibido" },
         { name = "tracking_company", type = "string", comment = "Transportadora" },
-        { name = "location_id", type = "string", comment = "ID da localização" },
-        { name = "tracking_number", type = "string", comment = "Número de rastreio (single)" },
-        { name = "tracking_numbers", type = "array<string>", comment = "Números de rastreio (lista)" },
-        { name = "tracking_url", type = "string", comment = "URL de rastreio (single)" },
-        { name = "tracking_urls", type = "array<string>", comment = "URLs de rastreio (lista)" },
-        { name = "admin_graphql_api_id", type = "string", comment = "Admin GraphQL API ID" }
+        { name = "tracking_number", type = "string", comment = "Número principal de rastreio" },
+        { name = "tracking_numbers", type = "array<string>", comment = "Números de rastreio" },
+        { name = "tracking_url", type = "string", comment = "URL principal de rastreio" },
+        { name = "tracking_urls", type = "array<string>", comment = "URLs de rastreio" }
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
@@ -294,25 +261,35 @@ locals {
         { name = "fulfillment_id", type = "string", comment = "ID do fulfillment" },
         { name = "fulfillment_pos", type = "int", comment = "Posição do fulfillment" },
         { name = "line_pos", type = "int", comment = "Posição da linha" },
-        { name = "item_id", type = "string", comment = "ID do item" },
-        { name = "product_id", type = "string", comment = "ID do produto" },
-        { name = "variant_id", type = "string", comment = "ID da variante" },
+        { name = "item_id", type = "string", comment = "ID do item do pedido" },
         { name = "sku", type = "string", comment = "SKU" },
         { name = "title", type = "string", comment = "Título" },
         { name = "vendor", type = "string", comment = "Fornecedor" },
-        { name = "quantity", type = "int", comment = "Quantidade" },
-        { name = "fulfillment_service", type = "string", comment = "Serviço de fulfillment" },
-        { name = "grams", type = "int", comment = "Peso em gramas" },
-        { name = "price", type = "decimal(18,2)", comment = "Preço" },
-        { name = "total_discount", type = "decimal(18,2)", comment = "Desconto total" },
-        { name = "taxable", type = "boolean", comment = "Se é tributável" },
-        { name = "gift_card", type = "boolean", comment = "Se é gift card" },
-        { name = "requires_shipping", type = "boolean", comment = "Se requer envio" }
+        { name = "quantity", type = "int", comment = "Quantidade" }
       ]
       partition_keys = [
         { name = "order_date", type = "date", comment = "Partição por data do pedido" }
       ]
     }
+
+    iglu_returns = {
+      description = "Iglu returns, normalized from the public returns report."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=iglu/dataset=returns/"
+      columns = [
+        { name = "return_document_key", type = "string", comment = "Return fiscal document key" },
+        { name = "sale_document_key", type = "string", comment = "Original sale fiscal document key" },
+        { name = "return_store", type = "string", comment = "Store where the return was registered" },
+        { name = "sale_store", type = "string", comment = "Store where the original sale was registered" },
+        { name = "shopify_order_name", type = "string", comment = "Associated Shopify order name" },
+        { name = "returned_at", type = "timestamp", comment = "Return date and time" },
+        { name = "return_amount", type = "decimal(18,2)", comment = "Returned amount" },
+        { name = "_ingestion_ts", type = "timestamp", comment = "Data lake ingestion timestamp" }
+      ]
+      partition_keys = [
+        { name = "return_date", type = "date", comment = "Partition by return date" }
+      ]
+    }
+
   }
 }
 
@@ -329,4 +306,3 @@ module "tables" {
   partition_keys = each.value.partition_keys
   parameters     = { classification = "parquet", compressionType = "snappy" }
 }
-

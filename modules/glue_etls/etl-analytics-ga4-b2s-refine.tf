@@ -86,6 +86,3 @@ module "glue_job_ga4_transactions_to_silver" {
     Owner = "data-platform"
   })
 }
-
-
-

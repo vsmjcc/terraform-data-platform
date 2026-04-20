@@ -5,7 +5,7 @@ module "glue_job_orders_s2s_enriched" {
   name = "orders-s2s-enriched"
 
   script_bucket = var.etls_bucket
-  script_key    = "glue/glue-s2s/orders-s2s-enriched.py"
+  script_key    = "glue/glue-s2s/orders-s2s-glue.py"
   temp_bucket   = var.etls_bucket
 
   data_buckets = [
@@ -20,7 +20,7 @@ module "glue_job_orders_s2s_enriched" {
     "--SOURCE_GLUE_DATABASE" = "silver_commerce"
     "--SOURCE_GLUE_TABLE"    = "orders"
     "--GLUE_DATABASE"        = "silver_enriched"
-    "--GLUE_TABLE"          = "orders_enriched"
+    "--GLUE_TABLE"           = "orders"
     "--MODE"                 = "overwrite"
   }
 
@@ -29,4 +29,3 @@ module "glue_job_orders_s2s_enriched" {
     Owner = "data-platform"
   })
 }
-

@@ -28,6 +28,7 @@ resource "aws_glue_job" "this" {
       "--enable-glue-datacatalog"          = "true"
       "--job-bookmark-option"              = "job-bookmark-enable"
       "--conf"                             = "spark.sql.sources.partitionOverwriteMode=dynamic"
+      "--extra-py-files"                   = "s3://${var.script_bucket}/glue/libs/zrzs_glue.zip"
     },
     var.default_arguments
   )
