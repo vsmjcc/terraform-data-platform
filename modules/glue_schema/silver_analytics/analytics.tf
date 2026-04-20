@@ -10,11 +10,6 @@ locals {
         { name = "session_source_medium", type = "string", comment = "Fonte / Mídia da sessão (ex.: google / cpc)" },
         { name = "session_campaign_name", type = "string", comment = "Nome da campanha (ex.: [ED] Zerezes Institucional)" },
 
-        #taxonomia
-        { name = "class1", type = "string", comment = "Class1" },
-        { name = "class2", type = "string", comment = "Class2" },
-        { name = "class3", type = "string", comment = "Class3" },
-
         # Métricas
         { name = "sessions", type = "bigint", comment = "Quantidade de sessões" },
 
@@ -49,11 +44,6 @@ locals {
         { name = "transaction_id", type = "string", comment = "ID da transação (pode vir vazio em linhas agregadas)" },
         { name = "source_medium", type = "string", comment = "Fonte / Mídia atribuídas" },
         { name = "campaign_name", type = "string", comment = "Nome da campanha atribuída" },
-
-        #taxonomia
-        { name = "class1", type = "string", comment = "Class1" },
-        { name = "class2", type = "string", comment = "Class2" },
-        { name = "class3", type = "string", comment = "Class3" },
 
         # Métricas
         { name = "conversions", type = "bigint", comment = "Número de conversões atribuídas" },

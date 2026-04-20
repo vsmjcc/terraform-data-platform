@@ -379,6 +379,86 @@ locals {
       ]
     }
 
+    ga4_sessions_daily = {
+      description = "Sessões GA4 enriquecidas com classificação de canais (class1/2/3)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=google_analytics/dataset=ga4_sessions/"
+
+      columns = [
+        # Dimensões GA4
+        { name = "session_source_medium", type = "string", comment = "Fonte / Mídia da sessão (ex.: google / cpc)" },
+        { name = "session_campaign_name", type = "string", comment = "Nome da campanha (ex.: [ED] Zerezes Institucional)" },
+
+        # Taxonomia de canais (enriquecimento)
+        { name = "class1", type = "string", comment = "Class1 da classificação de canais" },
+        { name = "class2", type = "string", comment = "Class2 da classificação de canais" },
+        { name = "class3", type = "string", comment = "Class3 da classificação de canais" },
+
+        # Métricas
+        { name = "sessions", type = "bigint", comment = "Quantidade de sessões" },
+
+        # Metadados do pipeline
+        { name = "source_system", type = "string", comment = "Sistema de origem (ga4)" },
+        { name = "ingestion_date", type = "date", comment = "Dia que o dado entrou na bronze" },
+        { name = "run_id", type = "string", comment = "ID de execução/ingestão" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "report_date"
+          type    = "date"
+          comment = "Dia do relatório (YYYY-MM-DD, derivado do GA4 date)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
+    ga4_transactions_daily = {
+      description = "Transações GA4 enriquecidas com classificação de canais (class1/2/3)."
+      location    = "s3://${var.bucket}/domain=${var.domain}/source=google_analytics/dataset=ga4_transactions/"
+
+      columns = [
+        # Dimensões GA4
+        { name = "transaction_id", type = "string", comment = "ID da transação (pode vir vazio em linhas agregadas)" },
+        { name = "source_medium", type = "string", comment = "Fonte / Mídia atribuídas" },
+        { name = "campaign_name", type = "string", comment = "Nome da campanha atribuída" },
+
+        # Taxonomia de canais (enriquecimento)
+        { name = "class1", type = "string", comment = "Class1 da classificação de canais" },
+        { name = "class2", type = "string", comment = "Class2 da classificação de canais" },
+        { name = "class3", type = "string", comment = "Class3 da classificação de canais" },
+
+        # Métricas
+        { name = "conversions", type = "bigint", comment = "Número de conversões atribuídas" },
+        { name = "total_revenue", type = "double", comment = "Receita total atribuída (moeda da propriedade/relatório)" },
+
+        # Metadados do pipeline
+        { name = "source_system", type = "string", comment = "Sistema de origem (ga4)" },
+        { name = "ingestion_date", type = "date", comment = "Dia que o dado entrou na bronze" },
+        { name = "run_id", type = "string", comment = "ID de execução/ingestão" }
+      ]
+
+      partition_keys = [
+        {
+          name    = "report_date"
+          type    = "date"
+          comment = "Dia do relatório (YYYY-MM-DD, derivado do GA4 date)"
+          projection = {
+            type          = "date"
+            format        = "yyyy-MM-dd"
+            range         = "2020-01-01,NOW"
+            interval      = "1"
+            interval_unit = "DAYS"
+          }
+        }
+      ]
+    }
+
   }
 }
 
