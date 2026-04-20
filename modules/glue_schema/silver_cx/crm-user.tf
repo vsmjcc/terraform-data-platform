@@ -368,6 +368,7 @@ locals {
         { name = "customer_id",         type = "string",    comment = "ID do cliente no Typeform" },
         { name = "email",               type = "string",    comment = "Email do cliente" },
         { name = "customer_name",       type = "string",    comment = "Nome do cliente" },
+        { name = "order_created_at",    type = "timestamp", comment = "Data/hora de criação do pedido" }, # ADICIONADO
         { name = "order_number",        type = "string",    comment = "Order name / número do pedido vindo do form" },
         { name = "store_name",          type = "string",    comment = "Nome da loja" },
         { name = "store_id",            type = "string",    comment = "ID da loja" },
